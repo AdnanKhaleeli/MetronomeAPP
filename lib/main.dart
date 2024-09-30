@@ -5,7 +5,7 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 void main() async {
    var db = await mongo.Db.create("mongodb+srv://USER:USER1@metronome-cluster.3otig.mongodb.net/metronome_db?retryWrites=true&w=majority");
-  await db.open();
+   await db.open();
 
   print('Connected to database: ${db.databaseName}');
   runApp(const MyApp());
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Metronome',
       theme: ThemeData(
         // This is the theme of your application.
         //
