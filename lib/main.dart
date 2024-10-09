@@ -1,33 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 void main() {
   runApp(MetronomeApp());
 }
 
-
-void main() async {
-   var db = await mongo.Db.create("mongodb+srv://USER:USER1@metronome-cluster.3otig.mongodb.net/metronome_db?retryWrites=true&w=majority");
-   await db.open();
-
 class MetronomeApp extends StatefulWidget {
-  print('Connected to database: ${db.databaseName}');
-  runApp(const Metronome());
-
-
-}
-
-class Metronome extends StatefulWidget {
-  const Metronome({super.key});
-
   @override
-  State<Metronome> createState() => _Metronome();
   _MetronomeAppState createState() => _MetronomeAppState();
 }
 
-class _Metronome extends State<Metronome> {
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
   final player = AudioPlayer();
@@ -36,23 +19,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Metronome'),
-          centerTitle: true,
-          backgroundColor: Colors.red[400],
-        ),
-        drawer:  Drawer(
-          child: ListView(
-            padding: const EdgeInsets.all(0),
-            children: <Widget>[
-              ListTile(
-                title: const Text('Hello there'),
-                onTap: () {},
-              )
-            ],
-          )
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -216,7 +182,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
         ],
         ),
-      )
+      ),
     );
   }
 }
