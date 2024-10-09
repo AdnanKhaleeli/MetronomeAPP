@@ -58,6 +58,7 @@ flutter:
   assets:
     #0.022 seconds
     - assets/tick_sound.wav
+    - assets/tick_sound_156.wav
 
 
   # The following line ensures that the Material Icons font is

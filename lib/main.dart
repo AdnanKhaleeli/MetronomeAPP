@@ -102,13 +102,13 @@ class _MetronomeAppState extends State<MetronomeApp> {
                         double oneBeat = 60/_bpm;
 
                         //length of tick_sound is 0.022. length of one beat - length of tick sound is wait time
-                        double waitTime = oneBeat-0.022;
+                        double waitTime = oneBeat-0.156;
                         //setting source of the audio file
-                        await player.setSource(AssetSource('tick_sound.wav'));
+                        await player.setSource(AssetSource('tick_sound_156.wav'));
                         //playing the audio file
                         await player.resume();
                         //delaying the loop (length of tick sound)
-                        await Future.delayed(Duration(milliseconds: 22));
+                        await Future.delayed(Duration(milliseconds: 156));
                         //delaying the loop(length of wait time
                         await Future.delayed(Duration(milliseconds: (waitTime * 1000).toInt()));
                         //Now, one full beat has been completed. The loop will loop again!
