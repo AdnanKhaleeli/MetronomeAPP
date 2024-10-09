@@ -14,7 +14,7 @@ class MetronomeApp extends StatefulWidget {
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
   final player = AudioPlayer();
-
+  bool playing = true;
 
 
   @override
@@ -41,7 +41,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 onPressed: () {
                   setState(()
                   {
-                    _bpm = _bpm - 1;
+                    if(_bpm > 40)
+                      {
+                        _bpm = _bpm - 1;
+                      }
                   });
                 },
                 child: Text("-"),
@@ -52,6 +55,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                               value: _bpm,
                               //If changed, new value is newBPM
                               onChanged: (newBPM) {
+
                                 setState(()
                                 {
                                 //setting the BPM to new BPM
@@ -65,7 +69,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 {
                   setState(()
                   {
-                    _bpm = _bpm + 1;
+                    if(_bpm < 199)
+                    {
+                      _bpm = _bpm + 1;
+                    }
                   });
                 },
                 child: Text("+"),
@@ -86,18 +93,93 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   //when pressed, start the metronome
                   onPressed: ()
                   async {
-                    await player.play(AssetSource('assets/tick_sound.mp3'));
+                  playing = true;
+
+                    //looping the sound
+                    while (playing)
+                      {
+                        //calculation desired duration of one beat in seconds
+                        double oneBeat = 60/_bpm;
+
+                        //length of tick_sound is 0.022. length of one beat - length of tick sound is wait time
+                        double waitTime = oneBeat-0.022;
+                        //setting source of the audio file
+                        await player.setSource(AssetSource('tick_sound.wav'));
+                        //playing the audio file
+                        await player.resume();
+                        //delaying the loop (length of tick sound)
+                        await Future.delayed(Duration(milliseconds: 22));
+                        //delaying the loop(length of wait time
+                        await Future.delayed(Duration(milliseconds: (waitTime * 1000).toInt()));
+                        //Now, one full beat has been completed. The loop will loop again!
+
+                      }
+
+
                   },
                   child: Text('Start'),
                 ),
                 SizedBox(width: 20),
                 ElevatedButton(
                   //when pressed, stop the metronome
-                  onPressed: () {  },
+                  onPressed: () {
+                    playing = false;
+                    player.stop();
+                  },
                   child: Text('Stop'),
                 ),
               ],
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: (){},
+                  child: Text('Beat 1'),
+                ),
+                ElevatedButton(
+                  onPressed: (){},
+                  child: Text('Beat 2'),
+                ),
+                ElevatedButton(
+                  onPressed: (){},
+                  child: Text('Beat 3'),
+                ),
+                ElevatedButton(
+                  onPressed: (){},
+                  child: Text('Beat 4'),
+                )
+
+              ]
+            ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: (){},
+                    child: Text('♩', style: new TextStyle(fontSize: 50.0)),
+                  ),
+                  ElevatedButton(
+                    onPressed: (){},
+                    child: Text('♪', style: TextStyle(fontSize: 50.0)),
+                  ),
+                  ElevatedButton(
+                    onPressed: (){},
+                    child: Text('♫', style: TextStyle(fontSize: 50.0)),
+                  ),
+                  ElevatedButton(
+                    onPressed: (){},
+                    child: Text('♬', style: TextStyle(fontSize: 50.0)),
+                  )
+
+                ]
+            )
+
+
+
+
+
+
         ],
         ),
       ),
