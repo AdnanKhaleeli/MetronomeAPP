@@ -26,7 +26,20 @@ class _MetronomeAppState extends State<MetronomeApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Metronome App'),
+          title: const Text('Metronome App'),
+          centerTitle: true,
+          backgroundColor: Colors.red[400],
+        ),
+        drawer:  Drawer(
+          child: ListView(
+            padding: const EdgeInsets.all(0),
+            children: <Widget>[
+              ListTile(
+                title: const Text('Hello there'),
+                onTap: () {},
+              )
+            ],
+          )
         ),
         body: Column(
 
