@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
-void main() {
+void main() async {
+  var db = await mongo.Db.create("mongodb+srv://USER:USER1@metronome-cluster.3otig.mongodb.net/metronome_db?retryWrites=true&w=majority");
+  await db.open();
+  print('Connected to database: ${db.databaseName}');
   runApp(MetronomeApp());
 }
 
