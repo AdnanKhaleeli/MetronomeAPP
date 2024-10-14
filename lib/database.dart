@@ -55,7 +55,7 @@ class DatabaseHelper {
     var newStudent = {
       'name': name,
       'pwd': pwd,
-      'assigned_music': [],
+      'assigned_music': {},
       'subgroup_id': null
     };
 
