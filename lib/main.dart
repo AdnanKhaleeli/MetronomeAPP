@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'database.dart';
 
+import 'sign_in.dart';
+import 'settings.dart';
+
+
 void main() async {
   var db = DatabaseHelper();
   await db.init();
@@ -10,7 +14,20 @@ void main() async {
   bool result = await db.insertStudent(name: 'Adnan', pwd: '2782738');
   print(result);
 
-  runApp(MetronomeApp());
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MetronomeApp(),
+      initialRoute: '/',
+       routes: {
+        '/sign_in': (context) => SignIn()
+       }
+    );
+  }
 }
 
 class MetronomeApp extends StatefulWidget {
@@ -38,7 +55,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
           children: <Widget>[
             ListTile(
               title: const Text('Hello there'),
-              onTap: () {},
+              onTap: () {
+                 Navigator.pushNamed(context, '/sign_in');
+              },
             )
           ],
         )),
@@ -169,6 +188,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
           ],
         ),
       ),
+      
     );
   }
 }
