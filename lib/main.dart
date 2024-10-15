@@ -6,7 +6,7 @@ import 'database.dart';
 import 'sign_in.dart';
 import 'settings.dart';
 
-
+// App
 void main() async {
   var db = DatabaseHelper();
   await db.init();
