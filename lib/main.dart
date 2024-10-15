@@ -54,7 +54,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
           padding: const EdgeInsets.all(0),
           children: <Widget>[
             ListTile(
-              title: const Text('Hello there'),
+              title: const Text('Sign in Here'),
               onTap: () {
                  Navigator.pushNamed(context, '/sign_in');
               },
