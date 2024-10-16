@@ -6,15 +6,16 @@ class SignIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-              appBar: AppBar(
-                  title: Text('Please Sign In '),
-                  centerTitle: true,
-                  backgroundColor: Colors.red[300],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Login'),
+        centerTitle: true,
+        backgroundColor: Colors.red[400],
       ),
-    )
-       
+      drawer: CustomDrawer(), // Use the same CustomDrawer
+      body: Center(
+        child: Text('Sign In Screen'),
+      ),
     );
   }
 }
