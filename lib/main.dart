@@ -45,6 +45,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
   int currentSubdivisions = 1;
   int tickCount = 0;
 
+  // Track the currently selected button index
+  int selectedSubdivisionIndex = 0;
+
   // Unified method to start the metronome
   void startMetronome(int subdivisions) {
     playing = true;
@@ -61,7 +64,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
       } else {
         await player.setVolume(0.2);
       }
-      
+
       await player.resume();
     });
   }
@@ -156,34 +159,61 @@ class _MetronomeAppState extends State<MetronomeApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedSubdivisionIndex == 0 ? Colors.red : Colors.white,
+                ),
                 onPressed: () {
-                  currentSubdivisions = 1; // Whole note
-                  stopMetronome(); // Stop the metronome
-                  startMetronome(currentSubdivisions); // Restart with whole notes
+                  setState(() {
+                    selectedSubdivisionIndex = 0; // Whole note
+                    currentSubdivisions = 1;
+                    stopMetronome();
+                    startMetronome(currentSubdivisions); // Restart with whole notes
+                  });
                 },
                 child: Text('Whole'),
               ),
+              SizedBox(width: 8),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedSubdivisionIndex == 1 ? Colors.red : Colors.white,
+                ),
                 onPressed: () {
-                  currentSubdivisions = 2; // Eighth notes
-                  stopMetronome(); // Stop the metronome
-                  startMetronome(currentSubdivisions); // Restart with eighth notes
+                  setState(() {
+                    selectedSubdivisionIndex = 1; // Eighth notes
+                    currentSubdivisions = 2;
+                    stopMetronome();
+                    startMetronome(currentSubdivisions); // Restart with eighth notes
+                  });
                 },
                 child: Text('Eighth'),
               ),
+              SizedBox(width: 8),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedSubdivisionIndex == 2 ? Colors.red : Colors.white,
+                ),
                 onPressed: () {
-                  currentSubdivisions = 3; // Triplets
-                  stopMetronome(); // Stop the metronome
-                  startMetronome(currentSubdivisions); // Restart with triplets
+                  setState(() {
+                    selectedSubdivisionIndex = 2; // Triplets
+                    currentSubdivisions = 3;
+                    stopMetronome();
+                    startMetronome(currentSubdivisions); // Restart with triplets
+                  });
                 },
                 child: Text('Triplet'),
               ),
+              SizedBox(width: 8),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedSubdivisionIndex == 3 ? Colors.red : Colors.white,
+                ),
                 onPressed: () {
-                  currentSubdivisions = 4; // Sixteenth notes
-                  stopMetronome(); // Stop the metronome
-                  startMetronome(currentSubdivisions); // Restart with sixteenth notes
+                  setState(() {
+                    selectedSubdivisionIndex = 3; // Sixteenth notes
+                    currentSubdivisions = 4;
+                    stopMetronome();
+                    startMetronome(currentSubdivisions); // Restart with sixteenth notes
+                  });
                 },
                 child: Text('Sixteenth'),
               ),
