@@ -8,7 +8,7 @@ import 'settings.dart';
 
 // App
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization of Flutter bindings
+  WidgetsFlutterBinding.ensureInitialized();
   var db = DatabaseHelper();
   await db.init();
 
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => MetronomeApp(),
-        '/sign_in': (context) => SignIn(), // Define the sign-in route
+        '/sign_in': (context) => SignIn(),
       },
     );
   }
@@ -40,7 +40,58 @@ class MetronomeApp extends StatefulWidget {
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
   final player = AudioPlayer();
+  Timer? _timer; // Declare a Timer variable
   bool playing = false; // Change default to false
+  int currentSubdivisions = 1; // Track current subdivisions
+  int tickCount = 0; // Track the count of ticks
+
+  // Method to start the metronome
+  void startMetronome() {
+    playing = true;
+    final double oneBeat = 60 / _bpm; // Duration of one beat in seconds
+
+    _timer = Timer.periodic(Duration(milliseconds: (oneBeat * 1000).toInt()), (timer) async {
+      tickCount++;
+      await player.setSource(AssetSource('tick_sound_156.wav'));
+      await player.setVolume(1.0); // Full volume for main beat
+      await player.resume();
+    });
+  }
+
+  void startMetronomeWithSubdivisions(int subdivisions) {
+    playing = true;
+    final double oneBeat = 60 / _bpm; // Duration of one beat in seconds
+    final double tickDuration = oneBeat / subdivisions; // Duration of each tick
+
+    _timer = Timer.periodic(Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
+      tickCount++;
+      await player.setSource(AssetSource('tick_sound_156.wav'));
+      
+      // Set volume based on whether it's a main beat or subdivision
+      if (tickCount % subdivisions == 0) {
+        await player.setVolume(1.0); // Full volume for main beat
+      } else {
+        await player.setVolume(0.2); // Lower volume for subdivisions
+      }
+      
+      await player.resume();
+    });
+  }
+
+  // Method to stop the metronome
+  void stopMetronome() {
+    playing = false;
+    _timer?.cancel(); // Cancel the timer
+    player.stop(); // Stop the audio player
+    tickCount = 0; // Reset tick count
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when disposing
+    player.dispose(); // Dispose the audio player
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +114,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   setState(() {
                     if (_bpm > 40) {
                       _bpm -= 1;
+                      stopMetronome(); // Stop the metronome
+                      startMetronome(); // Restart with new BPM
                     }
                   });
                 },
@@ -75,6 +128,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 onChanged: (newBPM) {
                   setState(() {
                     _bpm = newBPM;
+                    stopMetronome(); // Stop the metronome
+                    startMetronome(); // Restart with new BPM
                   });
                 },
               ),
@@ -83,6 +138,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   setState(() {
                     if (_bpm < 199) {
                       _bpm += 1;
+                      stopMetronome(); // Stop the metronome
+                      startMetronome(); // Restart with new BPM
                     }
                   });
                 },
@@ -94,67 +151,57 @@ class _MetronomeAppState extends State<MetronomeApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: () async {
-                  playing = true;
-                  while (playing) {
-                    double oneBeat = 60 / _bpm;
-                    double waitTime = oneBeat - 0.156;
-
-                    await player.setSource(AssetSource('tick_sound_156.wav'));
-                    await player.setVolume(1.0);
-                    await player.resume();
-                    await Future.delayed(Duration(milliseconds: 156));
-                    await Future.delayed(Duration(milliseconds: (waitTime * 1000).toInt()));
-                  }
+                onPressed: () {
+                  stopMetronome(); // Stop any ongoing metronome
+                  startMetronome(); // Start the metronome with regular beats
                 },
                 child: Text('Start'),
               ),
               SizedBox(width: 20),
               ElevatedButton(
-                onPressed: () {
-                  playing = false;
-                  player.stop();
-                },
+                onPressed: stopMetronome,
                 child: Text('Stop'),
               ),
             ],
           ),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('Beat 1'),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('Beat 2'),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('Beat 3'),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('Beat 4'),
-            )
-          ]),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('♩', style: TextStyle(fontSize: 50.0)),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('♪', style: TextStyle(fontSize: 50.0)),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('♫', style: TextStyle(fontSize: 50.0)),
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('♬', style: TextStyle(fontSize: 50.0)),
-            )
-          ]),
+          // Subdivision buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  stopMetronome(); // Stop the metronome
+                  currentSubdivisions = 1; // Set to whole note
+                  startMetronome(); // Start the metronome with regular beats
+                },
+                child: Text('1 (Whole)'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  stopMetronome(); // Stop the metronome
+                  currentSubdivisions = 2; // Set to eighth notes
+                  startMetronomeWithSubdivisions(currentSubdivisions);
+                },
+                child: Text('2 (Eighth)'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  stopMetronome(); // Stop the metronome
+                  currentSubdivisions = 3; // Set to triplets
+                  startMetronomeWithSubdivisions(currentSubdivisions);
+                },
+                child: Text('3 (Triplet)'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  stopMetronome(); // Stop the metronome
+                  currentSubdivisions = 4; // Set to sixteenth notes
+                  startMetronomeWithSubdivisions(currentSubdivisions);
+                },
+                child: Text('4 (Sixteenth)'),
+              ),
+            ],
+          ),
         ],
       ),
     );
