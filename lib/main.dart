@@ -40,56 +40,43 @@ class MetronomeApp extends StatefulWidget {
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
   final player = AudioPlayer();
-  Timer? _timer; // Declare a Timer variable
-  bool playing = false; // Change default to false
-  int currentSubdivisions = 1; // Track current subdivisions
-  int tickCount = 0; // Track the count of ticks
+  Timer? _timer;
+  bool playing = false;
+  int currentSubdivisions = 1;
+  int tickCount = 0;
 
-  // Method to start the metronome
-  void startMetronome() {
+  // Unified method to start the metronome
+  void startMetronome(int subdivisions) {
     playing = true;
-    final double oneBeat = 60 / _bpm; // Duration of one beat in seconds
+    final double oneBeat = 60 / _bpm;
+    final double tickDuration = (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
-    _timer = Timer.periodic(Duration(milliseconds: (oneBeat * 1000).toInt()), (timer) async {
-      tickCount++;
-      await player.setSource(AssetSource('tick_sound_156.wav'));
-      await player.setVolume(1.0); // Full volume for main beat
-      await player.resume();
-    });
-  }
-
-  void startMetronomeWithSubdivisions(int subdivisions) {
-    playing = true;
-    final double oneBeat = 60 / _bpm; // Duration of one beat in seconds
-    final double tickDuration = oneBeat / subdivisions; // Duration of each tick
-
+    _timer?.cancel(); // Cancel any existing timer
     _timer = Timer.periodic(Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
       await player.setSource(AssetSource('tick_sound_156.wav'));
-      
-      // Set volume based on whether it's a main beat or subdivision
-      if (tickCount % subdivisions == 0) {
-        await player.setVolume(1.0); // Full volume for main beat
+
+      if (subdivisions == 1 || tickCount % subdivisions == 0) {
+        await player.setVolume(1.0);
       } else {
-        await player.setVolume(0.2); // Lower volume for subdivisions
+        await player.setVolume(0.2);
       }
       
       await player.resume();
     });
   }
 
-  // Method to stop the metronome
   void stopMetronome() {
     playing = false;
-    _timer?.cancel(); // Cancel the timer
-    player.stop(); // Stop the audio player
-    tickCount = 0; // Reset tick count
+    _timer?.cancel();
+    player.stop();
+    tickCount = 0;
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel the timer when disposing
-    player.dispose(); // Dispose the audio player
+    _timer?.cancel();
+    player.dispose();
     super.dispose();
   }
 
@@ -114,8 +101,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   setState(() {
                     if (_bpm > 40) {
                       _bpm -= 1;
-                      stopMetronome(); // Stop the metronome
-                      startMetronome(); // Restart with new BPM
+                      stopMetronome();
+                      startMetronome(currentSubdivisions); // Restart with new BPM
                     }
                   });
                 },
@@ -128,8 +115,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 onChanged: (newBPM) {
                   setState(() {
                     _bpm = newBPM;
-                    stopMetronome(); // Stop the metronome
-                    startMetronome(); // Restart with new BPM
+                    stopMetronome();
+                    startMetronome(currentSubdivisions); // Restart with new BPM
                   });
                 },
               ),
@@ -138,8 +125,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   setState(() {
                     if (_bpm < 199) {
                       _bpm += 1;
-                      stopMetronome(); // Stop the metronome
-                      startMetronome(); // Restart with new BPM
+                      stopMetronome();
+                      startMetronome(currentSubdivisions); // Restart with new BPM
                     }
                   });
                 },
@@ -152,8 +139,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  stopMetronome(); // Stop any ongoing metronome
-                  startMetronome(); // Start the metronome with regular beats
+                  stopMetronome();
+                  startMetronome(currentSubdivisions); // Start with current subdivisions
                 },
                 child: Text('Start'),
               ),
@@ -170,33 +157,33 @@ class _MetronomeAppState extends State<MetronomeApp> {
             children: [
               ElevatedButton(
                 onPressed: () {
+                  currentSubdivisions = 1; // Whole note
                   stopMetronome(); // Stop the metronome
-                  currentSubdivisions = 1; // Set to whole note
-                  startMetronome(); // Start the metronome with regular beats
+                  startMetronome(currentSubdivisions); // Restart with whole notes
                 },
                 child: Text('Whole'),
               ),
               ElevatedButton(
                 onPressed: () {
+                  currentSubdivisions = 2; // Eighth notes
                   stopMetronome(); // Stop the metronome
-                  currentSubdivisions = 2; // Set to eighth notes
-                  startMetronomeWithSubdivisions(currentSubdivisions);
+                  startMetronome(currentSubdivisions); // Restart with eighth notes
                 },
                 child: Text('Eighth'),
               ),
               ElevatedButton(
                 onPressed: () {
+                  currentSubdivisions = 3; // Triplets
                   stopMetronome(); // Stop the metronome
-                  currentSubdivisions = 3; // Set to triplets
-                  startMetronomeWithSubdivisions(currentSubdivisions);
+                  startMetronome(currentSubdivisions); // Restart with triplets
                 },
                 child: Text('Triplet'),
               ),
               ElevatedButton(
                 onPressed: () {
+                  currentSubdivisions = 4; // Sixteenth notes
                   stopMetronome(); // Stop the metronome
-                  currentSubdivisions = 4; // Set to sixteenth notes
-                  startMetronomeWithSubdivisions(currentSubdivisions);
+                  startMetronome(currentSubdivisions); // Restart with sixteenth notes
                 },
                 child: Text('Sixteenth'),
               ),
