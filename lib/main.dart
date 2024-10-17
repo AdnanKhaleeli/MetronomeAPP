@@ -174,7 +174,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   currentSubdivisions = 1; // Set to whole note
                   startMetronome(); // Start the metronome with regular beats
                 },
-                child: Text('1 (Whole)'),
+                child: Text('Whole'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -182,7 +182,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   currentSubdivisions = 2; // Set to eighth notes
                   startMetronomeWithSubdivisions(currentSubdivisions);
                 },
-                child: Text('2 (Eighth)'),
+                child: Text('Eighth'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -190,7 +190,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   currentSubdivisions = 3; // Set to triplets
                   startMetronomeWithSubdivisions(currentSubdivisions);
                 },
-                child: Text('3 (Triplet)'),
+                child: Text('Triplet'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -198,7 +198,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   currentSubdivisions = 4; // Set to sixteenth notes
                   startMetronomeWithSubdivisions(currentSubdivisions);
                 },
-                child: Text('4 (Sixteenth)'),
+                child: Text('Sixteenth'),
               ),
             ],
           ),
