@@ -5,6 +5,7 @@ import 'database.dart';
 
 import 'sign_in.dart';
 import 'settings.dart';
+import 'customdrawer.dart';
 
 // App
 void main() async {
@@ -12,7 +13,8 @@ void main() async {
   var db = DatabaseHelper();
   await db.init();
 
-  bool result = await db.insertStudent(name: 'Adnan', pwd: '2782738');
+  bool result = await db.insertStudent(
+      username: 'Adnan', pwd: '2782738', profilename: 'profile_Name');
   print(result);
 
   runApp(MyApp());
@@ -28,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => MetronomeApp(),
         '/sign_in': (context) => SignIn(),
       },
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -52,10 +55,12 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void startMetronome(int subdivisions) {
     playing = true;
     final double oneBeat = 60 / _bpm;
-    final double tickDuration = (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
+    final double tickDuration =
+        (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
     _timer?.cancel(); // Cancel any existing timer
-    _timer = Timer.periodic(Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
+    _timer = Timer.periodic(
+        Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
       await player.setSource(AssetSource('tick_sound_156.wav'));
 
@@ -105,7 +110,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     if (_bpm > 40) {
                       _bpm -= 1;
                       stopMetronome();
-                      startMetronome(currentSubdivisions); // Restart with new BPM
+                      startMetronome(
+                          currentSubdivisions); // Restart with new BPM
                     }
                   });
                 },
@@ -129,7 +135,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     if (_bpm < 199) {
                       _bpm += 1;
                       stopMetronome();
-                      startMetronome(currentSubdivisions); // Restart with new BPM
+                      startMetronome(
+                          currentSubdivisions); // Restart with new BPM
                     }
                   });
                 },
@@ -143,7 +150,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
               ElevatedButton(
                 onPressed: () {
                   stopMetronome();
-                  startMetronome(currentSubdivisions); // Start with current subdivisions
+                  startMetronome(
+                      currentSubdivisions); // Start with current subdivisions
                 },
                 child: Text('Start'),
               ),
@@ -160,14 +168,16 @@ class _MetronomeAppState extends State<MetronomeApp> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedSubdivisionIndex == 0 ? Colors.red : Colors.white,
+                  backgroundColor:
+                      selectedSubdivisionIndex == 0 ? Colors.red : Colors.white,
                 ),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 0; // Whole note
                     currentSubdivisions = 1;
                     stopMetronome();
-                    startMetronome(currentSubdivisions); // Restart with whole notes
+                    startMetronome(
+                        currentSubdivisions); // Restart with whole notes
                   });
                 },
                 child: Text('Whole'),
@@ -175,14 +185,16 @@ class _MetronomeAppState extends State<MetronomeApp> {
               SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedSubdivisionIndex == 1 ? Colors.red : Colors.white,
+                  backgroundColor:
+                      selectedSubdivisionIndex == 1 ? Colors.red : Colors.white,
                 ),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 1; // Eighth notes
                     currentSubdivisions = 2;
                     stopMetronome();
-                    startMetronome(currentSubdivisions); // Restart with eighth notes
+                    startMetronome(
+                        currentSubdivisions); // Restart with eighth notes
                   });
                 },
                 child: Text('Eighth'),
@@ -190,14 +202,16 @@ class _MetronomeAppState extends State<MetronomeApp> {
               SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedSubdivisionIndex == 2 ? Colors.red : Colors.white,
+                  backgroundColor:
+                      selectedSubdivisionIndex == 2 ? Colors.red : Colors.white,
                 ),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 2; // Triplets
                     currentSubdivisions = 3;
                     stopMetronome();
-                    startMetronome(currentSubdivisions); // Restart with triplets
+                    startMetronome(
+                        currentSubdivisions); // Restart with triplets
                   });
                 },
                 child: Text('Triplet'),
@@ -205,39 +219,21 @@ class _MetronomeAppState extends State<MetronomeApp> {
               SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedSubdivisionIndex == 3 ? Colors.red : Colors.white,
+                  backgroundColor:
+                      selectedSubdivisionIndex == 3 ? Colors.red : Colors.white,
                 ),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 3; // Sixteenth notes
                     currentSubdivisions = 4;
                     stopMetronome();
-                    startMetronome(currentSubdivisions); // Restart with sixteenth notes
+                    startMetronome(
+                        currentSubdivisions); // Restart with sixteenth notes
                   });
                 },
                 child: Text('Sixteenth'),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Custom Drawer
-class CustomDrawer extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: const EdgeInsets.all(0),
-        children: <Widget>[
-          ListTile(
-            title: const Text('Sign up / Log in Here'),
-            onTap: () {
-              Navigator.pushNamed(context, '/sign_in');
-            },
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
+import 'customdrawer.dart';
+
 
 class SignIn extends StatelessWidget {
   const SignIn({super.key});
@@ -12,7 +13,7 @@ class SignIn extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.red[400],
       ),
-      drawer: CustomDrawer(), // Use the same CustomDrawer
+      drawer: CustomDrawer(isOnSignInPage: true,),
       body: Center(
         child: Text('Sign In Screen'),
       ),

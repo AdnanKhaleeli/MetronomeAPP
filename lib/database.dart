@@ -38,23 +38,25 @@ class DatabaseHelper {
   }
 
   Future<bool> insertStudent({
-    required String name,
+    required String username,
     required String pwd,
+    required String profilename
   }) async {
     if (_db == null) {
       return false;
     }
 
     var studentsCollection = _db!.collection('Student');
-    var student = await studentsCollection.findOne(where.eq('name', name));
+    var student = await studentsCollection.findOne(where.eq('name', username));
 
     if (student != null) {
       return false;
     }
 
     var newStudent = {
-      'name': name,
+      'username': username,
       'pwd': pwd,
+      'profilename' : profilename,
       'assigned_music': {},
       'subgroup_id': null
     };
@@ -62,4 +64,7 @@ class DatabaseHelper {
     await studentsCollection.insert(newStudent);
     return true;
   }
+
+
+
 }
