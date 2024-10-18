@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 class CustomDrawer extends StatelessWidget {
   final bool isUserSignedIn;
-  final bool isOnSignInPage; // New parameter to check if on sign-in page
-
+  final bool isOnSignInPage; 
   CustomDrawer({
     this.isUserSignedIn = false,
-    this.isOnSignInPage = false, // Default to false
+    this.isOnSignInPage = false, 
   });
 
   @override
@@ -29,12 +28,12 @@ class CustomDrawer extends StatelessWidget {
               color: Colors.red[400],
             ),
           ),
-          if (!isOnSignInPage) // Only show this if not on sign-in page
+          if (!isOnSignInPage) 
             ListTile(
               title: Text(isUserSignedIn ? 'Profile' : 'Sign Up / Log In'),
               onTap: () {
                 if (isUserSignedIn) {
-                  // Navigate to profile
+                  
                 } else {
                   Navigator.pushNamed(context, '/sign_in');
                 }
@@ -43,14 +42,14 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             title: Text('Settings'),
             onTap: () {
-              // Navigate to Settings
+    
               Navigator.pushNamed(context, '/settings');
             },
           ),
           ListTile(
             title: Text('About'),
             onTap: () {
-              // Navigate to About
+    
             },
           ),
         ],
