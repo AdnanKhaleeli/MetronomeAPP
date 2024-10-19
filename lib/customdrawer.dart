@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class CustomDrawer extends StatelessWidget {
   final bool isUserSignedIn;
-  final bool isOnSignInPage; 
+  final bool isOnSignInPage;
   CustomDrawer({
     this.isUserSignedIn = false,
-    this.isOnSignInPage = false, 
+    this.isOnSignInPage = false,
   });
 
   @override
@@ -16,7 +16,8 @@ class CustomDrawer extends StatelessWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(isUserSignedIn ? "User Name" : "Guest"),
-            accountEmail: Text(isUserSignedIn ? "user@example.com" : "guest@example.com"),
+            accountEmail:
+                Text(isUserSignedIn ? "user@example.com" : "guest@example.com"),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
@@ -28,13 +29,13 @@ class CustomDrawer extends StatelessWidget {
               color: Colors.red[400],
             ),
           ),
-          if (!isOnSignInPage) 
+          if (!isOnSignInPage)
             ListTile(
               title: Text(isUserSignedIn ? 'Profile' : 'Sign Up / Log In'),
               onTap: () {
                 if (isUserSignedIn) {
-                  
                 } else {
+                  Scaffold.of(context).closeDrawer();
                   Navigator.pushNamed(context, '/sign_in');
                 }
               },
@@ -42,15 +43,12 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             title: Text('Settings'),
             onTap: () {
-    
               Navigator.pushNamed(context, '/settings');
             },
           ),
           ListTile(
             title: Text('About'),
-            onTap: () {
-    
-            },
+            onTap: () {},
           ),
         ],
       ),

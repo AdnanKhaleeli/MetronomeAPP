@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'customdrawer.dart';
-
+import "database.dart";
 
 class SignIn extends StatelessWidget {
   const SignIn({super.key});
@@ -9,14 +9,55 @@ class SignIn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('Login or Sign_up'),
         centerTitle: true,
         backgroundColor: Colors.red[400],
       ),
-      drawer: CustomDrawer(isOnSignInPage: true,),
-      body: Center(
-        child: Text('Sign In Screen'),
+      drawer: CustomDrawer(
+        isOnSignInPage: true,
       ),
+      body: Center(
+          child: Column(
+        children: [LogIn()],
+      )),
     );
+  }
+}
+
+class LogIn extends StatefulWidget {
+  const LogIn({super.key});
+
+  @override
+  State<LogIn> createState() => _LogInState();
+}
+
+class _LogInState extends State<LogIn> {
+  final _formKey = GlobalKey<FormState>();
+  String? _username;
+  String? _password;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+        key: _formKey,
+        child: Column(children: <Widget>[
+          Container(
+            margin: EdgeInsets.all(40),
+            child: TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  hintText: 'Enter your username',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0)
+                ),
+               
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a username';
+                  }
+                  return null;
+                }),
+          )
+        ]));
   }
 }
