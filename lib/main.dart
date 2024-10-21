@@ -96,7 +96,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
         centerTitle: true,
         backgroundColor: Colors.red[400],
       ),
-      drawer: CustomDrawer(),
+      drawer: CustomDrawer(stopMetronome: stopMetronome,),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

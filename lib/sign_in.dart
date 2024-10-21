@@ -57,7 +57,42 @@ class _LogInState extends State<LogIn> {
                   }
                   return null;
                 }),
-          )
+          ),
+            Container(
+            margin: EdgeInsets.all(40),
+            child: TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  hintText: 'Enter your password',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0)
+                ),
+               
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  return null;
+                }),
+          ),
+           Container(
+            margin: EdgeInsets.all(40),
+            child: TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Profile name',
+                  hintText: 'Enter your profile name',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0)
+                ),
+               
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a profile name';
+                  }
+                  return null;
+                }),
+
+           ),
         ]));
   }
 }

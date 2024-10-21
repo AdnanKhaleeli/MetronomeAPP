@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:metronome/main.dart';
 
 class CustomDrawer extends StatelessWidget {
   final bool isUserSignedIn;
   final bool isOnSignInPage;
+  var stopMetronome;
   CustomDrawer({
     this.isUserSignedIn = false,
     this.isOnSignInPage = false,
+    this.stopMetronome,
   });
 
   @override
@@ -36,6 +39,7 @@ class CustomDrawer extends StatelessWidget {
                 if (isUserSignedIn) {
                 } else {
                   Scaffold.of(context).closeDrawer();
+                  stopMetronome();
                   Navigator.pushNamed(context, '/sign_in');
                 }
               },
