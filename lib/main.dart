@@ -30,6 +30,27 @@ class MyApp extends StatelessWidget {
         '/': (context) => MetronomeApp(),
         '/sign_in': (context) => SignIn(),
       },
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+         textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white, // Text color for TextButton
+          ),     
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue, // Background color for ElevatedButton
+            foregroundColor: Colors.white, // Text color for ElevatedButton
+          ),
+        ),
+          sliderTheme: const SliderThemeData(
+          activeTrackColor: Colors.red,
+          inactiveTrackColor: Colors.grey,
+          thumbColor: Colors.white,
+          
+        ), 
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -170,6 +191,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       selectedSubdivisionIndex == 0 ? Colors.red : Colors.white,
+                      foregroundColor: Colors.black
                 ),
                 onPressed: () {
                   setState(() {
@@ -187,6 +209,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       selectedSubdivisionIndex == 1 ? Colors.red : Colors.white,
+                      foregroundColor: Colors.black
                 ),
                 onPressed: () {
                   setState(() {
@@ -204,6 +227,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       selectedSubdivisionIndex == 2 ? Colors.red : Colors.white,
+                      foregroundColor: Colors.black
                 ),
                 onPressed: () {
                   setState(() {
@@ -221,6 +245,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       selectedSubdivisionIndex == 3 ? Colors.red : Colors.white,
+                      foregroundColor: Colors.black
                 ),
                 onPressed: () {
                   setState(() {
