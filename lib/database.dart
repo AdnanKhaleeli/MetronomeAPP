@@ -37,11 +37,10 @@ class DatabaseHelper {
     return _db!;
   }
 
-  Future<bool> insertStudent({
-    required String username,
-    required String pwd,
-    required String profilename
-  }) async {
+  Future<bool> insertStudent(
+      {required String username,
+      required String pwd,
+      required String profilename}) async {
     if (_db == null) {
       return false;
     }
@@ -56,7 +55,7 @@ class DatabaseHelper {
     var newStudent = {
       'username': username,
       'pwd': pwd,
-      'profilename' : profilename,
+      'profilename': profilename,
       'assigned_music': {},
       'subgroup_id': null
     };
@@ -65,6 +64,13 @@ class DatabaseHelper {
     return true;
   }
 
+  Future<bool> checkUserNameUnique(String username) async {
+    var studentsCollection = _db!.collection('Student');
+    var student = await studentsCollection.findOne(where.eq('name', username));
 
-
+    if (student != null) {
+      return false;
+    }
+    return true;
+  }
 }
