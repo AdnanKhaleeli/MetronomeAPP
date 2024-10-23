@@ -57,9 +57,7 @@ class _LogInState extends State<LogIn> {
   Future<bool> _isUsernameUnique(String username) async {
     var db = DatabaseHelper();
     await db.init();
-
-    bool isUnique = await db.checkUserNameUnique(username);
-    return isUnique;
+    return await db.checkUserNameUnique(username);
   }
 
   @override
@@ -85,11 +83,9 @@ class _LogInState extends State<LogIn> {
               return null; // Assume valid for now
             },
             onChanged: (value) async {
-              // Check for uniqueness on input change
-
-              if (value.isNotEmpty) {
+              // Check for uniqueness on input change (only if in sign-up mode)
+              if (value.isNotEmpty && sign_up) {
                 bool isUnique = await _isUsernameUnique(value);
-                print(isUnique);
                 if (!isUnique) {
                   _showSnackBar('Username is already taken');
                 }
@@ -142,7 +138,7 @@ class _LogInState extends State<LogIn> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  sign_up = false;
+                  sign_up = false; // Switch to login
                 });
               },
               child: Text('Login'),
@@ -150,7 +146,7 @@ class _LogInState extends State<LogIn> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  sign_up = true;
+                  sign_up = true; // Switch to sign-up
                 });
               },
               child: Text('SignUp'),
@@ -159,8 +155,9 @@ class _LogInState extends State<LogIn> {
         ),
         ElevatedButton(
           onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              if (sign_up) {
+            if (sign_up) {
+              // Sign-up logic
+              if (_formKey.currentState!.validate()) {
                 bool isUnique =
                     await _isUsernameUnique(_userNameController.text);
                 if (!isUnique) {
@@ -178,10 +175,9 @@ class _LogInState extends State<LogIn> {
                 );
 
                 var userID = await db.getUserID(_userNameController.text);
-
                 if (userID != null) {
                   User user = User(
-                    userId: (await db.getUserID(_userNameController.text))!,
+                    userId: userID,
                     username: _userNameController.text,
                     password: _pwdController.text,
                     profileName: _profileController.text,
@@ -194,7 +190,32 @@ class _LogInState extends State<LogIn> {
                     ),
                   );
                 }
-              } else {}
+              }
+            } else {
+              // Login logic
+              if (_formKey.currentState!.validate()) {
+                var db = DatabaseHelper();
+                await db.init();
+
+                var userID = await db.getUserID(_userNameController.text);
+                if (userID == null) {
+                  _showSnackBar(
+                      'Username not found'); // Show feedback only if username is not found
+                  return;
+                }
+
+                var user =
+                    await db.loginUser(_userNameController.text, _pwdController.text);
+
+                if (user != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MetronomeApp(user: user),
+                    ),
+                  );
+                }
+              }
             }
           },
           child: Text('Submit'),

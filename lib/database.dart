@@ -1,6 +1,7 @@
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 import 'package:mongo_dart/mongo_dart.dart';
+import 'user.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -46,7 +47,8 @@ class DatabaseHelper {
     }
 
     var studentsCollection = _db!.collection('Student');
-    var student = await studentsCollection.findOne(where.eq('name', username));
+    var student =
+        await studentsCollection.findOne(where.eq('username', username));
 
     if (student != null) {
       return false;
@@ -66,7 +68,8 @@ class DatabaseHelper {
 
   Future<bool> checkUserNameUnique(String username) async {
     var studentsCollection = _db!.collection('Student');
-    var student = await studentsCollection.findOne(where.eq('username', username));
+    var student =
+        await studentsCollection.findOne(where.eq('username', username));
 
     if (student == null) {
       return true;
@@ -76,11 +79,34 @@ class DatabaseHelper {
 
   Future<ObjectId?> getUserID(String username) async {
     var studentsCollection = _db!.collection('Student');
-    var student = await studentsCollection.findOne(where.eq('username', username));
-  
-  if (student != null) {
-    return student['_id'];
+    var student =
+        await studentsCollection.findOne(where.eq('username', username));
+
+    if (student != null) {
+      return student['_id'];
+    }
+    return null; // Return null if no student is found
   }
-   return null; // Return null if no student is found
+
+
+  Future<User?> loginUser(String username, String password) async {
+  var studentsCollection = _db!.collection('Student');
+
+  // Find the student by username
+  var student = await studentsCollection.findOne(where.eq('username', username));
+
+  // Check if the student exists and if the password matches
+  if (student != null && student['pwd'] == password) {
+    // Create and return a User object if credentials match
+    return User(
+      userId: student['_id'], // Assuming _id is the user ID
+      username: student['username'],
+      password: student['pwd'], // Consider handling this securely
+      profileName: student['profilename'] ?? '', // Default to an empty string if not set
+    );
   }
+
+  // Return null if no matching student is found
+  return null;
+}
 }
