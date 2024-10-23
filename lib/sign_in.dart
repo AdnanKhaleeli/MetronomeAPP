@@ -97,19 +97,27 @@ class _LogInState extends State<LogIn> {
               ElevatedButton(
                   onPressed: () {
                     setState(() {
-                     sign_up = false; // Update state to show login fields
-                  });
+                      sign_up = false; // Update state to show login fields
+                    });
                   },
                   child: Text('Login')),
               ElevatedButton(
                   onPressed: () {
                     setState(() {
-                    sign_up = true; // Update state to show login fields
+                      sign_up = true; // Update state to show login fields
                     });
                   },
                   child: Text('SignUp')),
             ],
-          )
+          ),
+          ElevatedButton(
+              onPressed: () async {
+                var db = DatabaseHelper();
+                if (sign_up) {
+                // bool result = await db.insertStudent(username: username, pwd: pwd, profilename: profilename)
+                }
+              },
+              child: Text('Submit'))
         ]));
   }
 }
