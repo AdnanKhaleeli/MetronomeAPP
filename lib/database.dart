@@ -68,10 +68,10 @@ class DatabaseHelper {
     var studentsCollection = _db!.collection('Student');
     var student = await studentsCollection.findOne(where.eq('username', username));
 
-    if (student != null) {
-      return false;
+    if (student == null) {
+      return true;
     }
-    return true;
+    return false;
   }
 
   Future<ObjectId?> getUserID(String username) async {

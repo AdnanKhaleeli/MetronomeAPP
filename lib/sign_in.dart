@@ -86,8 +86,10 @@ class _LogInState extends State<LogIn> {
             },
             onChanged: (value) async {
               // Check for uniqueness on input change
+
               if (value.isNotEmpty) {
                 bool isUnique = await _isUsernameUnique(value);
+                print(isUnique);
                 if (!isUnique) {
                   _showSnackBar('Username is already taken');
                 }
