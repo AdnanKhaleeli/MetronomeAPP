@@ -66,11 +66,21 @@ class DatabaseHelper {
 
   Future<bool> checkUserNameUnique(String username) async {
     var studentsCollection = _db!.collection('Student');
-    var student = await studentsCollection.findOne(where.eq('name', username));
+    var student = await studentsCollection.findOne(where.eq('username', username));
 
     if (student != null) {
       return false;
     }
     return true;
+  }
+
+  Future<ObjectId?> getUserID(String username) async {
+    var studentsCollection = _db!.collection('Student');
+    var student = await studentsCollection.findOne(where.eq('username', username));
+  
+  if (student != null) {
+    return student['_id'];
+  }
+   return null; // Return null if no student is found
   }
 }

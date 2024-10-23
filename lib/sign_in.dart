@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'customdrawer.dart';
 import 'database.dart';
+import 'main.dart';
+import 'user.dart';
 
 class SignIn extends StatelessWidget {
   const SignIn({super.key});
@@ -15,6 +17,7 @@ class SignIn extends StatelessWidget {
       ),
       drawer: CustomDrawer(
         isOnSignInPage: true,
+        user: null,
       ),
       body: Center(
         child: Column(
@@ -54,12 +57,10 @@ class _LogInState extends State<LogIn> {
   Future<bool> _isUsernameUnique(String username) async {
     var db = DatabaseHelper();
     await db.init();
-    
+
     bool isUnique = await db.checkUserNameUnique(username);
     return isUnique;
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,8 @@ class _LogInState extends State<LogIn> {
               labelText: 'Username',
               hintText: 'Enter your username',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -101,7 +103,8 @@ class _LogInState extends State<LogIn> {
               labelText: 'Password',
               hintText: 'Enter your password',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -120,13 +123,14 @@ class _LogInState extends State<LogIn> {
                 labelText: 'Profile name',
                 hintText: 'Enter your profile name',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a profile name';
                 }
-                return null; 
+                return null;
               },
             ),
           ),
@@ -136,7 +140,7 @@ class _LogInState extends State<LogIn> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  sign_up = false; 
+                  sign_up = false;
                 });
               },
               child: Text('Login'),
@@ -144,7 +148,7 @@ class _LogInState extends State<LogIn> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  sign_up = true; 
+                  sign_up = true;
                 });
               },
               child: Text('SignUp'),
@@ -155,12 +159,13 @@ class _LogInState extends State<LogIn> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               if (sign_up) {
-                bool isUnique = await _isUsernameUnique(_userNameController.text);
+                bool isUnique =
+                    await _isUsernameUnique(_userNameController.text);
                 if (!isUnique) {
                   _showSnackBar('Error: Username taken');
-                  return; 
+                  return;
                 }
-                
+
                 // Insert student if unique
                 var db = DatabaseHelper();
                 await db.init();
@@ -170,12 +175,24 @@ class _LogInState extends State<LogIn> {
                   profilename: _profileController.text,
                 );
 
+                var userID = await db.getUserID(_userNameController.text);
 
+                if (userID != null) {
+                  User user = User(
+                    userId: (await db.getUserID(_userNameController.text))!,
+                    username: _userNameController.text,
+                    password: _pwdController.text,
+                    profileName: _profileController.text,
+                  );
 
-               
-              } else {
-                
-              }
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MetronomeApp(user: user),
+                    ),
+                  );
+                }
+              } else {}
             }
           },
           child: Text('Submit'),

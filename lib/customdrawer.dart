@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:metronome/main.dart';
+import 'user.dart';
 
 class CustomDrawer extends StatelessWidget {
   final bool isUserSignedIn;
   final bool isOnSignInPage;
-  var stopMetronome;
+  final Function? stopMetronome;
+  final User? user;
+
   CustomDrawer({
     this.isUserSignedIn = false,
     this.isOnSignInPage = false,
     this.stopMetronome,
+    this.user,
   });
 
   @override
@@ -18,9 +22,8 @@ class CustomDrawer extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text(isUserSignedIn ? "User Name" : "Guest"),
-            accountEmail:
-                Text(isUserSignedIn ? "user@example.com" : "guest@example.com"),
+            accountName: Text(user != null ? user!.getProfileName() : "Guest"),
+            accountEmail: Text(isUserSignedIn ? "user@example.com" : "guest@example.com"),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
@@ -34,12 +37,11 @@ class CustomDrawer extends StatelessWidget {
           ),
           if (!isOnSignInPage)
             ListTile(
-              title: Text(isUserSignedIn ? 'Profile' : 'Sign Up / Log In'),
+              title: Text(user == null ? 'Sign Up / Log In' :  'Profile'),
               onTap: () {
-                if (isUserSignedIn) {
-                } else {
+                if (!isUserSignedIn) {
                   Scaffold.of(context).closeDrawer();
-                  stopMetronome();
+                  stopMetronome?.call();
                   Navigator.pushNamed(context, '/sign_in');
                 }
               },

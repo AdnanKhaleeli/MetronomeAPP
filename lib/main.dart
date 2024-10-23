@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'database.dart';
+import 'user.dart';
 
 import 'sign_in.dart';
 import 'settings.dart';
@@ -33,10 +34,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
-         textButtonTheme: TextButtonThemeData(
+        textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             foregroundColor: Colors.white, // Text color for TextButton
-          ),     
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -44,12 +45,11 @@ class MyApp extends StatelessWidget {
             foregroundColor: Colors.white, // Text color for ElevatedButton
           ),
         ),
-          sliderTheme: const SliderThemeData(
+        sliderTheme: const SliderThemeData(
           activeTrackColor: Colors.red,
           inactiveTrackColor: Colors.grey,
           thumbColor: Colors.white,
-          
-        ), 
+        ),
       ),
       debugShowCheckedModeBanner: false,
     );
@@ -58,10 +58,16 @@ class MyApp extends StatelessWidget {
 
 class MetronomeApp extends StatefulWidget {
   @override
+
+   User? user;
+
+   MetronomeApp({Key? key, this.user}) : super(key: key);
+
   _MetronomeAppState createState() => _MetronomeAppState();
 }
 
 class _MetronomeAppState extends State<MetronomeApp> {
+  
   double _bpm = 60;
   final player = AudioPlayer();
   Timer? _timer;
@@ -71,6 +77,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   // Track the currently selected button index
   int selectedSubdivisionIndex = 0;
+
 
   // Unified method to start the metronome
   void startMetronome(int subdivisions) {
@@ -117,7 +124,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
         centerTitle: true,
         backgroundColor: Colors.red[400],
       ),
-      drawer: CustomDrawer(stopMetronome: stopMetronome,),
+      drawer: CustomDrawer(
+        stopMetronome: stopMetronome,
+        user: widget.user,
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -189,10 +199,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      selectedSubdivisionIndex == 0 ? Colors.red : Colors.white,
-                      foregroundColor: Colors.black
-                ),
+                    backgroundColor: selectedSubdivisionIndex == 0
+                        ? Colors.red
+                        : Colors.white,
+                    foregroundColor: Colors.black),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 0; // Whole note
@@ -207,10 +217,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
               SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      selectedSubdivisionIndex == 1 ? Colors.red : Colors.white,
-                      foregroundColor: Colors.black
-                ),
+                    backgroundColor: selectedSubdivisionIndex == 1
+                        ? Colors.red
+                        : Colors.white,
+                    foregroundColor: Colors.black),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 1; // Eighth notes
@@ -225,10 +235,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
               SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      selectedSubdivisionIndex == 2 ? Colors.red : Colors.white,
-                      foregroundColor: Colors.black
-                ),
+                    backgroundColor: selectedSubdivisionIndex == 2
+                        ? Colors.red
+                        : Colors.white,
+                    foregroundColor: Colors.black),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 2; // Triplets
@@ -243,10 +253,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
               SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      selectedSubdivisionIndex == 3 ? Colors.red : Colors.white,
-                      foregroundColor: Colors.black
-                ),
+                    backgroundColor: selectedSubdivisionIndex == 3
+                        ? Colors.red
+                        : Colors.white,
+                    foregroundColor: Colors.black),
                 onPressed: () {
                   setState(() {
                     selectedSubdivisionIndex = 3; // Sixteenth notes
