@@ -350,24 +350,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  stopMetronome();
-                  startMetronome(
-                      currentSubdivisions); // Start with current subdivisions
-                },
-                child: Text('Start'),
-              ),
-              SizedBox(width: 20),
-              ElevatedButton(
-                onPressed: stopMetronome,
-                child: Text('Stop'),
-              ),
-            ],
-          ),
           // Subdivision buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
