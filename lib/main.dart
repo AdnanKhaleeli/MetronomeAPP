@@ -74,6 +74,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   bool playing = false;
   int currentSubdivisions = 1;
   int tickCount = 0;
+  int newBpmInput = 0;
 
   // Track the currently selected button index
   int selectedSubdivisionIndex = 0;
@@ -175,6 +176,180 @@ class _MetronomeAppState extends State<MetronomeApp> {
               ),
             ],
           ),
+          Row( // BPM keypad value
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (newBpmInput == 0) Text("Enter new BPM:") // If value is 0, don't display
+              else (Text("Enter new BPM: $newBpmInput")),
+            ],
+          ),
+          Row( // Row for numbers 1, 2, 3
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton( // 1
+                  onPressed: () {
+                    addToInput(1);
+                  },
+                  child: Text("1"),
+                style: ElevatedButton.styleFrom(
+                    shape: CircleBorder(),
+                ),
+              ),
+              ElevatedButton( // 2
+                onPressed: () {
+                  addToInput(2);
+                },
+                child: Text("2"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+              ElevatedButton( // 3
+                onPressed: () {
+                  addToInput(3);
+                },
+                child: Text("3"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+            ],
+          ),
+          Row( // Row for numbers 4, 5, 6
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton( // 4
+                onPressed: () {
+                  addToInput(4);
+                },
+                child: Text("4"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+              ElevatedButton( // 5
+                onPressed: () {
+                  addToInput(5);
+                },
+                child: Text("5"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+              ElevatedButton( // 6
+                onPressed: () {
+                  addToInput(6);
+                },
+                child: Text("6"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+            ],
+          ),
+          Row( // Row for numbers 7, 8, 9
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton( // 7
+                onPressed: () {
+                  addToInput(7);
+                },
+                child: Text("7"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+              ElevatedButton( // 8
+                onPressed: () {
+                  addToInput(8);
+                },
+                child: Text("8"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+              ElevatedButton( // 9
+                onPressed: () {
+                  addToInput(9);
+                },
+                child: Text("9"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+            ],
+          ),
+          Row( // Row for number 0
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton( // 0
+                onPressed: () {
+                  addToInput(0);
+                },
+                child: Text("0"),
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                ),
+              ),
+            ],
+          ),
+          Row( // Row enter and backspace
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton( // enter
+                onPressed: () {
+                  if (newBpmInput >= 40 && newBpmInput <= 200) { // Input is valid
+                    setState(() {
+                      _bpm = newBpmInput.toDouble();
+                      newBpmInput = 0; // Set new text and value
+                    });
+                  }
+                },
+                child: Text("Enter"),
+              ),
+              ElevatedButton( // backspace
+                onPressed: () {
+                  setState(() { // Set new text and value
+                    if (newBpmInput < 10) { // Ensure input is not ever 'empty' since it is an int
+                      newBpmInput = 0;
+                    } else {
+                      newBpmInput = int.parse(newBpmInput.toString().substring(0, newBpmInput.toString().length - 1));
+                    }
+                  });
+                },
+                child: Text("Back"),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  playing = true;
+                  while (playing) {
+                    double oneBeat = 60 / _bpm;
+                    double waitTime = oneBeat - 0.156;
+
+                    await player.setSource(AssetSource('tick_sound_156.wav'));
+                    await player.setVolume(1.0);
+                    await player.resume();
+                    await Future.delayed(Duration(milliseconds: 156));
+                    await Future.delayed(Duration(milliseconds: (waitTime * 1000).toInt()));
+                  }
+                },
+                child: Text('Start'),
+              ),
+              SizedBox(width: 20),
+              ElevatedButton(
+                onPressed: () {
+                  playing = false;
+                  player.stop();
+                },
+                child: Text('Stop'),
+              ),
+            ],
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -273,5 +448,14 @@ class _MetronomeAppState extends State<MetronomeApp> {
         ],
       ),
     );
+  }
+  void addToInput(int num) {
+    setState(() { // Set new text and value
+      if (newBpmInput == 0) {
+        newBpmInput = num;
+      } else if (newBpmInput < 100) { // Limit new input to 3 digits
+        newBpmInput = int.parse(newBpmInput.toString() + num.toString());
+      }
+    });
   }
 }
