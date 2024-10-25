@@ -51,9 +51,10 @@ class DatabaseHelper {
         await studentsCollection.findOne(where.eq('username', username));
 
     var conductorCollection = _db!.collection('Conductor');
-    var conductor = await conductorCollection.findOne(where.eq('username', username));
+    var conductor =
+        await conductorCollection.findOne(where.eq('username', username));
 
-    if (student != null && conductor != null)  {
+    if (student != null && conductor != null) {
       return false;
     }
 
@@ -75,8 +76,9 @@ class DatabaseHelper {
         await studentsCollection.findOne(where.eq('username', username));
 
     var conductorCollection = _db!.collection('Conductor');
-    var conductor = await conductorCollection.findOne(where.eq('username', username));
-    
+    var conductor =
+        await conductorCollection.findOne(where.eq('username', username));
+
     if (student == null && conductor == null) {
       return true;
     }
@@ -88,8 +90,14 @@ class DatabaseHelper {
     var student =
         await studentsCollection.findOne(where.eq('username', username));
 
+    var conductorCollection = _db!.collection('Conductor');
+    var conductor =
+        await conductorCollection.findOne(where.eq('username', username));
+
     if (student != null) {
       return student['_id'];
+    } else if (conductor != null) {
+      return conductor['_id'];
     }
     return null; // Return null if no student is found
   }
@@ -119,7 +127,7 @@ class DatabaseHelper {
       if (conductor != null && conductor['pwd'] == password) {
         return Conductor(
             userId: conductor['_id'],
-            username: conductor['_username'],
+            username: conductor['username'],
             password: conductor['pwd'],
             profileName: conductor['profilename']);
       }
