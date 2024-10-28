@@ -13,11 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var db = DatabaseHelper();
   await db.init();
-
-  bool result = await db.insertStudent(
-      username: 'Adnan', pwd: '2782738', profilename: 'profile_Name');
-  print(result);
-
   runApp(MyApp());
 }
 

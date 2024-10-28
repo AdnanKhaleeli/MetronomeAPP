@@ -50,7 +50,11 @@ class DatabaseHelper {
     var student =
         await studentsCollection.findOne(where.eq('username', username));
 
-    if (student != null) {
+    var conductorCollection = _db!.collection('Conductor');
+    var conductor =
+        await conductorCollection.findOne(where.eq('username', username));
+
+    if (student != null && conductor != null) {
       return false;
     }
 
@@ -71,7 +75,11 @@ class DatabaseHelper {
     var student =
         await studentsCollection.findOne(where.eq('username', username));
 
-    if (student == null) {
+    var conductorCollection = _db!.collection('Conductor');
+    var conductor =
+        await conductorCollection.findOne(where.eq('username', username));
+
+    if (student == null && conductor == null) {
       return true;
     }
     return false;
@@ -82,31 +90,50 @@ class DatabaseHelper {
     var student =
         await studentsCollection.findOne(where.eq('username', username));
 
+    var conductorCollection = _db!.collection('Conductor');
+    var conductor =
+        await conductorCollection.findOne(where.eq('username', username));
+
     if (student != null) {
       return student['_id'];
+    } else if (conductor != null) {
+      return conductor['_id'];
     }
     return null; // Return null if no student is found
   }
 
-
   Future<User?> loginUser(String username, String password) async {
-  var studentsCollection = _db!.collection('Student');
+    var studentsCollection = _db!.collection('Student');
 
-  // Find the student by username
-  var student = await studentsCollection.findOne(where.eq('username', username));
+    // Find the student by username
+    var student =
+        await studentsCollection.findOne(where.eq('username', username));
 
-  // Check if the student exists and if the password matches
-  if (student != null && student['pwd'] == password) {
-    // Create and return a User object if credentials match
-    return User(
-      userId: student['_id'], // Assuming _id is the user ID
-      username: student['username'],
-      password: student['pwd'], // Consider handling this securely
-      profileName: student['profilename'] ?? '', // Default to an empty string if not set
-    );
+    // Check if the student exists and if the password matches
+    if (student != null && student['pwd'] == password) {
+      // Create and return a User object if credentials match
+      return Student(
+        userId: student['_id'], // Assuming _id is the user ID
+        username: student['username'],
+        password: student['pwd'], // Consider handling this securely
+        profileName: student['profilename'] ??
+            '', // Default to an empty string if not set
+      );
+    } else {
+      var conductorCollection = _db!.collection('Conductor');
+      var conductor =
+          await conductorCollection.findOne(where.eq('username', username));
+
+      if (conductor != null && conductor['pwd'] == password) {
+        return Conductor(
+            userId: conductor['_id'],
+            username: conductor['username'],
+            password: conductor['pwd'],
+            profileName: conductor['profilename']);
+      }
+    }
+
+    // Return null if no matching student is found
+    return null;
   }
-
-  // Return null if no matching student is found
-  return null;
-}
 }
