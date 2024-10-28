@@ -14,7 +14,7 @@ class addMusicState extends State<AddMusic> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Add Music Here')
+        appBar: AppBar(title: Text('Add Music Here'),
         centerTitle: true,
         ),
 
