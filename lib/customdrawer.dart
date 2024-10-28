@@ -39,7 +39,7 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
               title: Text(user == null ? 'Sign Up / Log In' : 'Profile'),
               onTap: () {
-                if (user != null) {
+                if (user == null) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
                   Navigator.pushNamed(context, '/sign_in');
@@ -55,7 +55,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             title: Text('Settings'),
             onTap: () {
-              Navigator.pushNamed(context, '/settings');
+             
             },
           ),
           ListTile(

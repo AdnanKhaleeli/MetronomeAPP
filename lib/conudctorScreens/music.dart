@@ -16,6 +16,7 @@ class addMusicState extends State<AddMusic> {
     return Scaffold(
         appBar: AppBar(title: Text('Add Music Here'),
         centerTitle: true,
+        
         ),
 
         drawer: CustomDrawer(
