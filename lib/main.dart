@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => MetronomeApp(),
         '/sign_in': (context) => SignIn(),
-        '/addMusic': (context) => AddMusic(user: ModalRoute.of(context)!.settings.arguments as User)
+        '/addMusic': (context) => AddMusic(user: ModalRoute.of(context)!.settings.arguments as Conductor)
       },
       theme: ThemeData(
         brightness: Brightness.dark,

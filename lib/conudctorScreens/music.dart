@@ -3,7 +3,7 @@ import '../user.dart';
 import '../customdrawer.dart';
 
 class AddMusic extends StatefulWidget {
-  User user;
+  Conductor user;
   AddMusic({super.key, required this.user});
 
   @override
