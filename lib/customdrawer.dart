@@ -3,13 +3,12 @@ import 'package:metronome/main.dart';
 import 'user.dart';
 
 class CustomDrawer extends StatelessWidget {
-  final bool isUserSignedIn;
+ 
   final bool isOnSignInPage;
   final Function? stopMetronome;
   final User? user;
 
   CustomDrawer({
-    this.isUserSignedIn = false,
     this.isOnSignInPage = false,
     this.stopMetronome,
     this.user,
@@ -23,11 +22,12 @@ class CustomDrawer extends StatelessWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(user != null ? user!.getProfileName() : "Guest"),
-            accountEmail: Text(isUserSignedIn ? "user@example.com" : "guest@example.com"),
+            accountEmail:
+                Text(user != null ? "user@example.com" : "guest@example.com"),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                isUserSignedIn ? "U" : "G",
+                user != null ? "U" : "G",
                 style: TextStyle(fontSize: 40.0, color: Colors.red),
               ),
             ),
@@ -37,15 +37,21 @@ class CustomDrawer extends StatelessWidget {
           ),
           if (!isOnSignInPage)
             ListTile(
-              title: Text(user == null ? 'Sign Up / Log In' :  'Profile'),
+              title: Text(user == null ? 'Sign Up / Log In' : 'Profile'),
               onTap: () {
-                if (!isUserSignedIn) {
+                if (user != null) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
                   Navigator.pushNamed(context, '/sign_in');
                 }
               },
             ),
+          if (user is Conductor)
+            ListTile(
+                title: Text("Add Music"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/addMusic', arguments: user);
+                }),
           ListTile(
             title: Text('Settings'),
             onTap: () {

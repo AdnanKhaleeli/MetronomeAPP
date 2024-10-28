@@ -7,6 +7,7 @@ import 'user.dart';
 import 'sign_in.dart';
 import 'settings.dart';
 import 'customdrawer.dart';
+import 'conudctorScreens/music.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => MetronomeApp(),
         '/sign_in': (context) => SignIn(),
+        '/addMusic': (context) => AddMusic(user: ModalRoute.of(context)!.settings.arguments as User)
       },
       theme: ThemeData(
         brightness: Brightness.dark,
