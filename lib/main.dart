@@ -25,7 +25,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => MetronomeApp(),
         '/sign_in': (context) => SignIn(),
-        '/addMusic': (context) => AddMusic(user: ModalRoute.of(context)!.settings.arguments as Conductor)
+        '/addMusic': (context) => AddMusic(
+            user: ModalRoute.of(context)!.settings.arguments as Conductor)
       },
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -68,10 +69,12 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void startMetronome(int subdivisions) {
     playing = true;
     final double oneBeat = 60 / _bpm;
-    final double tickDuration = (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
+    final double tickDuration =
+        (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
+    _timer = Timer.periodic(
+        Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
       await player.setSource(AssetSource('tick_sound_156.wav'));
 
@@ -150,7 +153,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     ],
                     onChanged: (value) {
                       int? bpmInput = int.tryParse(value);
-                      if (bpmInput != null && bpmInput >= 40 && bpmInput <= 200) {
+                      if (bpmInput != null &&
+                          bpmInput >= 40 &&
+                          bpmInput <= 200) {
                         setState(() {
                           _bpm = bpmInput.toDouble();
                           stopMetronome();
