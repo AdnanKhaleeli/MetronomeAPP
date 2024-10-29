@@ -62,7 +62,7 @@ class DatabaseHelper {
       'username': username,
       'pwd': pwd,
       'profilename': profilename,
-      'assigned_music': {},
+      'assigned_music': [],
       'subgroup_id': null
     };
 
@@ -136,6 +136,7 @@ class DatabaseHelper {
     // Return null if no matching student is found
     return null;
   }
+
   Future<List<Map<String, dynamic>>> getStudents() async {
     // Check if the database is initialized
     if (_db == null) {
@@ -158,5 +159,52 @@ class DatabaseHelper {
       };
     }).toList();
   }
+Future<mongo.ObjectId?> insertMusic({
+  required String pieceName,
+  required List<String> sectionNames,
+  required List<int> sectionBpms,
+}) async {
+  if (_db == null) {
+    return null;
+  }
+
+  var musicCollection = _db!.collection('Music');
+
+  // Create a new music entry
+  var newMusic = {
+    'piece_name': pieceName,
+    'sections': List.generate(sectionNames.length, (index) {
+      return {
+        'name': sectionNames[index],
+        'bpm': sectionBpms[index],
+      };
+    }),
+  };
+
+  // Insert the music entry
+  await musicCollection.insert(newMusic);
+
+  // Now, search for the music entry by piece name to get its ID
+  var insertedMusic = await musicCollection.findOne(where.eq('piece_name', pieceName));
+  
+  // Return the ID of the inserted document
+  return insertedMusic?['_id']; // Return null if not found
+}
+
+Future<bool> addMusicToStudent(mongo.ObjectId studentId, mongo.ObjectId musicId) async {
+  if (_db == null) {
+    return false;
+  }
+
+  var studentsCollection = _db!.collection('Student');
+
+  // Update the student document to add the music ID to assigned_music
+  var result = await studentsCollection.updateOne(
+    where.eq('_id', studentId), // Use the ObjectId directly
+    modify.addToSet('assigned_music', musicId),
+  );
+
+  return result.isAcknowledged; // Return true if the update was successful
+}
 
 }

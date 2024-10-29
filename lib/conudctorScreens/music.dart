@@ -1,7 +1,11 @@
+
 import 'package:flutter/material.dart';
 import '../user.dart';
 import '../customdrawer.dart';
-import 'selectStudentsPage.dart'; // Import the new student selection page
+import 'selectStudentsPage.dart';
+import '../database.dart';
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
+// Import the DatabaseHelper
 
 class AddMusic extends StatefulWidget {
   final Conductor user;
@@ -15,7 +19,6 @@ class AddMusicState extends State<AddMusic> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _pieceNameController = TextEditingController();
   final TextEditingController _numSectionsController = TextEditingController();
-
   List<TextEditingController> _sectionNameControllers = [];
   List<TextEditingController> _sectionBpmControllers = [];
   int _numSections = 0;
@@ -103,7 +106,7 @@ class AddMusicState extends State<AddMusic> {
                     ),
                     SizedBox(width: 10),
                     Container(
-                      width: 80,  // Set a fixed width for the BPM field
+                      width: 80,
                       child: TextFormField(
                         controller: _sectionBpmControllers[i],
                         decoration: InputDecoration(labelText: 'BPM'),
@@ -125,24 +128,37 @@ class AddMusicState extends State<AddMusic> {
                 SizedBox(height: 10),
               ],
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     String pieceName = _pieceNameController.text;
                     List<String> sectionNames = _sectionNameControllers.map((c) => c.text).toList();
                     List<int> sectionBpms = _sectionBpmControllers.map((c) => int.parse(c.text)).toList();
 
-                    // Navigate to the SelectStudentsPage with piece data
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SelectStudentsPage(
-                          pieceName: pieceName,
-                          sectionNames: sectionNames,
-                          sectionBpms: sectionBpms,
-                          user: widget.user,
-                        ),
-                      ),
+                    // Insert music and get the generated music ID
+                    mongo.ObjectId? musicId = await DatabaseHelper().insertMusic(
+                      pieceName: pieceName,
+                      sectionNames: sectionNames,
+                      sectionBpms: sectionBpms,
                     );
+
+                    if (musicId != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SelectStudentsPage(
+                            pieceName: pieceName,
+                            sectionNames: sectionNames,
+                            sectionBpms: sectionBpms,
+                            musicId: musicId, // Pass the music ID here
+                            user: widget.user,
+                          ),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to add music to the database.')),
+                      );
+                    }
                   }
                 },
                 child: Text("Next"),
