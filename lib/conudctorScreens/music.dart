@@ -7,16 +7,16 @@ class AddMusic extends StatefulWidget {
   AddMusic({super.key, required this.user});
 
   @override
-  State<AddMusic> createState() => addMusicState();
+  State<AddMusic> createState() => AddMusicState();
 }
 
-class addMusicState extends State<AddMusic> {
+class AddMusicState extends State<AddMusic> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: Text('Add Music Here'),
         centerTitle: true,
-        
+
         ),
 
         drawer: CustomDrawer(
