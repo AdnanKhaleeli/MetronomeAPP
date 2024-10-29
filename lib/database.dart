@@ -136,4 +136,27 @@ class DatabaseHelper {
     // Return null if no matching student is found
     return null;
   }
+  Future<List<Map<String, dynamic>>> getStudents() async {
+    // Check if the database is initialized
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
+
+    // Access the students collection
+    var studentsCollection = _db!.collection('Student');
+
+    // Fetch all students from the collection
+    final students = await studentsCollection.find().toList();
+
+    // Map each document to a simplified format and return as a list
+    return students.map((student) {
+      return {
+        '_id': student['_id'],
+        'username': student['username'],
+        'profilename': student['profilename'],
+        // Add any other fields as necessary
+      };
+    }).toList();
+  }
+
 }
