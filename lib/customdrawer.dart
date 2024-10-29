@@ -35,7 +35,7 @@ class CustomDrawer extends StatelessWidget {
               color: Colors.red[400],
             ),
           ),
-          if (user != null)
+          if (!isOnSignInPage)
             ListTile(
               title: Text(user == null ? 'Sign Up / Log In' : 'Profile'),
               onTap: () {
