@@ -9,6 +9,7 @@ class SelectStudentsPage extends StatefulWidget {
   final List<int> sectionBpms;
   final mongo.ObjectId musicId; // Change to ObjectId
   final Conductor user;
+  final int numSections;
 
   SelectStudentsPage({
     Key? key,
@@ -17,6 +18,7 @@ class SelectStudentsPage extends StatefulWidget {
     required this.sectionBpms,
     required this.musicId, // Pass musicId here
     required this.user,
+    required this.numSections,
   }) : super(key: key);
 
   @override
@@ -53,7 +55,8 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
 
   Future<void> _assignMusicToStudents() async {
     for (var studentId in _selectedStudents) {
-      await DatabaseHelper().addMusicToStudent(studentId, widget.musicId); // Pass ObjectId directly
+      await DatabaseHelper().addMusicToStudent(
+          studentId, widget.musicId, widget.numSections); // Pass ObjectId directly
     }
 
     // Notify the user about the success
@@ -86,7 +89,8 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
                 return ListTile(
                   title: Text(student['username']),
                   trailing: Checkbox(
-                    value: _selectedStudents.contains(student['_id']), // Use ObjectId directly
+                    value: _selectedStudents
+                        .contains(student['_id']), // Use ObjectId directly
                     onChanged: (bool? value) {
                       // Convert the string ID to ObjectId
                       var studentId = student['_id'] as mongo.ObjectId;

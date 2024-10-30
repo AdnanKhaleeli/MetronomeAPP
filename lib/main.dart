@@ -75,7 +75,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
     // Fetch the piece names assigned to the current user
     fetchPieceNames();
   }
-
   void fetchPieceNames() async {
     // Replace this with your logic to fetch piece names from your database
     // For example:
@@ -88,7 +87,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
     setState(() {});
   }
-
   void fetchSections(String piece) async {
     // Fetch sections for the selected piece from the database
     sections = await DatabaseHelper().getSectionsForPiece(piece);
@@ -106,6 +104,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
     setState(() {}); // Trigger UI update
   }
+
+
 
   void startMetronome(int subdivisions) {
     playing = true;
@@ -165,24 +165,23 @@ class _MetronomeAppState extends State<MetronomeApp> {
           children: [
             // Piece Dropdown
 
-            if (widget.user is Student)
-              DropdownButton<String>(
-                value: selectedPiece,
-                hint: Text('Select a Piece'),
-                items: pieceNames.map((String pieceName) {
-                  return DropdownMenuItem<String>(
-                    value: pieceName,
-                    child: Text(pieceName),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedPiece = newValue;
-                    fetchSections(
-                        selectedPiece!); // Fetch sections for selected piece
-                  });
-                },
-              ),
+            if(widget.user is Student)
+            DropdownButton<String>(
+              value: selectedPiece,
+              hint: Text('Select a Piece'),
+              items: pieceNames.map((String pieceName) {
+                return DropdownMenuItem<String>(
+                  value: pieceName,
+                  child: Text(pieceName),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedPiece = newValue;
+                  fetchSections(selectedPiece!); // Fetch sections for selected piece
+                });
+              },
+            ),
 
             // Section Dropdown
             // Section Dropdown
@@ -199,8 +198,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedSection = newValue;
-                    fetchBpmForSection(
-                        selectedSection!); // Fetch BPM for selected section
+                    fetchBpmForSection(selectedSection!); // Fetch BPM for selected section
                   });
                 },
               ),
@@ -218,6 +216,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
                 ElevatedButton(
                   onPressed: () {
                     setState(() {

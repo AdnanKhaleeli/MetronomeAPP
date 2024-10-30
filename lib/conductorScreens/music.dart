@@ -151,6 +151,7 @@ class AddMusicState extends State<AddMusic> {
                             sectionBpms: sectionBpms,
                             musicId: musicId, // Pass the music ID here
                             user: widget.user,
+                            numSections: _numSections ,
                           ),
                         ),
                       );

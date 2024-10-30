@@ -62,7 +62,7 @@ class DatabaseHelper {
       'username': username,
       'pwd': pwd,
       'profilename': profilename,
-      'assigned_music': [],
+      'assigned_music': {},
       'subgroup_id': null
     };
 
@@ -159,68 +159,75 @@ class DatabaseHelper {
       };
     }).toList();
   }
-Future<mongo.ObjectId?> insertMusic({
-  required String pieceName,
-  required List<String> sectionNames,
-  required List<int> sectionBpms,
-}) async {
-  if (_db == null) {
-    return null;
+
+  Future<mongo.ObjectId?> insertMusic({
+    required String pieceName,
+    required List<String> sectionNames,
+    required List<int> sectionBpms,
+  }) async {
+    if (_db == null) {
+      return null;
+    }
+
+    var musicCollection = _db!.collection('Music');
+
+  
+    var newMusic = {
+      'piece_name': pieceName,
+      'sections': List.generate(sectionNames.length, (index) {
+        return {
+          'name': sectionNames[index],
+          'bpm': sectionBpms[index],
+        };
+      }),
+    };
+
+ 
+    await musicCollection.insert(newMusic);
+
+    
+    var insertedMusic =
+        await musicCollection.findOne(where.eq('piece_name', pieceName));
+
+ 
+    return insertedMusic?['_id']; // Return null if not found
   }
 
-  var musicCollection = _db!.collection('Music');
-
-  // Create a new music entry
-  var newMusic = {
-    'piece_name': pieceName,
-    'sections': List.generate(sectionNames.length, (index) {
-      return {
-        'name': sectionNames[index],
-        'bpm': sectionBpms[index],
-      };
-    }),
-  };
-
-  // Insert the music entry
-  await musicCollection.insert(newMusic);
-
-  // Now, search for the music entry by piece name to get its ID
-  var insertedMusic = await musicCollection.findOne(where.eq('piece_name', pieceName));
-  
-  // Return the ID of the inserted document
-  return insertedMusic?['_id']; // Return null if not found
-}
-
-Future<bool> addMusicToStudent(mongo.ObjectId studentId, mongo.ObjectId musicId) async {
+  Future<bool> addMusicToStudent(mongo.ObjectId studentId, mongo.ObjectId musicId, int numSections) async {
   if (_db == null) {
     return false;
   }
 
   var studentsCollection = _db!.collection('Student');
 
-  // Update the student document to add the music ID to assigned_music
+   List<int> initialArray = List<int>.filled(numSections, 0);
+
   var result = await studentsCollection.updateOne(
-    where.eq('_id', studentId), // Use the ObjectId directly
-    modify.addToSet('assigned_music', musicId),
+    where.eq('_id', studentId),
+    modify.set('assigned_music.$musicId', initialArray),
   );
 
-  return result.isAcknowledged; // Return true if the update was successful
+  return result.isAcknowledged; 
 }
+
   Future<List<String>> getPieceNamesForUser(User user) async {
     if (_db == null) {
       throw Exception('Database not initialized. Call init() first.');
     }
 
     var studentsCollection = _db!.collection('Student');
-    var student = await studentsCollection.findOne(where.eq('_id', user.userId)); // Assuming userId is of type ObjectId
+    var student = await studentsCollection.findOne(
+        where.eq('_id', user.userId)); // Assuming userId is of type ObjectId
 
     if (student != null) {
       // Extract the assigned_music which is a list of ObjectIds
-      List<ObjectId> musicIds = List<ObjectId>.from(student['assigned_music'] ?? []);
+      List<ObjectId> musicIds =
+          List<ObjectId>.from(student['assigned_music'] ?? []);
 
       // Now fetch the music names from the Music collection based on these IDs
       var musicCollection = _db!.collection('Music');
-      var musicPieces = await musicCollection.find(where.oneFrom('_id', musicIds)).toList();
+      var musicPieces =
+          await musicCollection.find(where.oneFrom('_id', musicIds)).toList();
 
       // Return the names of the pieces
       return musicPieces.map((music) => music['piece_name'] as String).toList();
@@ -236,11 +243,13 @@ Future<bool> addMusicToStudent(mongo.ObjectId studentId, mongo.ObjectId musicId)
 
     var musicCollection = _db!.collection('Music');
     // Find the music piece by name
-    var musicPiece = await musicCollection.findOne(where.eq('piece_name', pieceName));
+    var musicPiece =
+        await musicCollection.findOne(where.eq('piece_name', pieceName));
 
     if (musicPiece != null) {
       // Extract the sections from the music piece
-      List<Map<String, dynamic>> sections = List<Map<String, dynamic>>.from(musicPiece['sections'] ?? []);
+      List<Map<String, dynamic>> sections =
+          List<Map<String, dynamic>>.from(musicPiece['sections'] ?? []);
       // Return the names of the sections
       return sections.map((section) => section['name'] as String).toList();
     }
@@ -256,21 +265,26 @@ Future<bool> addMusicToStudent(mongo.ObjectId studentId, mongo.ObjectId musicId)
     var musicCollection = _db!.collection('Music');
 
     // Find the music piece that contains the section with the given name
-    var musicPieces = await musicCollection.find(where.eq('sections.name', sectionName)).toList();
+    var musicPieces = await musicCollection
+        .find(where.eq('sections.name', sectionName))
+        .toList();
 
     if (musicPieces.isNotEmpty) {
       var musicPiece = musicPieces.first; // Take the first match
-      List<Map<String, dynamic>> sections = List<Map<String, dynamic>>.from(musicPiece['sections'] ?? []);
+      List<Map<String, dynamic>> sections =
+          List<Map<String, dynamic>>.from(musicPiece['sections'] ?? []);
 
       // Find the section in the music piece
-      var section = sections.firstWhere(
-              (s) => s['name'] == sectionName,
+      var section = sections.firstWhere((s) => s['name'] == sectionName,
           orElse: () => {} // Provide an empty map as the default value
-      );
+          );
 
       // Check if the section map is not empty and return the BPM
-      return section.isNotEmpty ? section['bpm'] : null; // Return the BPM or null if not found
+      return section.isNotEmpty
+          ? section['bpm']
+          : null; // Return the BPM or null if not found
     }
 
     return null; // Return null if no section is found
-  }}
+  }
+}
