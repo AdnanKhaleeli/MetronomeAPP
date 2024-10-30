@@ -164,6 +164,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Piece Dropdown
+
+            if(widget.user is Student)
             DropdownButton<String>(
               value: selectedPiece,
               hint: Text('Select a Piece'),
