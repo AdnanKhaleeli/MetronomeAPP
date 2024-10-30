@@ -27,7 +27,7 @@ class CustomDrawer extends StatelessWidget {
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                user != null ? "U" : "G",
+                user != null ? user!.profileName[0] : "G",
                 style: TextStyle(fontSize: 40.0, color: Colors.red),
               ),
             ),
