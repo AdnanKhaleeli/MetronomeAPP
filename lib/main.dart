@@ -7,7 +7,7 @@ import 'user.dart';
 import 'sign_in.dart';
 import 'settings.dart';
 import 'customdrawer.dart';
-import 'conudctorScreens/music.dart';
+import 'conductorScreens/music.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
