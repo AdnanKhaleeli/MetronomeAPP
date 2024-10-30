@@ -206,5 +206,71 @@ Future<bool> addMusicToStudent(mongo.ObjectId studentId, mongo.ObjectId musicId)
 
   return result.isAcknowledged; // Return true if the update was successful
 }
+  Future<List<String>> getPieceNamesForUser(User user) async {
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
 
-}
+    var studentsCollection = _db!.collection('Student');
+    var student = await studentsCollection.findOne(where.eq('_id', user.userId)); // Assuming userId is of type ObjectId
+
+    if (student != null) {
+      // Extract the assigned_music which is a list of ObjectIds
+      List<ObjectId> musicIds = List<ObjectId>.from(student['assigned_music'] ?? []);
+
+      // Now fetch the music names from the Music collection based on these IDs
+      var musicCollection = _db!.collection('Music');
+      var musicPieces = await musicCollection.find(where.oneFrom('_id', musicIds)).toList();
+
+      // Return the names of the pieces
+      return musicPieces.map((music) => music['piece_name'] as String).toList();
+    }
+
+    return []; // Return an empty list if no student is found
+  }
+
+  Future<List<String>> getSectionsForPiece(String pieceName) async {
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
+
+    var musicCollection = _db!.collection('Music');
+    // Find the music piece by name
+    var musicPiece = await musicCollection.findOne(where.eq('piece_name', pieceName));
+
+    if (musicPiece != null) {
+      // Extract the sections from the music piece
+      List<Map<String, dynamic>> sections = List<Map<String, dynamic>>.from(musicPiece['sections'] ?? []);
+      // Return the names of the sections
+      return sections.map((section) => section['name'] as String).toList();
+    }
+
+    return []; // Return an empty list if no music piece is found
+  }
+
+  Future<int?> getBpmForSection(String sectionName) async {
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
+
+    var musicCollection = _db!.collection('Music');
+
+    // Find the music piece that contains the section with the given name
+    var musicPieces = await musicCollection.find(where.eq('sections.name', sectionName)).toList();
+
+    if (musicPieces.isNotEmpty) {
+      var musicPiece = musicPieces.first; // Take the first match
+      List<Map<String, dynamic>> sections = List<Map<String, dynamic>>.from(musicPiece['sections'] ?? []);
+
+      // Find the section in the music piece
+      var section = sections.firstWhere(
+              (s) => s['name'] == sectionName,
+          orElse: () => {} // Provide an empty map as the default value
+      );
+
+      // Check if the section map is not empty and return the BPM
+      return section.isNotEmpty ? section['bpm'] : null; // Return the BPM or null if not found
+    }
+
+    return null; // Return null if no section is found
+  }}

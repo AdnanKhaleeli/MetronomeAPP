@@ -65,6 +65,47 @@ class _MetronomeAppState extends State<MetronomeApp> {
   int tickCount = 0;
   final TextEditingController _controller = TextEditingController();
   int selectedSubdivisionIndex = 0;
+  List<String> pieceNames = []; // List to hold the piece names
+  String? selectedPiece; // Variable to hold the selected piece
+  List<String> sections = []; // List to hold sections of the selected piece
+  String? selectedSection; // Variable to hold the selected section
+  int? goalBpm;
+  void initState() {
+    super.initState();
+    // Fetch the piece names assigned to the current user
+    fetchPieceNames();
+  }
+  void fetchPieceNames() async {
+    // Replace this with your logic to fetch piece names from your database
+    // For example:
+    if (widget.user != null) {
+      pieceNames = await DatabaseHelper().getPieceNamesForUser(widget.user!);
+    } else {
+      // Handle the case when the user is null
+      pieceNames = []; // or show an error message, etc.
+    }
+
+    setState(() {});
+  }
+  void fetchSections(String piece) async {
+    // Fetch sections for the selected piece from the database
+    sections = await DatabaseHelper().getSectionsForPiece(piece);
+    setState(() {
+      selectedSection = null; // Reset selected section
+    });
+  }
+
+  void fetchBpmForSection(String section) async {
+    // Fetch BPM for the selected section
+    int? bpmValue = await DatabaseHelper().getBpmForSection(section);
+
+    // Assign the fetched BPM to goalBpm
+    goalBpm = bpmValue;
+
+    setState(() {}); // Trigger UI update
+  }
+
+
 
   void startMetronome(int subdivisions) {
     playing = true;
@@ -122,9 +163,58 @@ class _MetronomeAppState extends State<MetronomeApp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Piece Dropdown
+            DropdownButton<String>(
+              value: selectedPiece,
+              hint: Text('Select a Piece'),
+              items: pieceNames.map((String pieceName) {
+                return DropdownMenuItem<String>(
+                  value: pieceName,
+                  child: Text(pieceName),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedPiece = newValue;
+                  fetchSections(selectedPiece!); // Fetch sections for selected piece
+                });
+              },
+            ),
+
+            // Section Dropdown
+            // Section Dropdown
+            if (sections.isNotEmpty)
+              DropdownButton<String>(
+                value: selectedSection,
+                hint: Text('Select a Section'),
+                items: sections.map((String section) {
+                  return DropdownMenuItem<String>(
+                    value: section,
+                    child: Text(section),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedSection = newValue;
+                    fetchBpmForSection(selectedSection!); // Fetch BPM for selected section
+                  });
+                },
+              ),
+
+            if (goalBpm != null) // Check if goalBpm is set
+              Text(
+                'Goal BPM: $goalBpm', // Display the Goal BPM
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
