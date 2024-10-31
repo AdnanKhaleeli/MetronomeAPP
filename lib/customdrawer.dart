@@ -3,7 +3,6 @@ import 'package:metronome/main.dart';
 import 'user.dart';
 
 class CustomDrawer extends StatelessWidget {
- 
   final bool isOnSignInPage;
   final Function? stopMetronome;
   final User? user;
@@ -54,14 +53,19 @@ class CustomDrawer extends StatelessWidget {
                 }),
           ListTile(
             title: Text('Settings'),
-            onTap: () {
-             
-            },
+            onTap: () {},
           ),
           ListTile(
             title: Text('About'),
             onTap: () {},
           ),
+          if (user != null)
+            ListTile(
+              title: Text('Logout'),
+              onTap: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
         ],
       ),
     );

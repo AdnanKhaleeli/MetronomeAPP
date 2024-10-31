@@ -295,23 +295,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    int? bpmInput = int.tryParse(_controller.text);
-                    if (bpmInput != null && bpmInput >= 40 && bpmInput <= 200) {
-                      setState(() {
-                        _bpm = bpmInput.toDouble();
-                        _controller.clear();
-                      });
-                    }
-                  },
-                  child: Text("Enter"),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
                     stopMetronome();
                     startMetronome(currentSubdivisions);
                   },
