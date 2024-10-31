@@ -65,6 +65,28 @@ class _LogInState extends State<LogIn> {
     return Form(
       key: _formKey,
       child: Column(children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+          child: ToggleButtons(
+            isSelected: [!sign_up, sign_up],
+            onPressed: (int index) {
+              setState(() {
+                sign_up = index == 1;
+              });
+            },
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text('Login'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text('Sign Up'),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20),
         Container(
           margin: EdgeInsets.all(40),
           child: TextFormField(
@@ -83,7 +105,6 @@ class _LogInState extends State<LogIn> {
               return null; // Assume valid for now
             },
             onChanged: (value) async {
-              // Check for uniqueness on input change (only if in sign-up mode)
               if (value.isNotEmpty && sign_up) {
                 bool isUnique = await _isUsernameUnique(value);
                 if (!isUnique) {
@@ -132,27 +153,6 @@ class _LogInState extends State<LogIn> {
               },
             ),
           ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  sign_up = false; // Switch to login
-                });
-              },
-              child: Text('Login'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  sign_up = true; // Switch to sign-up
-                });
-              },
-              child: Text('SignUp'),
-            ),
-          ],
-        ),
         ElevatedButton(
           onPressed: () async {
             if (sign_up) {
@@ -165,7 +165,6 @@ class _LogInState extends State<LogIn> {
                   return;
                 }
 
-                // Insert student if unique
                 var db = DatabaseHelper();
                 await db.init();
                 await db.insertStudent(
@@ -199,13 +198,12 @@ class _LogInState extends State<LogIn> {
 
                 var userID = await db.getUserID(_userNameController.text);
                 if (userID == null) {
-                  _showSnackBar(
-                      'Username not found'); // Show feedback only if username is not found
+                  _showSnackBar('Username not found');
                   return;
                 }
 
-                var user =
-                    await db.loginUser(_userNameController.text, _pwdController.text);
+                var user = await db.loginUser(
+                    _userNameController.text, _pwdController.text);
 
                 if (user != null) {
                   Navigator.pushReplacement(
