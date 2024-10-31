@@ -5,7 +5,7 @@ import 'user.dart';
 class CustomDrawer extends StatelessWidget {
 
   final Function? stopMetronome;
-  final User? user;
+  User? user;
 
   CustomDrawer({
   
@@ -38,7 +38,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             title: Text('Home'),
             onTap: () {
-              Navigator.pushNamed(context, '/', arguments: user);
+             Navigator.pushReplacementNamed(context, '/', arguments: user);
             },
             
           ),

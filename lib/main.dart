@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Metronome App',
       initialRoute: '/',
       routes: {
-        '/': (context) => MetronomeApp(),
+        '/': (context) => MetronomeApp(user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor)
