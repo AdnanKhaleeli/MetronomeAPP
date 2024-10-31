@@ -52,7 +52,6 @@ class AddMusicState extends State<AddMusic> {
         centerTitle: true,
       ),
       drawer: CustomDrawer(
-        isOnSignInPage: false,
         user: widget.user,
       ),
       body: Padding(

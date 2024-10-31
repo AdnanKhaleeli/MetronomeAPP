@@ -16,7 +16,6 @@ class SignIn extends StatelessWidget {
         backgroundColor: Colors.red[400],
       ),
       drawer: CustomDrawer(
-        isOnSignInPage: true,
         user: null,
       ),
       body: Center(

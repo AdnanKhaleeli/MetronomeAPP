@@ -157,7 +157,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
       ),
       drawer: CustomDrawer(
         stopMetronome: stopMetronome,
-        isOnSignInPage: false,
         user: widget.user,
       ),
       body: GestureDetector(
