@@ -148,6 +148,20 @@ class _MetronomeAppState extends State<MetronomeApp> {
     super.dispose();
   }
 
+  void handleSwipe(DragEndDetails details) {
+    if (details.velocity.pixelsPerSecond.dx > 0) {
+      if (_currentSectionIndex > 0) {
+        _pageController.previousPage(
+            duration: Duration(milliseconds: 300), curve: Curves.ease);
+      }
+    } else if (details.velocity.pixelsPerSecond.dx < 0) {
+      if (_currentSectionIndex < sections.length - 1) {
+        _pageController.nextPage(
+            duration: Duration(milliseconds: 300), curve: Curves.ease);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,6 +178,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
         onTap: () {
           FocusScope.of(context).unfocus();
         },
+        onHorizontalDragEnd: handleSwipe,
+        behavior: HitTestBehavior.translucent, // Allow swipes on children
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
