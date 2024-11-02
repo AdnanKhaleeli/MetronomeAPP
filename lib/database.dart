@@ -205,11 +205,7 @@ class DatabaseHelper {
     if (student != null) {
       var assignedMusic = student['assigned_music'];
 
-      // Print the keys and their types to debug
-      print('Assigned Music Keys: ${assignedMusic.keys}');
-      for (var key in assignedMusic.keys) {
-        print('Key: $key, Type: ${key.runtimeType}');
-      }
+     
 
       List<mongo.ObjectId> musicIds = [];
 

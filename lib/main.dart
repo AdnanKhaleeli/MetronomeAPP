@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
       title: 'Metronome App',
       initialRoute: '/',
       routes: {
-        '/': (context) => MetronomeApp(user: ModalRoute.of(context)?.settings.arguments as User?),
+        '/': (context) => MetronomeApp(
+            user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor)
@@ -59,56 +60,55 @@ class MetronomeApp extends StatefulWidget {
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
   final player = AudioPlayer();
+
   Timer? _timer;
   bool playing = false;
   int currentSubdivisions = 1;
   int tickCount = 0;
   final TextEditingController _controller = TextEditingController();
   int selectedSubdivisionIndex = 0;
-  List<String> pieceNames = []; // List to hold the piece names
-  String? selectedPiece; // Variable to hold the selected piece
-  List<String> sections = []; // List to hold sections of the selected piece
-  String? selectedSection; // Variable to hold the selected section
+  List<String> pieceNames = [];
+  String? selectedPiece;
+  List<String> sections = [];
+  String? selectedSection;
   int? goalBpm;
+  PageController _pageController = PageController();
+  int _currentSectionIndex = 0;
+
+  @override
   void initState() {
     super.initState();
-
     if (widget.user is Student) {
       fetchPieceNames();
     }
   }
 
   void fetchPieceNames() async {
-    // Replace this with your logic to fetch piece names from your database
-    // For example:
     if (widget.user != null) {
       pieceNames = await DatabaseHelper().getPieceNamesForUser(widget.user!);
     } else {
-      // Handle the case when the user is null
-      pieceNames = []; // or show an error message, etc.
+      pieceNames = [];
     }
-
-    print(pieceNames);
-
     setState(() {});
   }
 
   void fetchSections(String piece) async {
-    // Fetch sections for the selected piece from the database
     sections = await DatabaseHelper().getSectionsForPiece(piece);
     setState(() {
-      selectedSection = null; // Reset selected section
+      selectedSection = null;
+      _currentSectionIndex = 0;
+      if (sections.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _pageController.jumpToPage(0);
+        });
+      }
     });
   }
 
   void fetchBpmForSection(String section) async {
-    // Fetch BPM for the selected section
     int? bpmValue = await DatabaseHelper().getBpmForSection(section);
-
-    // Assign the fetched BPM to goalBpm
     goalBpm = bpmValue;
-
-    setState(() {}); // Trigger UI update
+    setState(() {});
   }
 
   void startMetronome(int subdivisions) {
@@ -144,9 +144,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void dispose() {
     _timer?.cancel();
     player.dispose();
+    _pageController.dispose();
     super.dispose();
   }
- //Change
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,8 +167,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Piece Dropdown
-
             if (widget.user is Student)
               DropdownButton<String>(
                 value: selectedPiece,
@@ -181,43 +180,46 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedPiece = newValue;
-                    fetchSections(
-                        selectedPiece!); // Fetch sections for selected piece
+                    fetchSections(selectedPiece!);
                   });
                 },
               ),
-
-            // Section Dropdown
-            // Section Dropdown
             if (sections.isNotEmpty)
-              DropdownButton<String>(
-                value: selectedSection,
-                hint: Text('Select a Section'),
-                items: sections.map((String section) {
-                  return DropdownMenuItem<String>(
-                    value: section,
-                    child: Text(section),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedSection = newValue;
-                    fetchBpmForSection(
-                        selectedSection!); // Fetch BPM for selected section
-                  });
-                },
+              Container(
+                height: 50,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: sections.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentSectionIndex = index;
+                      selectedSection = sections[index];
+                      fetchBpmForSection(selectedSection!);
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    return Center(
+                      child: Text(
+                        sections[index],
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-
-            if (goalBpm != null) // Check if goalBpm is set
+            if (goalBpm != null)
               Text(
-                'Goal BPM: $goalBpm', // Display the Goal BPM
+                'Goal BPM: $goalBpm',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
