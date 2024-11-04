@@ -279,22 +279,46 @@ class DatabaseHelper {
       return {
         '_id': music['_id'],
         'piece_name': music['piece_name'],
-        'sections': music['sections'], 
+        'sections': music['sections'],
       };
     }).toList();
-
-    
   }
 
   Future<bool> deleteMusicPiece(ObjectId musicId) async {
-  if (_db == null) {
-    return false;
+    if (_db == null) {
+      return false;
+    }
+
+    var musicCollection = _db!.collection('Music');
+
+    // Delete the music piece
+    var result = await musicCollection.deleteOne(where.eq('_id', musicId));
+
+    if (result.isAcknowledged) {
+      // Update the Student collection to remove this music piece from assigned_music
+      var studentsCollection = _db!.collection('Student');
+
+      // Find students who have this music assigned
+      var students = await studentsCollection.find({
+        'assigned_music': {'\$exists': true, '\$ne': {}}
+      }).toList();
+
+      for (var student in students) {
+        var studentId = student['_id'];
+        var assignedMusic = student['assigned_music'];
+
+        // If the musicId exists in assigned_music, remove it
+        if (assignedMusic.containsKey(musicId.oid)) {
+          await studentsCollection.updateOne(
+            where.eq('_id', studentId),
+            modify.unset('assigned_music.${musicId.oid}'),
+          );
+        }
+      }
+
+      return true; // Deletion was successful
+    }
+
+    return false; // Deletion failed
   }
-
-  var musicCollection = _db!.collection('Music');
-  var result = await musicCollection.deleteOne(where.eq('_id', musicId));
-
-  return result.isAcknowledged;
-}
-
 }
