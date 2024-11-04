@@ -26,76 +26,151 @@ class _DashboardState extends State<Dashboard> {
     setState(() {});
   }
 
-  void onMusicPieceTap(Map<String, dynamic> music) {
-    // Handle music piece tap
-    // You can navigate to a details page or perform another action
-    // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => MusicDetailPage(music: music)));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
+        backgroundColor: Colors.black, // Dark AppBar
       ),
       drawer: CustomDrawer(user: widget.user),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'All Music',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: Container(
+        color: Colors.black, // Keep the body black
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'All Music',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // White text
+                ),
+              ),
             ),
-          ),
-          Expanded(
-            child: musicPieces.isEmpty
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: musicPieces.length,
-                    itemBuilder: (context, index) {
-                      final music = musicPieces[index];
-                      final sections = music['sections'] as List;
+            Expanded(
+              child: musicPieces.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      // Enable scrolling
+                      child: ListView.builder(
+                        physics:
+                            NeverScrollableScrollPhysics(), // Disable inner scroll
+                        shrinkWrap:
+                            true, // Allow ListView to take only the space it needs
+                        itemCount: musicPieces.length,
+                        itemBuilder: (context, index) {
+                          final music = musicPieces[index];
+                          final sections = music['sections'] as List;
 
-                      return Card(
-                        margin: EdgeInsets.all(8.0),
-                        elevation: 4, // Add shadow to the card
-                        child: InkWell(
-                          onTap: () => onMusicPieceTap(music), // Handle tap
-                          child: ListTile(
-                            title: Text(music['piece_name']),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: sections.map((section) {
-                                return Text(
-                                  '${section['name']} - Goal Tempo: ${section['bpm']} BPM',
-                                  style: TextStyle(fontSize: 14),
-                                );
-                              }).toList(),
+                          return Card(
+                            margin: EdgeInsets.all(8.0),
+                            elevation: 6, // Card elevation
+                            color: Color(
+                                0xFF1C1C1C), // Slightly lighter card color
+                            child: InkWell(
+                              onTap: () => {}, // Handle tap
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Title of the music piece
+                                    Text(
+                                      music['piece_name'],
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18), // Title styling
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            8), // Space between title and sections
+                                    // Center the DataTable
+                                    Center(
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: DataTable(
+                                          columns: const [
+                                            DataColumn(
+                                                label: Center(
+                                                    child: Text('Section',
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white)))),
+                                            DataColumn(
+                                                label: Center(
+                                                    child: Text(
+                                                        'Goal Tempo (BPM)',
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .white)))),
+                                          ],
+                                          rows:
+                                              sections.map<DataRow>((section) {
+                                            return DataRow(cells: [
+                                              DataCell(
+                                                Center(
+                                                  child: Text(
+                                                    section['name'],
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.grey[400]),
+                                                  ),
+                                                ),
+                                              ),
+                                              DataCell(
+                                                Center(
+                                                  child: Text(
+                                                    '${section['bpm']}',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.grey[400]),
+                                                  ),
+                                                ),
+                                              ),
+                                            ]);
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ),
+                                    // Positioned delete icon (aligned to the right)
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors
+                                                .red), // Red icon for delete
+                                        onPressed: () async {
+                                          // Call delete function
+                                          bool success = await DatabaseHelper()
+                                              .deleteMusicPiece(music['_id']);
+                                          if (success) {
+                                            // Refresh the list after deletion
+                                            fetchMusicPieces();
+                                          } else {
+                                            // Optionally show an error message
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Failed to delete music piece')),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () async {
-                                // Call delete function
-                                bool success = await DatabaseHelper().deleteMusicPiece(music['_id']);
-                                if (success) {
-                                  // Refresh the list after deletion
-                                  fetchMusicPieces();
-                                } else {
-                                  // Optionally show an error message
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to delete music piece')),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
