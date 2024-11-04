@@ -98,6 +98,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
       selectedSection = null;
       _currentSectionIndex = 0;
       if (sections.isNotEmpty) {
+        selectedSection = sections[0];
+        fetchBpmForSection(selectedSection!);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _pageController.jumpToPage(0);
         });
@@ -179,7 +181,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
           FocusScope.of(context).unfocus();
         },
         onHorizontalDragEnd: handleSwipe,
-        behavior: HitTestBehavior.translucent, // Allow swipes on children
+        behavior: HitTestBehavior.translucent,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
