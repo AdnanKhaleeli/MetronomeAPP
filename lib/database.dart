@@ -1,4 +1,3 @@
-
 import 'package:mongo_dart/mongo_dart.dart';
 import 'user.dart';
 
@@ -177,7 +176,7 @@ class DatabaseHelper {
   }
 
   Future<bool> addMusicToStudent(
-    ObjectId studentId, ObjectId musicId, int numSections) async {
+      ObjectId studentId, ObjectId musicId, int numSections) async {
     if (_db == null) {
       return false;
     }
@@ -204,8 +203,6 @@ class DatabaseHelper {
 
     if (student != null) {
       var assignedMusic = student['assigned_music'];
-
-     
 
       List<ObjectId> musicIds = [];
 
@@ -269,4 +266,35 @@ class DatabaseHelper {
 
     return null;
   }
+
+  Future<List<Map<String, dynamic>>> getAllMusicPieces() async {
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
+
+    var musicCollection = _db!.collection('Music');
+    final musicPieces = await musicCollection.find().toList();
+
+    return musicPieces.map((music) {
+      return {
+        '_id': music['_id'],
+        'piece_name': music['piece_name'],
+        'sections': music['sections'], 
+      };
+    }).toList();
+
+    
+  }
+
+  Future<bool> deleteMusicPiece(ObjectId musicId) async {
+  if (_db == null) {
+    return false;
+  }
+
+  var musicCollection = _db!.collection('Music');
+  var result = await musicCollection.deleteOne(where.eq('_id', musicId));
+
+  return result.isAcknowledged;
+}
+
 }
