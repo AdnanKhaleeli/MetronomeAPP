@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart'; // Import ObjectId
+import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import '../user.dart';
-import '../database.dart'; // Import the DatabaseHelper
+import '../database.dart';
 
 class SelectStudentsPage extends StatefulWidget {
   final String pieceName;
   final List<String> sectionNames;
   final List<int> sectionBpms;
-  final mongo.ObjectId musicId; // Change to ObjectId
+  final mongo.ObjectId musicId;
   final Conductor user;
   final int numSections;
 
@@ -16,7 +16,7 @@ class SelectStudentsPage extends StatefulWidget {
     required this.pieceName,
     required this.sectionNames,
     required this.sectionBpms,
-    required this.musicId, // Pass musicId here
+    required this.musicId,
     required this.user,
     required this.numSections,
   }) : super(key: key);
@@ -27,7 +27,8 @@ class SelectStudentsPage extends StatefulWidget {
 
 class _SelectStudentsPageState extends State<SelectStudentsPage> {
   List<Map<String, dynamic>> _students = [];
-  List<mongo.ObjectId> _selectedStudents = []; // Change to List<ObjectId>
+  List<mongo.ObjectId> _selectedStudents = [];
+  bool _allSelected = false;
 
   @override
   void initState() {
@@ -36,7 +37,6 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
   }
 
   Future<void> _fetchStudents() async {
-    // Fetch the list of students from the database
     var students = await DatabaseHelper().getStudents();
     setState(() {
       _students = students;
@@ -50,21 +50,33 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
       } else {
         _selectedStudents.add(studentId);
       }
+
+      // Update the "Select All" checkbox based on the current selection
+      _allSelected = _selectedStudents.length == _students.length;
+    });
+  }
+
+  void _toggleSelectAll() {
+    setState(() {
+      if (_allSelected) {
+        _selectedStudents.clear();
+      } else {
+        _selectedStudents = _students.map((student) => student['_id'] as mongo.ObjectId).toList();
+      }
+      _allSelected = !_allSelected;
     });
   }
 
   Future<void> _assignMusicToStudents() async {
     for (var studentId in _selectedStudents) {
       await DatabaseHelper().addMusicToStudent(
-          studentId, widget.musicId, widget.numSections); // Pass ObjectId directly
+          studentId, widget.musicId, widget.numSections);
     }
 
-    // Notify the user about the success
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Music assigned to selected students!')),
     );
 
-    // Navigate back or to another page
     Navigator.pop(context);
   }
 
@@ -74,32 +86,40 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
       appBar: AppBar(
         title: Text('Select Students for ${widget.pieceName}'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.check),
-            onPressed: _assignMusicToStudents,
+          Row(
+            children: [
+              Checkbox(
+                value: _allSelected,
+                onChanged: (bool? value) {
+                  _toggleSelectAll();
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.check),
+                onPressed: _assignMusicToStudents,
+              ),
+            ],
           ),
         ],
       ),
       body: _students.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: _students.length,
-              itemBuilder: (context, index) {
-                var student = _students[index];
-                return ListTile(
-                  title: Text(student['username']),
-                  trailing: Checkbox(
-                    value: _selectedStudents
-                        .contains(student['_id']), // Use ObjectId directly
-                    onChanged: (bool? value) {
-                      // Convert the string ID to ObjectId
-                      var studentId = student['_id'] as mongo.ObjectId;
-                      _toggleStudentSelection(studentId);
-                    },
-                  ),
-                );
+        itemCount: _students.length,
+        itemBuilder: (context, index) {
+          var student = _students[index];
+          return ListTile(
+            title: Text(student['username']),
+            trailing: Checkbox(
+              value: _selectedStudents.contains(student['_id']),
+              onChanged: (bool? value) {
+                var studentId = student['_id'] as mongo.ObjectId;
+                _toggleStudentSelection(studentId);
               },
             ),
+          );
+        },
+      ),
     );
   }
 }
