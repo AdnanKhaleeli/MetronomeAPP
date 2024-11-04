@@ -8,6 +8,7 @@ import 'sign_in.dart';
 import 'settings.dart';
 import 'customdrawer.dart';
 import 'conductorScreens/music.dart';
+import 'conductorScreens/dashboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +28,10 @@ class MyApp extends StatelessWidget {
             user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
         '/addMusic': (context) => AddMusic(
-            user: ModalRoute.of(context)!.settings.arguments as Conductor)
+            user: ModalRoute.of(context)!.settings.arguments as Conductor),
+        '/dashboard_conductor': (context) => Dashboard(
+           user: ModalRoute.of(context)?.settings.arguments as Conductor
+        )
       },
       theme: ThemeData(
         brightness: Brightness.dark,

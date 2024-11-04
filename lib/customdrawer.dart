@@ -59,6 +59,12 @@ class CustomDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(context, '/addMusic', arguments: user);
                 }),
+          if (user is Conductor)
+            ListTile(
+                title: Text("Dashboard"),
+                onTap: () {
+                  Navigator.pushNamed(context, '/dashboard_conductor', arguments: user);
+                }),
           ListTile(
             title: Text('Settings'),
             onTap: () {},
