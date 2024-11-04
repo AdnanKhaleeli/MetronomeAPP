@@ -1,4 +1,4 @@
-import 'package:mongo_dart/mongo_dart.dart' as mongo;
+
 import 'package:mongo_dart/mongo_dart.dart';
 import 'user.dart';
 
@@ -17,7 +17,7 @@ class DatabaseHelper {
   // Method to initialize the database connection
   Future<void> init() async {
     if (_db == null) {
-      _db = await mongo.Db.create(
+      _db = await Db.create(
           "mongodb+srv://USER:USER1@metronome-cluster.3otig.mongodb.net/metronome_db?retryWrites=true&w=majority");
       await _db!.open();
     }
@@ -84,7 +84,7 @@ class DatabaseHelper {
     return false;
   }
 
-  Future<mongo.ObjectId?> getUserID(String username) async {
+  Future<ObjectId?> getUserID(String username) async {
     var studentsCollection = _db!.collection('Student');
     var student =
         await studentsCollection.findOne(where.eq('username', username));
@@ -149,7 +149,7 @@ class DatabaseHelper {
     }).toList();
   }
 
-  Future<mongo.ObjectId?> insertMusic({
+  Future<ObjectId?> insertMusic({
     required String pieceName,
     required List<String> sectionNames,
     required List<int> sectionBpms,
@@ -177,7 +177,7 @@ class DatabaseHelper {
   }
 
   Future<bool> addMusicToStudent(
-      mongo.ObjectId studentId, mongo.ObjectId musicId, int numSections) async {
+    ObjectId studentId, ObjectId musicId, int numSections) async {
     if (_db == null) {
       return false;
     }
@@ -207,13 +207,13 @@ class DatabaseHelper {
 
      
 
-      List<mongo.ObjectId> musicIds = [];
+      List<ObjectId> musicIds = [];
 
       // Convert String instances back to ObjectId
       for (var key in assignedMusic.keys) {
         if (key is String) {
           // Convert string to ObjectId
-          musicIds.add(mongo.ObjectId.fromHexString(key));
+          musicIds.add(ObjectId.fromHexString(key));
         } else {
           print('Unexpected key type: $key of type ${key.runtimeType}');
         }
