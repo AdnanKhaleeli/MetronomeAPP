@@ -1,5 +1,6 @@
 import 'package:mongo_dart/mongo_dart.dart';
 import 'user.dart';
+import 'music.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -321,4 +322,60 @@ class DatabaseHelper {
 
     return false; // Deletion failed
   }
+
+  Future<List<Piece>> getPiecesForUser(User user) async {
+  if (_db == null) {
+    throw Exception('Database not initialized. Call init() first.');
+  }
+
+  var studentsCollection = _db!.collection('Student');
+  var student = await studentsCollection.findOne(where.eq('_id', user.userId));
+
+  if (student != null) {
+    var assignedMusic = student['assigned_music'];
+
+    List<ObjectId> musicIds = [];
+
+    // Convert String instances back to ObjectId
+    for (var key in assignedMusic.keys) {
+      if (key is String) {
+        musicIds.add(ObjectId.fromHexString(key));
+      } else {
+        print('Unexpected key type: $key of type ${key.runtimeType}');
+      }
+    }
+
+    var musicCollection = _db!.collection('Music');
+
+    // Query using ObjectId instances
+    var musicPieces = await musicCollection.find(where.oneFrom('_id', musicIds)).toList();
+
+    // Map the music pieces to Piece and Section instances
+    List<Piece> pieces = [];
+    for (var music in musicPieces) {
+      List<Section> sections = [];
+
+      // Loop through the sections of the current music piece
+      if (music['sections'] != null) {
+        for (var sectionData in music['sections']) {
+          sections.add(Section(
+            sectionName: sectionData['name'],
+            goalBpm: sectionData['bpm'],
+          ));
+        }
+      }
+
+      pieces.add(Piece(
+        pieceId: music['_id'].toHexString(),
+        pieceName: music['piece_name'],
+        sections: sections,
+      ));
+    }
+
+    return pieces;
+  }
+
+  return [];
+}
+
 }

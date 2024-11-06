@@ -66,26 +66,21 @@ class _DashboardState extends State<Dashboard> {
 
                           return Card(
                             margin: EdgeInsets.all(8.0),
-                            elevation: 6, 
-                            color: Color(
-                                0xFF1C1C1C), 
+                            elevation: 6,
+                            color: Color(0xFF1C1C1C),
                             child: InkWell(
-                              onTap: () => {}, 
+                              onTap: () => {},
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                   
                                     Text(
                                       music['piece_name'],
                                       style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18), 
+                                          color: Colors.white, fontSize: 18),
                                     ),
-                                    SizedBox(
-                                        height:
-                                            8), 
+                                    SizedBox(height: 8),
                                     // Center the DataTable
                                     Center(
                                       child: SingleChildScrollView(
@@ -134,7 +129,7 @@ class _DashboardState extends State<Dashboard> {
                                         ),
                                       ),
                                     ),
-                                  
+
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: IconButton(
@@ -146,10 +141,8 @@ class _DashboardState extends State<Dashboard> {
                                           bool success = await DatabaseHelper()
                                               .deleteMusicPiece(music['_id']);
                                           if (success) {
-                                           
                                             fetchMusicPieces();
                                           } else {
-                                          
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
                                               SnackBar(

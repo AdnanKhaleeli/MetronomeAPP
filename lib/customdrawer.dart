@@ -3,12 +3,10 @@ import 'package:metronome/main.dart';
 import 'user.dart';
 
 class CustomDrawer extends StatelessWidget {
-
   final Function? stopMetronome;
   User? user;
 
   CustomDrawer({
-  
     this.stopMetronome,
     this.user,
   });
@@ -34,14 +32,13 @@ class CustomDrawer extends StatelessWidget {
               color: Colors.red[400],
             ),
           ),
-          if(ModalRoute.of(context)?.settings.name != '/')
-          ListTile(
-            title: Text('Home'),
-            onTap: () {
-             Navigator.pushReplacementNamed(context, '/', arguments: user);
-            },
-            
-          ),
+          if (ModalRoute.of(context)?.settings.name != '/')
+            ListTile(
+              title: Text('Home'),
+              onTap: () {
+                Navigator.pushReplacementNamed(context, '/', arguments: user);
+              },
+            ),
           if (ModalRoute.of(context)?.settings.name != '/sign_in')
             ListTile(
               title: Text(user == null ? 'Sign Up / Log In' : 'Profile'),
@@ -53,11 +50,13 @@ class CustomDrawer extends StatelessWidget {
                 }
               },
             ),
-            if (user is Conductor)
+          if (user is Conductor)
             ListTile(
                 title: Text("Dashboard"),
                 onTap: () {
-                  Navigator.pushNamed(context, '/dashboard_conductor', arguments: user);
+                  stopMetronome?.call();
+                  Navigator.pushNamed(context, '/dashboard_conductor',
+                      arguments: user);
                 }),
           if (user is Conductor)
             ListTile(
@@ -65,7 +64,6 @@ class CustomDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(context, '/addMusic', arguments: user);
                 }),
-          
           ListTile(
             title: Text('Settings'),
             onTap: () {},

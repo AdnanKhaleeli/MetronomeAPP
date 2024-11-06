@@ -9,6 +9,7 @@ import 'settings.dart';
 import 'customdrawer.dart';
 import 'conductorScreens/music.dart';
 import 'conductorScreens/dashboard.dart';
+import 'music.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +31,7 @@ class MyApp extends StatelessWidget {
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
         '/dashboard_conductor': (context) => Dashboard(
-           user: ModalRoute.of(context)?.settings.arguments as Conductor
-        )
+            user: ModalRoute.of(context)?.settings.arguments as Conductor)
       },
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MetronomeApp extends StatefulWidget {
-  User? user;
+  final User? user;
 
   MetronomeApp({Key? key, this.user}) : super(key: key);
 
@@ -71,10 +71,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
   int tickCount = 0;
   final TextEditingController _controller = TextEditingController();
   int selectedSubdivisionIndex = 0;
-  List<String> pieceNames = [];
-  String? selectedPiece;
-  List<String> sections = [];
-  String? selectedSection;
+  List<Piece> pieces = []; // List of Piece objects
+  Piece? selectedPiece; // Currently selected Piece
+  Section? selectedSection; // Currently selected Section
   int? goalBpm;
   PageController _pageController = PageController();
   int _currentSectionIndex = 0;
@@ -83,40 +82,43 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void initState() {
     super.initState();
     if (widget.user is Student) {
-      fetchPieceNames();
+      fetchPieces(); // Fetch pieces when the user is a Student
     }
   }
 
-  void fetchPieceNames() async {
+  // Fetches the pieces assigned to the user
+  void fetchPieces() async {
     if (widget.user != null) {
-      pieceNames = await DatabaseHelper().getPieceNamesForUser(widget.user!);
+      pieces = await DatabaseHelper().getPiecesForUser(widget.user!);
     } else {
-      pieceNames = [];
+      pieces = [];
     }
     setState(() {});
   }
 
-  void fetchSections(String piece) async {
-    sections = await DatabaseHelper().getSectionsForPiece(piece);
+  // Fetches sections for the selected piece
+  void fetchSections(Piece piece) async {
     setState(() {
+      selectedPiece = piece;
       selectedSection = null;
       _currentSectionIndex = 0;
-      if (sections.isNotEmpty) {
-        selectedSection = sections[0];
-        fetchBpmForSection(selectedSection!);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _pageController.jumpToPage(0);
-        });
-      }
     });
+    if (selectedPiece != null && selectedPiece!.sections.isNotEmpty) {
+      selectedSection = selectedPiece!.sections[0];
+      fetchBpmForSection(selectedSection!);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _pageController.jumpToPage(0);
+      });
+    }
   }
 
-  void fetchBpmForSection(String section) async {
-    int? bpmValue = await DatabaseHelper().getBpmForSection(section);
-    goalBpm = bpmValue;
+  // Fetches the BPM for the selected section
+  void fetchBpmForSection(Section section) async {
+    goalBpm = section.goalBpm; // Assume bpm is stored in the Section object
     setState(() {});
   }
-
+ 
+  // Starts the metronome with the selected subdivisions
   void startMetronome(int subdivisions) {
     playing = true;
     final double oneBeat = 60 / _bpm;
@@ -139,6 +141,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
     });
   }
 
+  // Stops the metronome
   void stopMetronome() {
     playing = false;
     _timer?.cancel();
@@ -154,6 +157,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
     super.dispose();
   }
 
+  // Handles swipe gestures to switch between sections
   void handleSwipe(DragEndDetails details) {
     if (details.velocity.pixelsPerSecond.dx > 0) {
       if (_currentSectionIndex > 0) {
@@ -161,7 +165,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
             duration: Duration(milliseconds: 300), curve: Curves.ease);
       }
     } else if (details.velocity.pixelsPerSecond.dx < 0) {
-      if (_currentSectionIndex < sections.length - 1) {
+      if (_currentSectionIndex < selectedPiece!.sections.length - 1) {
         _pageController.nextPage(
             duration: Duration(milliseconds: 300), curve: Curves.ease);
       }
@@ -190,39 +194,39 @@ class _MetronomeAppState extends State<MetronomeApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (widget.user is Student)
-              DropdownButton<String>(
+              DropdownButton<Piece>(
                 value: selectedPiece,
                 hint: Text('Select a Piece'),
-                items: pieceNames.map((String pieceName) {
-                  return DropdownMenuItem<String>(
-                    value: pieceName,
-                    child: Text(pieceName),
+                items: pieces.map((Piece piece) {
+                  return DropdownMenuItem<Piece>(
+                    value: piece,
+                    child: Text(piece.pieceName),
                   );
                 }).toList(),
-                onChanged: (String? newValue) {
+                onChanged: (Piece? newValue) {
                   setState(() {
                     selectedPiece = newValue;
-                    fetchSections(selectedPiece!);
+                    fetchSections(newValue!);
                   });
                 },
               ),
-            if (sections.isNotEmpty)
+            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
               Container(
                 height: 50,
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: sections.length,
+                  itemCount: selectedPiece!.sections.length,
                   onPageChanged: (index) {
                     setState(() {
                       _currentSectionIndex = index;
-                      selectedSection = sections[index];
+                      selectedSection = selectedPiece!.sections[index];
                       fetchBpmForSection(selectedSection!);
                     });
                   },
                   itemBuilder: (context, index) {
                     return Center(
                       child: Text(
-                        sections[index],
+                        selectedPiece!.sections[index].sectionName,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
