@@ -396,18 +396,18 @@ class DatabaseHelper {
       if (student['assigned_music'] is Map) {
         Map<String, dynamic> assignedMusic = student['assigned_music'];
 
-        // Check if the musicID exists in 'assigned_music'
+       
         if (assignedMusic.containsKey(musicID)) {
-          // Update the BPM for the current section
+         
           List<dynamic> currentMusicData = assignedMusic[musicID];
 
-          // If currentMusicData is a list and has at least two elements (BPM and section)
-          if (currentMusicData is List && currentMusicData.length >= 2) {
-            // Update the BPM value at the 0th index (the BPM array position)
-            currentMusicData[0] = bpm; // Update BPM value
-            currentMusicData[1] = currentSection; // Update section index
+         
+          if (currentMusicData.length >= 2) {
+            
+            currentMusicData[0] = bpm;
+            currentMusicData[1] = currentSection; 
 
-            // Use updateOne to update the student's document in the collection
+            
             var result = await studentsCollection.updateOne(
               where.id(studentID),
               modify.set('assigned_music.$musicID', currentMusicData),
