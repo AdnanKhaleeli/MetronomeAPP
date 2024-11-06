@@ -324,58 +324,106 @@ class DatabaseHelper {
   }
 
   Future<List<Piece>> getPiecesForUser(User user) async {
-  if (_db == null) {
-    throw Exception('Database not initialized. Call init() first.');
-  }
-
-  var studentsCollection = _db!.collection('Student');
-  var student = await studentsCollection.findOne(where.eq('_id', user.userId));
-
-  if (student != null) {
-    var assignedMusic = student['assigned_music'];
-
-    List<ObjectId> musicIds = [];
-
-    // Convert String instances back to ObjectId
-    for (var key in assignedMusic.keys) {
-      if (key is String) {
-        musicIds.add(ObjectId.fromHexString(key));
-      } else {
-        print('Unexpected key type: $key of type ${key.runtimeType}');
-      }
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
     }
 
-    var musicCollection = _db!.collection('Music');
+    var studentsCollection = _db!.collection('Student');
+    var student =
+        await studentsCollection.findOne(where.eq('_id', user.userId));
 
-    // Query using ObjectId instances
-    var musicPieces = await musicCollection.find(where.oneFrom('_id', musicIds)).toList();
+    if (student != null) {
+      var assignedMusic = student['assigned_music'];
 
-    // Map the music pieces to Piece and Section instances
-    List<Piece> pieces = [];
-    for (var music in musicPieces) {
-      List<Section> sections = [];
+      List<ObjectId> musicIds = [];
 
-      // Loop through the sections of the current music piece
-      if (music['sections'] != null) {
-        for (var sectionData in music['sections']) {
-          sections.add(Section(
-            sectionName: sectionData['name'],
-            goalBpm: sectionData['bpm'],
-          ));
+      // Convert String instances back to ObjectId
+      for (var key in assignedMusic.keys) {
+        if (key is String) {
+          musicIds.add(ObjectId.fromHexString(key));
+        } else {
+          print('Unexpected key type: $key of type ${key.runtimeType}');
         }
       }
 
-      pieces.add(Piece(
-        pieceId: music['_id'].toHexString(),
-        pieceName: music['piece_name'],
-        sections: sections,
-      ));
+      var musicCollection = _db!.collection('Music');
+
+      // Query using ObjectId instances
+      var musicPieces =
+          await musicCollection.find(where.oneFrom('_id', musicIds)).toList();
+
+      // Map the music pieces to Piece and Section instances
+      List<Piece> pieces = [];
+      for (var music in musicPieces) {
+        List<Section> sections = [];
+
+        // Loop through the sections of the current music piece
+        if (music['sections'] != null) {
+          for (var sectionData in music['sections']) {
+            sections.add(Section(
+              sectionName: sectionData['name'],
+              goalBpm: sectionData['bpm'],
+            ));
+          }
+        }
+
+        pieces.add(Piece(
+          pieceId: music['_id'].toHexString(),
+          pieceName: music['piece_name'],
+          sections: sections,
+        ));
+      }
+
+      return pieces;
     }
 
-    return pieces;
+    return [];
   }
 
-  return [];
-}
+  Future<bool> updateStudentBPM(double bpm, ObjectId studentID, String musicID,
+      int currentSection) async {
+    var studentsCollection = _db!.collection('Student');
 
+    try {
+      // Fetch the student record by ID
+      var student = await studentsCollection.findOne(where.id(studentID));
+      if (student == null) {
+        print('Student not found');
+        return false;
+      }
+
+      // Ensure 'assigned_music' exists and is a map
+      if (student['assigned_music'] is Map) {
+        Map<String, dynamic> assignedMusic = student['assigned_music'];
+
+        // Check if the musicID exists in 'assigned_music'
+        if (assignedMusic.containsKey(musicID)) {
+          // Update the BPM for the current section
+          List<dynamic> currentMusicData = assignedMusic[musicID];
+
+          // If currentMusicData is a list and has at least two elements (BPM and section)
+          if (currentMusicData is List && currentMusicData.length >= 2) {
+            // Update the BPM value at the 0th index (the BPM array position)
+            currentMusicData[0] = bpm; // Update BPM value
+            currentMusicData[1] = currentSection; // Update section index
+
+            // Use updateOne to update the student's document in the collection
+            var result = await studentsCollection.updateOne(
+              where.id(studentID),
+              modify.set('assigned_music.$musicID', currentMusicData),
+            );
+
+            if (result.isAcknowledged) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    } catch (e) {
+      print('Error updating student BPM: $e');
+      return false;
+    }
+  }
 }

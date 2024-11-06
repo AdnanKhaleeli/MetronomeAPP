@@ -71,9 +71,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
   int tickCount = 0;
   final TextEditingController _controller = TextEditingController();
   int selectedSubdivisionIndex = 0;
-  List<Piece> pieces = []; // List of Piece objects
-  Piece? selectedPiece; // Currently selected Piece
-  Section? selectedSection; // Currently selected Section
+  List<Piece> pieces = [];
+  Piece? selectedPiece;
+  Section? selectedSection;
   int? goalBpm;
   PageController _pageController = PageController();
   int _currentSectionIndex = 0;
@@ -82,11 +82,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void initState() {
     super.initState();
     if (widget.user is Student) {
-      fetchPieces(); // Fetch pieces when the user is a Student
+      fetchPieces();
     }
   }
 
-  // Fetches the pieces assigned to the user
   void fetchPieces() async {
     if (widget.user != null) {
       pieces = await DatabaseHelper().getPiecesForUser(widget.user!);
@@ -96,7 +95,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
     setState(() {});
   }
 
-  // Fetches sections for the selected piece
   void fetchSections(Piece piece) async {
     setState(() {
       selectedPiece = piece;
@@ -112,13 +110,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
     }
   }
 
-  // Fetches the BPM for the selected section
   void fetchBpmForSection(Section section) async {
-    goalBpm = section.goalBpm; // Assume bpm is stored in the Section object
+    goalBpm = section.goalBpm;
     setState(() {});
   }
- 
-  // Starts the metronome with the selected subdivisions
+
   void startMetronome(int subdivisions) {
     playing = true;
     final double oneBeat = 60 / _bpm;
@@ -245,6 +241,18 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+              ),
+            if (widget.user is Student)
+              Container(
+                margin: EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                    onPressed: () async {
+                      // _currentSectionIndex
+                      // Student ID
+                     await  DatabaseHelper().updateStudentBPM(_bpm,
+                          widget.user!.userId, selectedPiece!.pieceId, _currentSectionIndex);
+                    },
+                    child: Text('Confirm BPM')),
               ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
