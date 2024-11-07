@@ -242,17 +242,33 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   color: Colors.white,
                 ),
               ),
-            if (widget.user is Student)
+            if (widget.user is Student && selectedPiece != null)
               Container(
                 margin: EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                    onPressed: () async {
-                      // _currentSectionIndex
-                      // Student ID
-                     await  DatabaseHelper().updateStudentBPM(_bpm,
-                          widget.user!.userId, selectedPiece!.pieceId, _currentSectionIndex);
-                    },
-                    child: Text('Confirm BPM')),
+                child: Row(children: <Widget>[
+                  ElevatedButton(
+                      onPressed: () async {
+                        // _currentSectionIndex
+                        // Student ID
+                        await DatabaseHelper().updateStudentBPM(
+                            'N/A',
+                            widget.user!.userId,
+                            selectedPiece!.pieceId,
+                            _currentSectionIndex);
+                      },
+                      child: Text('N/A BPM for this section')),
+                  ElevatedButton(
+                      onPressed: () async {
+                        // _currentSectionIndex
+                        // Student ID
+                        await DatabaseHelper().updateStudentBPM(
+                            _bpm,
+                            widget.user!.userId,
+                            selectedPiece!.pieceId,
+                            _currentSectionIndex);
+                      },
+                      child: Text('Confirm BPM')),
+                ]),
               ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

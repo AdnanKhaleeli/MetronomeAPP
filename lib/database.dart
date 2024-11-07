@@ -380,7 +380,7 @@ class DatabaseHelper {
     return [];
   }
 
-  Future<bool> updateStudentBPM(double bpm, ObjectId studentID, String musicID,
+  Future<bool> updateStudentBPM(var bpm, ObjectId studentID, String musicID,
       int currentSection) async {
     var studentsCollection = _db!.collection('Student');
 
