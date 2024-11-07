@@ -183,7 +183,7 @@ class DatabaseHelper {
     }
 
     var studentsCollection = _db!.collection('Student');
-    List<int> initialArray = List<int>.filled(numSections, 0);
+    List<dynamic> initialArray = List<dynamic>.filled(numSections, 'N/A');
 
     var result = await studentsCollection.updateOne(
       where.eq('_id', studentId),

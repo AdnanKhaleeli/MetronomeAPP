@@ -83,7 +83,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
     super.initState();
     if (widget.user is Student) {
       fetchPieces();
-    }
+    } 
   }
 
   void fetchPieces() async {
@@ -206,7 +206,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   });
                 },
               ),
-            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
+            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty) 
               Container(
                 height: 50,
                 child: PageView.builder(
@@ -244,31 +244,36 @@ class _MetronomeAppState extends State<MetronomeApp> {
               ),
             if (widget.user is Student && selectedPiece != null)
               Container(
+                
                 margin: EdgeInsets.all(16.0),
-                child: Row(children: <Widget>[
-                  ElevatedButton(
-                      onPressed: () async {
-                        // _currentSectionIndex
-                        // Student ID
-                        await DatabaseHelper().updateStudentBPM(
-                            'N/A',
-                            widget.user!.userId,
-                            selectedPiece!.pieceId,
-                            _currentSectionIndex);
-                      },
-                      child: Text('N/A BPM for this section')),
-                  ElevatedButton(
-                      onPressed: () async {
-                        // _currentSectionIndex
-                        // Student ID
-                        await DatabaseHelper().updateStudentBPM(
-                            _bpm,
-                            widget.user!.userId,
-                            selectedPiece!.pieceId,
-                            _currentSectionIndex);
-                      },
-                      child: Text('Confirm BPM')),
-                ]),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                    ElevatedButton(
+                        onPressed: () async {
+                          // _currentSectionIndex
+                          // Student ID
+                          await DatabaseHelper().updateStudentBPM(
+                              'N/A',
+                              widget.user!.userId,
+                              selectedPiece!.pieceId,
+                              _currentSectionIndex);
+                        },
+                        child: Text('N/A')),
+                    ElevatedButton(
+                        onPressed: () async {
+                          // _currentSectionIndex
+                          // Student ID
+                          await DatabaseHelper().updateStudentBPM(
+                              _bpm,
+                              widget.user!.userId,
+                              selectedPiece!.pieceId,
+                              _currentSectionIndex);
+                        },
+                        child: Text('Confirm BPM')),
+                  ]),
+                ),
               ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -392,7 +397,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                       startMetronome(currentSubdivisions);
                     });
                   },
-                  child: Text('Eighth'),
+                  child: Text('Eighth '),
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
