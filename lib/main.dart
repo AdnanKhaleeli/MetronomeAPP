@@ -83,7 +83,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
     super.initState();
     if (widget.user is Student) {
       fetchPieces();
-    } 
+    }
   }
 
   void fetchPieces() async {
@@ -116,7 +116,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void startMetronome(int subdivisions) {
-    playing = true;
     final double oneBeat = 60 / _bpm;
     final double tickDuration =
         (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
@@ -139,7 +138,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   // Stops the metronome
   void stopMetronome() {
-    playing = false;
     _timer?.cancel();
     player.stop();
     tickCount = 0;
@@ -206,7 +204,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   });
                 },
               ),
-            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty) 
+            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
               Container(
                 height: 50,
                 child: PageView.builder(
@@ -244,35 +242,34 @@ class _MetronomeAppState extends State<MetronomeApp> {
               ),
             if (widget.user is Student && selectedPiece != null)
               Container(
-                
                 margin: EdgeInsets.all(16.0),
                 child: Center(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                    ElevatedButton(
-                        onPressed: () async {
-                          // _currentSectionIndex
-                          // Student ID
-                          await DatabaseHelper().updateStudentBPM(
-                              'N/A',
-                              widget.user!.userId,
-                              selectedPiece!.pieceId,
-                              _currentSectionIndex);
-                        },
-                        child: Text('N/A')),
-                    ElevatedButton(
-                        onPressed: () async {
-                          // _currentSectionIndex
-                          // Student ID
-                          await DatabaseHelper().updateStudentBPM(
-                              _bpm,
-                              widget.user!.userId,
-                              selectedPiece!.pieceId,
-                              _currentSectionIndex);
-                        },
-                        child: Text('Confirm BPM')),
-                  ]),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ElevatedButton(
+                            onPressed: () async {
+                              // _currentSectionIndex
+                              // Student ID
+                              await DatabaseHelper().updateStudentBPM(
+                                  'N/A',
+                                  widget.user!.userId,
+                                  selectedPiece!.pieceId,
+                                  _currentSectionIndex);
+                            },
+                            child: Text('N/A')),
+                        ElevatedButton(
+                            onPressed: () async {
+                              // _currentSectionIndex
+                              // Student ID
+                              await DatabaseHelper().updateStudentBPM(
+                                  _bpm,
+                                  widget.user!.userId,
+                                  selectedPiece!.pieceId,
+                                  _currentSectionIndex);
+                            },
+                            child: Text('Confirm BPM')),
+                      ]),
                 ),
               ),
             Row(
@@ -349,17 +346,34 @@ class _MetronomeAppState extends State<MetronomeApp> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    stopMetronome();
-                    startMetronome(currentSubdivisions);
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (playing) {
+                        stopMetronome();
+                      } else {
+                        startMetronome(currentSubdivisions);
+                      }
+                      setState(() {
+                        playing = !playing;
+                      });
+                    });
                   },
-                  child: Text('Start'),
-                ),
-                SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: stopMetronome,
-                  child: Text('Stop'),
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        playing ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
