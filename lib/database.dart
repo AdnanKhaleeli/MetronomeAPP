@@ -380,8 +380,8 @@ class DatabaseHelper {
     return [];
   }
 
-  Future<bool> updateStudentBPM(var bpm, ObjectId studentID, String musicID,
-      int currentSection) async {
+  Future<bool> updateStudentBPM(
+      var bpm, ObjectId studentID, String musicID, int currentSection) async {
     var studentsCollection = _db!.collection('Student');
 
     try {
@@ -392,22 +392,16 @@ class DatabaseHelper {
         return false;
       }
 
-      // Ensure 'assigned_music' exists and is a map
       if (student['assigned_music'] is Map) {
         Map<String, dynamic> assignedMusic = student['assigned_music'];
 
-       
         if (assignedMusic.containsKey(musicID)) {
-         
           List<dynamic> currentMusicData = assignedMusic[musicID];
 
-         
           if (currentMusicData.length >= 2) {
-            
             currentMusicData[0] = bpm;
-            currentMusicData[1] = currentSection; 
+            currentMusicData[1] = currentSection;
 
-            
             var result = await studentsCollection.updateOne(
               where.id(studentID),
               modify.set('assigned_music.$musicID', currentMusicData),
@@ -425,5 +419,19 @@ class DatabaseHelper {
       print('Error updating student BPM: $e');
       return false;
     }
+  }
+
+  Future<int> getCurrentUserBPMForSection(
+    
+    int sectionIndex, ObjectId studentID, String musicID) async {
+    var studentCollection = db.collection('Student');
+
+    var student = await studentCollection.findOne(where.id(studentID));
+
+    Map<String, dynamic> assignedMusic = student!['assigned_music'];
+
+    List<dynamic> currentMusicData = assignedMusic[musicID];
+
+    return currentMusicData[sectionIndex].toInt();
   }
 }

@@ -77,6 +77,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   int? goalBpm;
   PageController _pageController = PageController();
   int _currentSectionIndex = 0;
+  dynamic? _currentSectionBpm = 0;
 
   @override
   void initState() {
@@ -111,8 +112,15 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void fetchBpmForSection(Section section) async {
-    goalBpm = section.goalBpm;
-    setState(() {});
+    final bpm = await DatabaseHelper().getCurrentUserBPMForSection(
+      _currentSectionIndex,
+      widget.user!.userId,
+      selectedPiece!.pieceId,
+    );
+    setState(() {
+      goalBpm = section.goalBpm;
+      _currentSectionBpm = bpm;
+    });
   }
 
   void startMetronome(int subdivisions) {
@@ -151,20 +159,35 @@ class _MetronomeAppState extends State<MetronomeApp> {
     super.dispose();
   }
 
-  // Handles swipe gestures to switch between sections
-  void handleSwipe(DragEndDetails details) {
-    if (details.velocity.pixelsPerSecond.dx > 0) {
-      if (_currentSectionIndex > 0) {
-        _pageController.previousPage(
-            duration: Duration(milliseconds: 300), curve: Curves.ease);
-      }
-    } else if (details.velocity.pixelsPerSecond.dx < 0) {
-      if (_currentSectionIndex < selectedPiece!.sections.length - 1) {
-        _pageController.nextPage(
-            duration: Duration(milliseconds: 300), curve: Curves.ease);
-      }
+   void handleSwipe(DragEndDetails details) {
+  if (details.velocity.pixelsPerSecond.dx > 0) {
+    // Swipe to the left, go to the previous section
+    if (_currentSectionIndex > 0) {
+      _pageController.previousPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+      setState(() {
+        _currentSectionIndex--;
+        selectedSection = selectedPiece!.sections[_currentSectionIndex];
+        fetchBpmForSection(selectedSection!);
+      });
+    }
+  } else if (details.velocity.pixelsPerSecond.dx < 0) {
+    // Swipe to the right, go to the next section
+    if (_currentSectionIndex < selectedPiece!.sections.length - 1) {
+      _pageController.nextPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+      setState(() {
+        _currentSectionIndex++;
+        selectedSection = selectedPiece!.sections[_currentSectionIndex];
+        fetchBpmForSection(selectedSection!);
+      });
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -272,6 +295,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
                       ]),
                 ),
               ),
+            if (_currentSectionBpm is int)
+              Text('Section BPM current: $_currentSectionBpm'),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
