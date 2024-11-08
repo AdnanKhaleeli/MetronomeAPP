@@ -36,8 +36,10 @@ class AddMusicState extends State<AddMusic> {
 
   void _updateSections(int numSections) {
     setState(() {
-      _sectionNameControllers = List.generate(numSections, (index) => TextEditingController());
-      _sectionBpmControllers = List.generate(numSections, (index) => TextEditingController());
+      _sectionNameControllers =
+          List.generate(numSections, (index) => TextEditingController());
+      _sectionBpmControllers =
+          List.generate(numSections, (index) => TextEditingController());
       _numSections = numSections;
     });
   }
@@ -93,7 +95,8 @@ class AddMusicState extends State<AddMusic> {
                       Expanded(
                         child: TextFormField(
                           controller: _sectionNameControllers[i],
-                          decoration: InputDecoration(labelText: 'Section ${i + 1} Name'),
+                          decoration: InputDecoration(
+                              labelText: 'Section ${i + 1} Name'),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter the name for section ${i + 1}';
@@ -129,10 +132,14 @@ class AddMusicState extends State<AddMusic> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       String pieceName = _pieceNameController.text;
-                      List<String> sectionNames = _sectionNameControllers.map((c) => c.text).toList();
-                      List<int> sectionBpms = _sectionBpmControllers.map((c) => int.parse(c.text)).toList();
+                      List<String> sectionNames =
+                          _sectionNameControllers.map((c) => c.text).toList();
+                      List<int> sectionBpms = _sectionBpmControllers
+                          .map((c) => int.parse(c.text))
+                          .toList();
 
-                      mongo.ObjectId? musicId = await DatabaseHelper().insertMusic(
+                      mongo.ObjectId? musicId =
+                          await DatabaseHelper().insertMusic(
                         pieceName: pieceName,
                         sectionNames: sectionNames,
                         sectionBpms: sectionBpms,
@@ -154,10 +161,14 @@ class AddMusicState extends State<AddMusic> {
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to add music to the database.')),
+                          SnackBar(
+                              content:
+                                  Text('Failed to add music to the database.')),
                         );
                       }
                     }
+
+                   
                   },
                   child: Text("Next"),
                 ),
