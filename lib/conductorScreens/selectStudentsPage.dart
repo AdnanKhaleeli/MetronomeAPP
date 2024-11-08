@@ -61,7 +61,9 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
       if (_allSelected) {
         _selectedStudents.clear();
       } else {
-        _selectedStudents = _students.map((student) => student['_id'] as mongo.ObjectId).toList();
+        _selectedStudents = _students
+            .map((student) => student['_id'] as mongo.ObjectId)
+            .toList();
       }
       _allSelected = !_allSelected;
     });
@@ -69,14 +71,16 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
 
   Future<void> _assignMusicToStudents() async {
     for (var studentId in _selectedStudents) {
-      await DatabaseHelper().addMusicToStudent(
-          studentId, widget.musicId, widget.numSections);
+      await DatabaseHelper()
+          .addMusicToStudent(studentId, widget.musicId, widget.numSections);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Music assigned to selected students!')),
     );
 
+    
+    Navigator.pop(context);
     Navigator.pop(context);
   }
 
@@ -105,21 +109,21 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
       body: _students.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
-        itemCount: _students.length,
-        itemBuilder: (context, index) {
-          var student = _students[index];
-          return ListTile(
-            title: Text(student['username']),
-            trailing: Checkbox(
-              value: _selectedStudents.contains(student['_id']),
-              onChanged: (bool? value) {
-                var studentId = student['_id'] as mongo.ObjectId;
-                _toggleStudentSelection(studentId);
+              itemCount: _students.length,
+              itemBuilder: (context, index) {
+                var student = _students[index];
+                return ListTile(
+                  title: Text(student['username']),
+                  trailing: Checkbox(
+                    value: _selectedStudents.contains(student['_id']),
+                    onChanged: (bool? value) {
+                      var studentId = student['_id'] as mongo.ObjectId;
+                      _toggleStudentSelection(studentId);
+                    },
+                  ),
+                );
               },
             ),
-          );
-        },
-      ),
     );
   }
 }

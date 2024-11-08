@@ -63,6 +63,7 @@ class CustomDrawer extends StatelessWidget {
                 title: Text("Add Music"),
                 onTap: () {
                   Navigator.pushNamed(context, '/addMusic', arguments: user);
+                  Scaffold.of(context).closeDrawer();
                 }),
           ListTile(
             title: Text('Settings'),
