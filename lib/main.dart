@@ -43,10 +43,13 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
+        scaffoldBackgroundColor: Color(0xFF121212), // Dark background
       ),
       debugShowCheckedModeBanner: false,
     );
@@ -64,7 +67,6 @@ class MetronomeApp extends StatefulWidget {
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
   final player = AudioPlayer();
-
   Timer? _timer;
   bool playing = false;
   int currentSubdivisions = 1;
@@ -124,6 +126,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void startMetronome(int subdivisions) {
+    if (playing) return; // Avoid starting if already playing
+
     final double oneBeat = 60 / _bpm;
     final double tickDuration =
         (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
@@ -142,13 +146,22 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
       await player.resume();
     });
+
+    setState(() {
+      playing = true;
+    });
   }
 
-  // Stops the metronome
   void stopMetronome() {
+    if (!playing) return; // Avoid stopping if not playing
+
     _timer?.cancel();
     player.stop();
     tickCount = 0;
+
+    setState(() {
+      playing = false;
+    });
   }
 
   @override
@@ -159,43 +172,13 @@ class _MetronomeAppState extends State<MetronomeApp> {
     super.dispose();
   }
 
-   void handleSwipe(DragEndDetails details) {
-  if (details.velocity.pixelsPerSecond.dx > 0) {
-    // Swipe to the left, go to the previous section
-    if (_currentSectionIndex > 0) {
-      _pageController.previousPage(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-      setState(() {
-        _currentSectionIndex--;
-        selectedSection = selectedPiece!.sections[_currentSectionIndex];
-        fetchBpmForSection(selectedSection!);
-      });
-    }
-  } else if (details.velocity.pixelsPerSecond.dx < 0) {
-    // Swipe to the right, go to the next section
-    if (_currentSectionIndex < selectedPiece!.sections.length - 1) {
-      _pageController.nextPage(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-      setState(() {
-        _currentSectionIndex++;
-        selectedSection = selectedPiece!.sections[_currentSectionIndex];
-        fetchBpmForSection(selectedSection!);
-      });
-    }
-  }
-}
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Metronome App'),
         centerTitle: true,
-        backgroundColor: Colors.red[400],
+        backgroundColor: Colors.teal[700],
       ),
       drawer: CustomDrawer(
         stopMetronome: stopMetronome,
@@ -205,27 +188,32 @@ class _MetronomeAppState extends State<MetronomeApp> {
         onTap: () {
           FocusScope.of(context).unfocus();
         },
-        onHorizontalDragEnd: handleSwipe,
         behavior: HitTestBehavior.translucent,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Top centered section with Music Piece and Section
             if (widget.user is Student)
-              DropdownButton<Piece>(
-                value: selectedPiece,
-                hint: Text('Select a Piece'),
-                items: pieces.map((Piece piece) {
-                  return DropdownMenuItem<Piece>(
-                    value: piece,
-                    child: Text(piece.pieceName),
-                  );
-                }).toList(),
-                onChanged: (Piece? newValue) {
-                  setState(() {
-                    selectedPiece = newValue;
-                    fetchSections(newValue!);
-                  });
-                },
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: DropdownButton<Piece>(
+                  value: selectedPiece,
+                  hint: Text('Select a Piece'),
+                  items: pieces.map((Piece piece) {
+                    return DropdownMenuItem<Piece>(
+                      value: piece,
+                      child: Text(piece.pieceName),
+                    );
+                  }).toList(),
+                  onChanged: (Piece? newValue) {
+                    setState(() {
+                      selectedPiece = newValue;
+                      fetchSections(newValue!);
+                    });
+                  },
+                  style: TextStyle(color: Colors.white),
+                  dropdownColor: Colors.teal[800],
+                ),
               ),
             if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
               Container(
@@ -255,110 +243,87 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 ),
               ),
             if (goalBpm != null)
-              Text(
-                'Goal BPM: $goalBpm',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            if (widget.user is Student && selectedPiece != null)
-              Container(
-                margin: EdgeInsets.all(16.0),
-                child: Center(
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        ElevatedButton(
-                            onPressed: () async {
-                              // _currentSectionIndex
-                              // Student ID
-                              await DatabaseHelper().updateStudentBPM(
-                                  'N/A',
-                                  widget.user!.userId,
-                                  selectedPiece!.pieceId,
-                                  _currentSectionIndex);
-                            },
-                            child: Text('N/A')),
-                        ElevatedButton(
-                            onPressed: () async {
-                              // _currentSectionIndex
-                              // Student ID
-                              await DatabaseHelper().updateStudentBPM(
-                                  _bpm,
-                                  widget.user!.userId,
-                                  selectedPiece!.pieceId,
-                                  _currentSectionIndex);
-                            },
-                            child: Text('Confirm BPM')),
-                      ]),
-                ),
-              ),
-            if (_currentSectionBpm is int)
-              Text('Section BPM current: $_currentSectionBpm'),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_bpm > 40) {
-                        _bpm -= 1;
-                        _controller.text = _bpm.toInt().toString();
-                        stopMetronome();
-                        startMetronome(currentSubdivisions);
-                      }
-                    });
-                  },
-                  child: Text("-"),
-                ),
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    controller: _controller,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'BPM',
-                    ),
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(3),
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    onChanged: (value) {
-                      int? bpmInput = int.tryParse(value);
-                      if (bpmInput != null &&
-                          bpmInput >= 40 &&
-                          bpmInput <= 200) {
-                        setState(() {
-                          _bpm = bpmInput.toDouble();
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      }
-                    },
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Goal BPM: $goalBpm',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_bpm < 199) {
-                        _bpm += 1;
-                        _controller.text = _bpm.toInt().toString();
-                        stopMetronome();
-                        startMetronome(currentSubdivisions);
-                      }
-                    });
-                  },
-                  child: Text("+"),
-                ),
-              ],
+              ),
+            // BPM Controls
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_bpm > 40) {
+                          _bpm -= 1;
+                          _controller.text = _bpm.toInt().toString();
+                          stopMetronome();
+                          startMetronome(currentSubdivisions);
+                        }
+                      });
+                    },
+                    child: Text("-"),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: TextField(
+                      controller: _controller,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'BPM',
+                        labelStyle: TextStyle(color: Colors.white),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(3),
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      onChanged: (value) {
+                        int? bpmInput = int.tryParse(value);
+                        if (bpmInput != null &&
+                            bpmInput >= 40 &&
+                            bpmInput <= 200) {
+                          setState(() {
+                            _bpm = bpmInput.toDouble();
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_bpm < 199) {
+                          _bpm += 1;
+                          _controller.text = _bpm.toInt().toString();
+                          stopMetronome();
+                          startMetronome(currentSubdivisions);
+                        }
+                      });
+                    },
+                    child: Text("+"),
+                  ),
+                ],
+              ),
             ),
             Slider(
               min: 40,
               max: 200,
               value: _bpm,
+              activeColor: Colors.blueAccent,
+              inactiveColor: Colors.white.withOpacity(0.5),
               onChanged: (newBPM) {
                 setState(() {
                   _bpm = newBPM;
@@ -368,27 +333,23 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 });
               },
             ),
+            // Metronome Controls (Play/Pause, Subdivisions)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
                   onTap: () {
-                    setState(() {
-                      if (playing) {
-                        stopMetronome();
-                      } else {
-                        startMetronome(currentSubdivisions);
-                      }
-                      setState(() {
-                        playing = !playing;
-                      });
-                    });
+                    if (playing) {
+                      stopMetronome();
+                    } else {
+                      startMetronome(currentSubdivisions);
+                    }
                   },
                   child: Container(
-                    width: 70,
-                    height: 70,
+                    width: 80,
+                    height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: Colors.teal[700],
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -408,9 +369,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: selectedSubdivisionIndex == 0
-                          ? Colors.red
-                          : Colors.white,
-                      foregroundColor: Colors.black),
+                          ? Colors.teal[700]
+                          : Colors.grey[800],
+                      foregroundColor: Colors.white),
                   onPressed: () {
                     setState(() {
                       selectedSubdivisionIndex = 0;
@@ -425,9 +386,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: selectedSubdivisionIndex == 1
-                          ? Colors.red
-                          : Colors.white,
-                      foregroundColor: Colors.black),
+                          ? Colors.teal[700]
+                          : Colors.grey[800],
+                      foregroundColor: Colors.white),
                   onPressed: () {
                     setState(() {
                       selectedSubdivisionIndex = 1;
@@ -436,15 +397,15 @@ class _MetronomeAppState extends State<MetronomeApp> {
                       startMetronome(currentSubdivisions);
                     });
                   },
-                  child: Text('Eighth '),
+                  child: Text('Eighth'),
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: selectedSubdivisionIndex == 2
-                          ? Colors.red
-                          : Colors.white,
-                      foregroundColor: Colors.black),
+                          ? Colors.teal[700]
+                          : Colors.grey[800],
+                      foregroundColor: Colors.white),
                   onPressed: () {
                     setState(() {
                       selectedSubdivisionIndex = 2;
@@ -459,9 +420,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: selectedSubdivisionIndex == 3
-                          ? Colors.red
-                          : Colors.white,
-                      foregroundColor: Colors.black),
+                          ? Colors.teal[700]
+                          : Colors.grey[800],
+                      foregroundColor: Colors.white),
                   onPressed: () {
                     setState(() {
                       selectedSubdivisionIndex = 3;
