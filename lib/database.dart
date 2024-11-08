@@ -399,8 +399,8 @@ class DatabaseHelper {
           List<dynamic> currentMusicData = assignedMusic[musicID];
 
           if (currentMusicData.length >= 2) {
-            currentMusicData[0] = bpm;
-            currentMusicData[1] = currentSection;
+            currentMusicData[currentSection] = bpm;
+      
 
             var result = await studentsCollection.updateOne(
               where.id(studentID),
