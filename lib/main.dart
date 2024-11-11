@@ -298,13 +298,18 @@ class _MetronomeAppState extends State<MetronomeApp> {
                                   widget.user!.userId,
                                   selectedPiece!.pieceId,
                                   _currentSectionIndex);
+
+                              setState(() {
+                                 _currentSectionBpm = _bpm;
+                              });
                             },
+
+
                             child: Text('Confirm BPM')),
                       ]),
                 ),
               ),
-            if (_currentSectionBpm is int)
-              Text('Section BPM current: $_currentSectionBpm'),
+            Text('Section BPM current: $_currentSectionBpm'),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -363,18 +368,25 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 ),
               ],
             ),
-            Slider(
-              min: 40,
-              max: 200,
-              value: _bpm,
-              onChanged: (newBPM) {
-                setState(() {
-                  _bpm = newBPM;
-                  _controller.text = newBPM.toInt().toString();
-                  stopMetronome();
-                  startMetronome(currentSubdivisions);
-                });
-              },
+            if ((widget.user is Student || widget.user is Conductor) && goalBpm != null &&  _currentSectionBpm != null) (
+                // If the user is logged in, a goalBpm is present, and they have a current section bpm
+                LinearProgressIndicator(
+                  value: _currentSectionBpm / goalBpm!,
+                )
+            ) else (
+                Slider(
+                  min: 40,
+                  max: 200,
+                  value: _bpm,
+                  onChanged: (newBPM) {
+                    setState(() {
+                      _bpm = newBPM;
+                      _controller.text = newBPM.toInt().toString();
+                      stopMetronome();
+                      startMetronome(currentSubdivisions);
+                    });
+                  },
+                )
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

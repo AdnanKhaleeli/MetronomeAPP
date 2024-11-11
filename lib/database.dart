@@ -421,9 +421,7 @@ class DatabaseHelper {
     }
   }
 
-  Future<int> getCurrentUserBPMForSection(
-    
-    int sectionIndex, ObjectId studentID, String musicID) async {
+  Future<int> getCurrentUserBPMForSection(int sectionIndex, ObjectId studentID, String musicID) async {
     var studentCollection = db.collection('Student');
 
     var student = await studentCollection.findOne(where.id(studentID));
