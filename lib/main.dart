@@ -474,7 +474,7 @@ class BPMIndicatorPainter extends CustomPainter {
     double bpmRange = goalBpm - 40;
 
     // Draw the background arc for the goal BPM
-    paint.color = Colors.grey.withOpacity(0.3); // Light grey for the background
+    paint.color = const Color.fromARGB(255, 255, 79, 66).withOpacity(0.8); // Light grey for the background
     double goalSweepAngle = fullCircle; // Full circle as the max range for Goal BPM
     canvas.drawArc(Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
 
@@ -484,7 +484,7 @@ class BPMIndicatorPainter extends CustomPainter {
       currentSweepAngle = fullCircle * ((currentBpm - 40) / bpmRange); // Map currentBpm from 40 to goalBpm
     }
 
-    paint.color = Colors.red.withOpacity(0.8); // Color for current BPM (bright red)
+    paint.color = Colors.yellow.withOpacity(0.8); // Color for current BPM (bright red)
     paint.strokeWidth = 14; // Thicker stroke for the current BPM
     canvas.drawArc(Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
 
@@ -494,7 +494,7 @@ class BPMIndicatorPainter extends CustomPainter {
       savedSweepAngle = fullCircle * ((savedBpm - 40) / bpmRange); // Map savedBpm from 40 to goalBpm
     }
 
-    paint.color = Colors.green.withOpacity(0.8); // Color for saved BPM (green)
+    paint.color = const Color.fromARGB(255, 0, 194, 6).withOpacity(1); // Color for saved BPM (green)
     paint.strokeWidth = 10; // Normal thickness for saved BPM
     canvas.drawArc(Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
 
