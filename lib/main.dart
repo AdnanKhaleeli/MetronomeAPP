@@ -220,14 +220,13 @@ class _MetronomeAppState extends State<MetronomeApp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
-             if (widget.user is Student && goalBpm != null)
+            if (widget.user is Student && goalBpm != null)
               CircularBPMIndicator(
                 currentBpm: _bpm,
                 goalBpm: goalBpm!.toDouble(),
                 savedBpm: _currentSectionBpm?.toDouble(),
               ),
-              if (widget.user is Student)
+            if (widget.user is Student)
               DropdownButton<Piece>(
                 value: selectedPiece,
                 hint: Text('Select a Piece'),
@@ -307,6 +306,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
                                   widget.user!.userId,
                                   selectedPiece!.pieceId,
                                   _currentSectionIndex);
+
+                              setState(() {
+                                _currentSectionBpm = _bpm;
+                              });
                             },
                             child: Text('Confirm BPM')),
                       ]),
