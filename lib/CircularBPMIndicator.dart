@@ -1,0 +1,123 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+class CircularBPMIndicator extends StatelessWidget {
+  final double currentBpm;
+  final double goalBpm;
+  final double savedBpm;
+
+  CircularBPMIndicator({
+    required this.currentBpm,
+    required this.goalBpm,
+    required this.savedBpm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(200, 200), // size of the circle
+      painter: BPMIndicatorPainter(
+          currentBpm: currentBpm, goalBpm: goalBpm, savedBpm: savedBpm),
+    );
+  }
+}
+
+class BPMIndicatorPainter extends CustomPainter {
+  final double currentBpm;
+  final double goalBpm;
+  final double savedBpm;
+
+  BPMIndicatorPainter({
+    required this.currentBpm,
+    required this.goalBpm,
+    required this.savedBpm,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10;
+
+    double goalAngleStart = -pi / 2; // Start from the top (12 o'clock)
+    double fullCircle = 2 * pi;
+
+    // Define the BPM range that starts from 40 BPM
+    double bpmRange = goalBpm - 40;
+
+    // Draw the background arc for the goal BPM
+    paint.color = const Color.fromARGB(255, 255, 79, 66)
+        .withOpacity(0.8); // Light grey for the background
+    double goalSweepAngle =
+        fullCircle; // Full circle as the max range for Goal BPM
+    canvas.drawArc(
+        Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
+
+    // Draw the arc for the current BPM (this is the "live" value)
+    double currentSweepAngle = 0.0;
+    if (currentBpm > 40) {
+      currentSweepAngle = fullCircle *
+          ((currentBpm - 40) / bpmRange); // Map currentBpm from 40 to goalBpm
+    }
+
+    paint.color =
+        Colors.yellow.withOpacity(0.8); // Color for current BPM (bright red)
+    paint.strokeWidth = 14; // Thicker stroke for the current BPM
+    canvas.drawArc(
+        Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
+
+    // Draw the arc for saved BPM (another track)
+    double savedSweepAngle = 0.0;
+    if (savedBpm > 40) {
+      savedSweepAngle = fullCircle *
+          ((savedBpm - 40) / bpmRange); // Map savedBpm from 40 to goalBpm
+    }
+
+    paint.color = const Color.fromARGB(255, 0, 194, 6)
+        .withOpacity(1); // Color for saved BPM (green)
+    paint.strokeWidth = 10; // Normal thickness for saved BPM
+    canvas.drawArc(
+        Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
+
+    // Check if savedBpm is null or N/A and display checkmark
+    if (savedBpm == -1 || currentBpm >= goalBpm) {
+      // -1 means 'N/A' BPM
+      TextSpan span = TextSpan(
+        style: TextStyle(
+            fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+        text: '✓', // Check mark
+      );
+      TextPainter tp = TextPainter(
+          text: span,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr);
+      tp.layout();
+      tp.paint(
+          canvas,
+          Offset(
+              size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
+    } else {
+      // Draw the current BPM value if not "N/A"
+      TextSpan span = TextSpan(
+        style: TextStyle(
+            fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        text: '${currentBpm.toInt()} BPM',
+      );
+      TextPainter tp = TextPainter(
+          text: span,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.ltr);
+      tp.layout();
+      tp.paint(
+          canvas,
+          Offset(
+              size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
