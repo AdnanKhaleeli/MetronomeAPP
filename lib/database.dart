@@ -421,9 +421,7 @@ class DatabaseHelper {
     }
   }
 
-  Future<int> getCurrentUserBPMForSection(
-    
-    int sectionIndex, ObjectId studentID, String musicID) async {
+  Future<int> getCurrentUserBPMForSection(int sectionIndex, ObjectId studentID, String musicID) async {
     var studentCollection = db.collection('Student');
 
     var student = await studentCollection.findOne(where.id(studentID));
@@ -433,5 +431,38 @@ class DatabaseHelper {
     List<dynamic> currentMusicData = assignedMusic[musicID];
 
     return currentMusicData[sectionIndex].toInt();
+  }
+
+  Future<List<Map<String, dynamic>>> getAllStudents() async {
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
+
+    var studentsCollection = _db!.collection('Student');
+    final students = await studentsCollection.find().toList();
+
+    return students.map((student) {
+      return {
+        '_id': student['_id'],
+        'username': student['username'],
+        'pwd': student['pwd'],
+        'profilename': student['profilename'],
+        'assigned_music': student['assigned_music'],
+        'subgroup_id': student['subgroup_id'],
+      };
+    }).toList();
+  }
+  Future<void> assignStudentsToMusic(ObjectId musicId, List<ObjectId> studentIds) async {
+    if (_db == null) {
+      throw Exception('Database not initialized. Call init() first.');
+    }
+
+    var musicCollection = _db!.collection('Music');
+
+    // Update the music piece to include the list of student IDs
+    await musicCollection.update(
+        where.eq('_id', musicId),
+        modify.set('assigned_students', studentIds.map((id) => id.toHexString()).toList())
+    );
   }
 }

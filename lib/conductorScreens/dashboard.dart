@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../customdrawer.dart';
 import '../user.dart';
 import '../database.dart';
+import 'music_piece_details.dart'; // Import the new widget
 
 class Dashboard extends StatefulWidget {
   final Conductor user;
@@ -69,7 +70,13 @@ class _DashboardState extends State<Dashboard> {
                             elevation: 6,
                             color: Color(0xFF1C1C1C),
                             child: InkWell(
-                              onTap: () => {},
+                              onTap: () => {
+                              Navigator.of(context).push(
+                              MaterialPageRoute(
+                              builder: (context) => MusicPieceDetails(piece: music),
+                              ),
+                              ),
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Column(
