@@ -40,6 +40,7 @@ class DatabaseHelper {
     required String username,
     required String pwd,
     required String profilename,
+    required String role
   }) async {
     if (_db == null) {
       return false;
@@ -62,6 +63,7 @@ class DatabaseHelper {
       'pwd': pwd,
       'profilename': profilename,
       'assigned_music': {},
+      'role' : role,
       'subgroup_id': null
     };
 
@@ -113,6 +115,7 @@ class DatabaseHelper {
         username: student['username'],
         password: student['pwd'],
         profileName: student['profilename'] ?? '',
+        role: student['role']
       );
     } else {
       var conductorCollection = _db!.collection('Conductor');
@@ -125,6 +128,7 @@ class DatabaseHelper {
           username: conductor['username'],
           password: conductor['pwd'],
           profileName: conductor['profilename'],
+          role : conductor['role']
         );
       }
     }
@@ -465,4 +469,7 @@ class DatabaseHelper {
         modify.set('assigned_students', studentIds.map((id) => id.toHexString()).toList())
     );
   }
+
+
+
 }
