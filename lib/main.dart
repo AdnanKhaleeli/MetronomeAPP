@@ -394,7 +394,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      if (_bpm < 199) {
+                      if (_bpm < 200) {
                         _bpm += 1;
                         _controller.text = _bpm.toInt().toString();
                         stopMetronome();

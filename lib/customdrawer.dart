@@ -24,7 +24,7 @@ class CustomDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             accountName: Text(user != null ? user!.getProfileName() : "Guest"),
             accountEmail:
-                Text(user != null ? "user@example.com" : "guest@example.com"),
+                Text(user != null ? user!.role : ""),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(

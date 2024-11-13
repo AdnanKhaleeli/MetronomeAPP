@@ -15,9 +15,7 @@ class SignIn extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.red[400],
       ),
-      drawer: CustomDrawer(
-        user: null,
-      ),
+      drawer: CustomDrawer(user: null),
       body: Center(
         child: Column(
           children: [LogIn()],
@@ -40,6 +38,13 @@ class _LogInState extends State<LogIn> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
   final TextEditingController _profileController = TextEditingController();
+  String? selectedRole;  // For role selection
+  List<String> roles = [
+    'Soprano Cornet', 'Solo Cornet', 'Repiano Cornet', 'Second Cornet', 'Third Cornet',
+    'Flugelhorn', 'Solo Horn', 'Horn 1', 'Horn 2', 'Baritone 1', 'Baritone 2',
+    'Trombone 1', 'Trombone 2', 'Bass Trombone', 'Euphonium', 'E-flat Bass', 
+    'B-Flat Bass', 'Percussion'
+  ];
 
   void _showSnackBar(String message) {
     final snackBar = SnackBar(
@@ -152,6 +157,34 @@ class _LogInState extends State<LogIn> {
               },
             ),
           ),
+        if (sign_up)
+          Container(
+            margin: EdgeInsets.all(40),
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Select Band Role',
+                border: OutlineInputBorder(),
+              ),
+              value: selectedRole,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedRole = newValue;
+                });
+              },
+              items: roles.map<DropdownMenuItem<String>>((String role) {
+                return DropdownMenuItem<String>(
+                  value: role,
+                  child: Text(role),
+                );
+              }).toList(),
+              validator: (value) {
+                if (value == null) {
+                  return 'Please select a role';
+                }
+                return null;
+              },
+            ),
+          ),
         ElevatedButton(
           onPressed: () async {
             if (sign_up) {
@@ -170,15 +203,17 @@ class _LogInState extends State<LogIn> {
                   username: _userNameController.text,
                   pwd: _pwdController.text,
                   profilename: _profileController.text,
+                  role: selectedRole ?? '', // Add the selected role here
                 );
 
                 var userID = await db.getUserID(_userNameController.text);
                 if (userID != null) {
-                  User user = User(
+                  Student user = Student(
                     userId: userID,
                     username: _userNameController.text,
                     password: _pwdController.text,
                     profileName: _profileController.text,
+                    role: selectedRole ?? '',  // Include the role for the user
                   );
 
                   Navigator.pushReplacement(

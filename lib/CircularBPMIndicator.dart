@@ -15,10 +15,23 @@ class CircularBPMIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(200, 200), // size of the circle
-      painter: BPMIndicatorPainter(
-          currentBpm: currentBpm, goalBpm: goalBpm, savedBpm: savedBpm),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomPaint(
+          size: Size(200, 200), // size of the circle
+          painter: BPMIndicatorPainter(
+            currentBpm: currentBpm,
+            goalBpm: goalBpm,
+            savedBpm: savedBpm,
+          ),
+        ),
+        SizedBox(height: 20), // Space between circle and text
+        Text(
+          'Saved BPM: ${savedBpm.toInt()} BPM',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
+        ),
+      ],
     );
   }
 }
@@ -40,75 +53,62 @@ class BPMIndicatorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10;
 
-    double goalAngleStart = -pi / 2; 
+    double goalAngleStart = -pi / 2;
     double fullCircle = 2 * pi;
-
 
     double bpmRange = goalBpm - 40;
 
-  
-    paint.color = const Color.fromARGB(255, 255, 79, 66)
-        .withOpacity(0.8); 
-    double goalSweepAngle =
-        fullCircle; 
-    canvas.drawArc(
-        Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
+    // Draw the full arc for goal BPM (red)
+    paint.color = const Color.fromARGB(255, 255, 79, 66).withOpacity(0.8);
+    double goalSweepAngle = fullCircle;
+    canvas.drawArc(Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
 
-   
+    // Draw the arc for the current BPM (yellow)
     double currentSweepAngle = 0.0;
     if (currentBpm > 40) {
-      currentSweepAngle = fullCircle *
-          ((currentBpm - 40) / bpmRange); 
+      currentSweepAngle = fullCircle * ((currentBpm - 40) / bpmRange);
     }
 
-    paint.color =  Colors.yellow.withOpacity(0.8);
-    paint.strokeWidth = 14; 
-    canvas.drawArc(  Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
+    paint.color = Colors.yellow.withOpacity(0.8);
+    paint.strokeWidth = 14;
+    canvas.drawArc(Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
 
-    
+    // Draw the arc for saved BPM (green)
     double savedSweepAngle = 0.0;
     if (savedBpm > 40) {
-      savedSweepAngle = fullCircle *
-          ((savedBpm - 40) / bpmRange); 
+      savedSweepAngle = fullCircle * ((savedBpm - 40) / bpmRange);
     }
 
-    paint.color = const Color.fromARGB(255, 0, 194, 6)
-        .withOpacity(1); // Color for saved BPM (green)
-    paint.strokeWidth = 10; // Normal thickness for saved BPM
-    canvas.drawArc(
-        Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
+    paint.color = const Color.fromARGB(255, 0, 194, 6).withOpacity(1);
+    paint.strokeWidth = 10;
+    canvas.drawArc(Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
 
-    
+    // Center Text (like a check mark when goal is met)
     if (savedBpm == -1 || currentBpm >= goalBpm) {
       // -1 means 'N/A' BPM
       TextSpan span = TextSpan(
-        style: TextStyle(
-            fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+        style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
         text: '✓', // Check mark
       );
       TextPainter tp = TextPainter(
-          text: span,
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.ltr);
+        text: span,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
       tp.layout();
-      tp.paint(
-          canvas,
-          Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
+      tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     } else {
-  
       TextSpan span = TextSpan(
-        style: TextStyle(
-            fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         text: '${currentBpm.toInt()} BPM',
       );
       TextPainter tp = TextPainter(
-          text: span,
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.ltr);
+        text: span,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
       tp.layout();
-      tp.paint(
-          canvas,
-          Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
+      tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     }
   }
 
