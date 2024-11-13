@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:metronome/main.dart';
 import 'user.dart';
+import 'studentScreens/Assignments.dart';
+import 'music.dart';
 
 class CustomDrawer extends StatelessWidget {
   final Function? stopMetronome;
   User? user;
+  List<Piece>? list;
 
   CustomDrawer({
     this.stopMetronome,
     this.user,
+    this.list
   });
 
   @override
@@ -47,6 +51,22 @@ class CustomDrawer extends StatelessWidget {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
                   Navigator.pushNamed(context, '/sign_in');
+                }
+              },
+            ),
+          if (ModalRoute.of(context)?.settings.name != '/assignments' &&
+              user != null)
+            ListTile(
+              title: Text("Assignments"),
+              onTap: () {
+                if (user is Student) {
+                  Scaffold.of(context).closeDrawer();
+                  stopMetronome?.call();
+                  Navigator.pushNamed(context, '/assignments',
+                      arguments:{
+                        'user': user,
+                        'pieces' : list
+                      });
                 }
               },
             ),

@@ -429,8 +429,8 @@ class DatabaseHelper {
     Map<String, dynamic> assignedMusic = student!['assigned_music'];
 
     List<dynamic> currentMusicData = assignedMusic[musicID];
-
-    return currentMusicData[sectionIndex].toInt();
+    
+    return currentMusicData[sectionIndex] != "N/A"?  currentMusicData[sectionIndex].toInt() : -1;
   }
 
   Future<List<Map<String, dynamic>>> getAllStudents() async {
