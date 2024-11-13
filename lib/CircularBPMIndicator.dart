@@ -40,34 +40,34 @@ class BPMIndicatorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10;
 
-    double goalAngleStart = -pi / 2; // Start from the top (12 o'clock)
+    double goalAngleStart = -pi / 2; 
     double fullCircle = 2 * pi;
 
-    // Define the BPM range that starts from 40 BPM
+
     double bpmRange = goalBpm - 40;
 
-    // Draw the background arc for the goal BPM
+  
     paint.color = const Color.fromARGB(255, 255, 79, 66)
-        .withOpacity(0.8); // Light grey for the background
+        .withOpacity(0.8); 
     double goalSweepAngle =
-        fullCircle; // Full circle as the max range for Goal BPM
+        fullCircle; 
     canvas.drawArc(
         Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
 
-    // Draw the arc for the current BPM (this is the "live" value)
+   
     double currentSweepAngle = 0.0;
     if (currentBpm > 40) {
       currentSweepAngle = fullCircle *
-          ((currentBpm - 40) / bpmRange); // Map currentBpm from 40 to goalBpm
+          ((currentBpm - 40) / bpmRange); 
     }
 
     paint.color =
-        Colors.yellow.withOpacity(0.8); // Color for current BPM (bright red)
-    paint.strokeWidth = 14; // Thicker stroke for the current BPM
+        Colors.yellow.withOpacity(0.8);
+    paint.strokeWidth = 14; 
     canvas.drawArc(
         Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
 
-    // Draw the arc for saved BPM (another track)
+    
     double savedSweepAngle = 0.0;
     if (savedBpm > 40) {
       savedSweepAngle = fullCircle *
@@ -80,7 +80,7 @@ class BPMIndicatorPainter extends CustomPainter {
     canvas.drawArc(
         Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
 
-    // Check if savedBpm is null or N/A and display checkmark
+    
     if (savedBpm == -1 || currentBpm >= goalBpm) {
       // -1 means 'N/A' BPM
       TextSpan span = TextSpan(
@@ -98,7 +98,7 @@ class BPMIndicatorPainter extends CustomPainter {
           Offset(
               size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     } else {
-      // Draw the current BPM value if not "N/A"
+  
       TextSpan span = TextSpan(
         style: TextStyle(
             fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
