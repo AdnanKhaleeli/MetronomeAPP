@@ -55,7 +55,7 @@ class CustomDrawer extends StatelessWidget {
               },
             ),
           if (ModalRoute.of(context)?.settings.name != '/assignments' &&
-              user != null)
+              user != null && user is Student)
             ListTile(
               title: Text("Assignments"),
               onTap: () {
