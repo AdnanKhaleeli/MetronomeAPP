@@ -15,36 +15,51 @@ class Assignments extends StatefulWidget {
 }
 
 class _AssignmentsState extends State<Assignments> {
-  // Map to hold current BPM for each piece and section
   Map<String, List<int?>> currentBpmMap = {};
+  Map<String, double> averageBpmMap = {}; // Map to store average BPM for each piece
 
-  // Fetch the current BPM for each section of a piece
+  // Fetch the current BPM and calculate the average BPM for each piece
   Future<void> fetchCurrentBPM(Piece piece) async {
     List<int?> currentBpmList = [];
 
     for (int sectionIndex = 0; sectionIndex < piece.sections.length; sectionIndex++) {
       final section = piece.sections[sectionIndex];
-
-      // Fetch current BPM for this section using the student's ID and the piece's ID
       int currentBpm = await DatabaseHelper().getCurrentUserBPMForSection(
         sectionIndex,
-        widget.student!.userId, // Assuming studentId is available in the Student object
-        piece.pieceId, // Assuming pieceId is available in the Piece object
+        widget.student!.userId,
+        piece.pieceId,
       );
 
       currentBpmList.add(currentBpm);
     }
 
-    // Update state once all BPMs are fetched for the current piece
+    // Calculate the average BPM for this piece
+    double averageBpm = _calculateAverageBpm(currentBpmList);
+
+    // Update state once all BPMs are fetched
     setState(() {
       currentBpmMap[piece.pieceId] = currentBpmList;
+      averageBpmMap[piece.pieceId] = averageBpm;
     });
+  }
+
+  // Method to calculate average BPM, excluding "N/A" (null values)
+  double _calculateAverageBpm(List<int?> bpms) {
+    int sum = 0;
+    int count = 0;
+
+    for (var bpm in bpms) {
+      if (bpm != null && bpm != -1) { // Exclude null and N/A (-1) values
+        sum += bpm;
+        count++;
+      }
+    }
+    return count > 0 ? sum / count : 0; // Avoid division by zero
   }
 
   @override
   void initState() {
     super.initState();
-    // Fetch the current BPM for each piece asynchronously
     Future.wait(widget.pieces.map((piece) => fetchCurrentBPM(piece))).then((_) {
       setState(() {});
     });
@@ -55,11 +70,11 @@ class _AssignmentsState extends State<Assignments> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Assignments'),
-        backgroundColor: Colors.black, // Dark app bar to match the theme
+        backgroundColor: Colors.black,
       ),
       drawer: CustomDrawer(user: widget.student),
       body: Container(
-        color: Colors.black, // Keep the body black
+        color: Colors.black,
         child: Column(
           children: [
             Padding(
@@ -69,7 +84,7 @@ class _AssignmentsState extends State<Assignments> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white, // White text
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -77,142 +92,123 @@ class _AssignmentsState extends State<Assignments> {
               child: widget.pieces.isEmpty
                   ? Center(child: CircularProgressIndicator())
                   : ListView.builder(
-                      itemCount: widget.pieces.length,
-                      itemBuilder: (context, index) {
-                        final piece = widget.pieces[index];
-                        final sections = piece.sections;
-                        final pieceCurrentBpm = currentBpmMap[piece.pieceId];
+                itemCount: widget.pieces.length,
+                itemBuilder: (context, index) {
+                  final piece = widget.pieces[index];
+                  final sections = piece.sections;
+                  final pieceCurrentBpm = currentBpmMap[piece.pieceId];
+                  final averageBpm = averageBpmMap[piece.pieceId];
 
-                        return Card(
-                          margin: EdgeInsets.all(8.0),
-                          elevation: 6,
-                          color: Color(0xFF1C1C1C),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  piece.pieceName, // Name of the piece
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                // Use a LayoutBuilder to allow responsive sizing
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    // Ensure the DataTable is centered and responsive
-                                    return Center(
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxWidth: constraints.maxWidth * 0.9, // Limit width to 90% of screen width
-                                        ),
-                                        child: DataTable(
-                                          columnSpacing: 10, // Adjust spacing between columns
-                                          columns: [
-                                            DataColumn(
-                                              label: Align(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  'Section',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: Align(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  'Goal BPM',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: Align(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  'Current BPM',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                          rows: sections.map<DataRow>((section) {
-                                            final currentBpm = pieceCurrentBpm != null
-                                                ? pieceCurrentBpm[sections.indexOf(section)]
-                                                : -1;
-                                            final currentBpmText = currentBpm == -1 ? "N/A" : currentBpm.toString();
-
-                                            // Set background color for cells based on comparison
-                                            Color? backgroundColorForCurrentBpm;
-                                            if (currentBpm == -1 || currentBpm! >= section.goalBpm) {
-                                              backgroundColorForCurrentBpm = Colors.green.shade700;
-                                            } else if (currentBpm! < section.goalBpm) {
-                                              backgroundColorForCurrentBpm = Colors.red.shade700;
-                                            }
-
-                                            return DataRow(cells: [
-                                              DataCell(
-                                                Align(
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    section.sectionName,
-                                                    style: TextStyle(
-                                                      color: Colors.grey[400],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              DataCell(
-                                                Align(
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    '${section.goalBpm}',
-                                                    style: TextStyle(
-                                                      color: Colors.grey[400],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              DataCell(
-                                                Container(
-                                                  color: backgroundColorForCurrentBpm,
-                                                  child: Align(
-                                                    alignment: Alignment.center,
-                                                    child: Text(
-                                                      currentBpmText,
-                                                      style: TextStyle(
-                                                        color: Colors.grey[400],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ]);
-                                          }).toList(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
+                  return Card(
+                    margin: EdgeInsets.all(8.0),
+                    elevation: 6,
+                    color: Color(0xFF1C1C1C),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            piece.pieceName,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
                             ),
                           ),
-                        );
-                      },
+                          SizedBox(height: 8),
+                          Text(
+                            'Average Tempo: ${averageBpm?.toStringAsFixed(2) ?? "N/A"} BPM',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: constraints.maxWidth * 0.9,
+                                  ),
+                                  child: DataTable(
+                                    columnSpacing: 10,
+                                    columns: [
+                                      DataColumn(
+                                        label: Text(
+                                          'Section',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(
+                                          'Goal BPM',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(
+                                          'Current BPM',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    rows: sections.map<DataRow>((section) {
+                                      final currentBpm = pieceCurrentBpm != null
+                                          ? pieceCurrentBpm[sections.indexOf(section)]
+                                          : -1;
+                                      final currentBpmText = currentBpm == -1 ? "N/A" : currentBpm.toString();
+
+                                      Color? backgroundColorForCurrentBpm;
+                                      if (currentBpm == -1 || currentBpm! >= section.goalBpm) {
+                                        backgroundColorForCurrentBpm = Colors.green.shade700;
+                                      } else if (currentBpm! < section.goalBpm) {
+                                        backgroundColorForCurrentBpm = Colors.red.shade700;
+                                      }
+
+                                      return DataRow(cells: [
+                                        DataCell(Text(
+                                          section.sectionName,
+                                          style: TextStyle(
+                                            color: Colors.grey[400],
+                                          ),
+                                        )),
+                                        DataCell(Text(
+                                          '${section.goalBpm}',
+                                          style: TextStyle(
+                                            color: Colors.grey[400],
+                                          ),
+                                        )),
+                                        DataCell(Container(
+                                          color: backgroundColorForCurrentBpm,
+                                          child: Text(
+                                            currentBpmText,
+                                            style: TextStyle(
+                                              color: Colors.grey[400],
+                                            ),
+                                          ),
+                                        )),
+                                      ]);
+                                    }).toList(),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
+                  );
+                },
+              ),
             ),
           ],
         ),

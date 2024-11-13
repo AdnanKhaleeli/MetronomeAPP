@@ -288,9 +288,25 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.green,
                 ),
               ),
+            if (_currentSectionBpm != null && _currentSectionBpm != "N/A" && goalBpm != null )
+
+              Text(
+                'Confirmed BPM: ${_currentSectionBpm!.toDouble()}',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: (_currentSectionBpm!.toDouble() >= goalBpm)
+                      ? Colors.green // Confirmed BPM >= Goal BPM
+                      : (_currentSectionBpm!.toDouble() >= (goalBpm! - 10))
+                      ? Colors.yellow // Confirmed BPM within 10 of Goal BPM
+                      : Colors.red, // Confirmed BPM less than within 10 of Goal BPM
+              ),
+            ),
+
+
             if (widget.user is Student && selectedPiece != null)
               Container(
                 margin: EdgeInsets.all(16.0),
@@ -307,7 +323,12 @@ class _MetronomeAppState extends State<MetronomeApp> {
                                   widget.user!.userId,
                                   selectedPiece!.pieceId,
                                   _currentSectionIndex);
-                            },
+
+                              setState(() {
+                                _currentSectionBpm = -1;
+                              });
+                            }
+                            ,
                             child: Text('N/A')),
                         ElevatedButton(
                             onPressed: () async {
