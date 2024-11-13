@@ -61,17 +61,15 @@ class BPMIndicatorPainter extends CustomPainter {
           ((currentBpm - 40) / bpmRange); 
     }
 
-    paint.color =
-        Colors.yellow.withOpacity(0.8);
+    paint.color =  Colors.yellow.withOpacity(0.8);
     paint.strokeWidth = 14; 
-    canvas.drawArc(
-        Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
+    canvas.drawArc(  Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
 
     
     double savedSweepAngle = 0.0;
     if (savedBpm > 40) {
       savedSweepAngle = fullCircle *
-          ((savedBpm - 40) / bpmRange); // Map savedBpm from 40 to goalBpm
+          ((savedBpm - 40) / bpmRange); 
     }
 
     paint.color = const Color.fromARGB(255, 0, 194, 6)
@@ -95,8 +93,7 @@ class BPMIndicatorPainter extends CustomPainter {
       tp.layout();
       tp.paint(
           canvas,
-          Offset(
-              size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
+          Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     } else {
   
       TextSpan span = TextSpan(
@@ -111,8 +108,7 @@ class BPMIndicatorPainter extends CustomPainter {
       tp.layout();
       tp.paint(
           canvas,
-          Offset(
-              size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
+          Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     }
   }
 

@@ -10,6 +10,7 @@ import 'customdrawer.dart';
 import 'conductorScreens/music.dart';
 import 'conductorScreens/dashboard.dart';
 import 'music.dart';
+import 'studentScreens/Assignments.dart';
 
 import 'CircularBPMIndicator.dart';
 
@@ -33,7 +34,17 @@ class MyApp extends StatelessWidget {
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
         '/dashboard_conductor': (context) => Dashboard(
-            user: ModalRoute.of(context)?.settings.arguments as Conductor)
+            user: ModalRoute.of(context)?.settings.arguments as Conductor),
+        '/assignments': (context) {
+          final Map arguments =
+              ModalRoute.of(context)?.settings.arguments as Map;
+          final Student student = arguments['user'];
+          final List<Piece> pieces = arguments['pieces'] as List<Piece>;
+          return Assignments(
+            student: student,
+            pieces: pieces,
+          );
+        }
       },
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -210,6 +221,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
       drawer: CustomDrawer(
         stopMetronome: stopMetronome,
         user: widget.user,
+        list: pieces,
       ),
       body: GestureDetector(
         onTap: () {
