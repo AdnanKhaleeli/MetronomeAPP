@@ -294,11 +294,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
             if (_currentSectionBpm != null && _currentSectionBpm != "N/A" && goalBpm != null )
 
               Text(
-                'Confirmed BPM: ${_currentSectionBpm!.toDouble()}',
+                'Confirmed BPM: ${_currentSectionBpm!.toInt() == -1? 'N/A' :_currentSectionBpm!.toInt() }',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: (_currentSectionBpm!.toDouble() >= goalBpm)
+                  color: (_currentSectionBpm!.toDouble() >= goalBpm || _currentSectionBpm! == -1)
                       ? Colors.green // Confirmed BPM >= Goal BPM
                       : (_currentSectionBpm!.toDouble() >= (goalBpm! - 10))
                       ? Colors.yellow // Confirmed BPM within 10 of Goal BPM
