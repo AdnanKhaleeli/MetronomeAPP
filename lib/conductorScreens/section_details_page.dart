@@ -159,7 +159,7 @@ class SectionDetailsPage extends StatelessWidget {
               ),
             ),
             Text(
-              average != null ? '${average!.toStringAsFixed(2)} BPM' : 'N/A',
+              average != null ? '${average!.toInt()} BPM' : 'N/A',
               style: TextStyle(
                 color: averageTempoColor,
                 fontSize: 20,
