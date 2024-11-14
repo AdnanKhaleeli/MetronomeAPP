@@ -113,7 +113,7 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
         itemBuilder: (context, index) {
           var student = _students[index];
           return ListTile(
-            title: Text(student['username']),
+            title: Text(student['profilename']),
             trailing: Checkbox(
               value: _selectedStudents.contains(student['_id']),
               onChanged: (bool? value) {
