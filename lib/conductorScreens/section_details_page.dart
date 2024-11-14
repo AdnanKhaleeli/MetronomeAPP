@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class SectionDetailsPage extends StatelessWidget {
-  final String? sectionName; // Make it nullable
-  final String songName; // Add a song name parameter
-  final int goalTempo; // Add a goal tempo parameter
-  final double? average; // Add the average tempo parameter
+  final String? sectionName;
+  final String songName;
+  final int goalTempo;
+  final double? average;
   final List<Map<String, dynamic>> studentTempos;
 
   const SectionDetailsPage({
@@ -36,8 +36,9 @@ class SectionDetailsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(sectionName ?? 'No Section Name'), // Provide default text
+        title: Text(sectionName ?? 'No Section Name'),
         backgroundColor: Colors.black,
+        elevation: 4.0,
       ),
       body: Container(
         color: Colors.black,
@@ -45,7 +46,7 @@ class SectionDetailsPage extends StatelessWidget {
           itemCount: studentTempos.length + 1, // Add 1 for the header
           itemBuilder: (context, index) {
             if (index == 0) {
-              // Display the song name, section name, goal tempo, and average tempo
+              // Header section with song name, section name, goal tempo, and average tempo
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -55,61 +56,120 @@ class SectionDetailsPage extends StatelessWidget {
                       songName,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 24, // Adjust font size for the song name
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    SizedBox(height: 8.0),
                     Text(
                       sectionName ?? 'No Section Name',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20, // Adjust font size for the section name
+                        fontSize: 20,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
-                    Text(
-                      'Goal Tempo: ${goalTempo.toString()}',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 28, // Larger font for goal tempo
-                        fontWeight: FontWeight.bold, // Bold for emphasis
-                      ),
-                    ),
-                    // Display the average tempo with color logic
-                    Text(
-                      'Average Tempo: ${average?.toStringAsFixed(2) ?? 'N/A'}', // Display the average with 2 decimal places
-                      style: TextStyle(
-                        color: averageTempoColor, // Use the calculated color for average tempo
-                        fontSize: 20, // Adjust font size for the average tempo
-                      ),
-                    ),
+                    SizedBox(height: 16.0),
+                    _buildGoalAndAverageTempo(averageTempoColor),
                   ],
                 ),
               );
             } else {
               // Regular ListTile for student tempos
-              final student = studentTempos[index - 1]; // Adjust for header
-              double studentTempo = student['tempo'] != null ? student['tempo'] : 0;
+              final student = studentTempos[index - 1];
+              int studentTempo = student['tempo'] != null ? student['tempo'].toInt() : 0;
 
               // Set the color based on the student's tempo compared to the goal tempo
               Color tempoColor;
               if (studentTempo >= goalTempo) {
-                tempoColor = Colors.green; // Tempo greater than or equal to goal
+                tempoColor = Colors.green;
               } else if (studentTempo >= goalTempo - 10) {
-                tempoColor = Colors.yellow; // Tempo within 10 of the goal
+                tempoColor = Colors.yellow;
               } else {
-                tempoColor = Colors.red; // Tempo below goal by more than 10
+                tempoColor = Colors.red;
               }
 
-              return ListTile(
-                title: Text(student['name'] ?? 'Unknown', style: TextStyle(color: Colors.white)), // Default name if null
-                subtitle: Text(
-                  'Tempo: ${studentTempo.toString()}',
-                  style: TextStyle(color: tempoColor), // Change text color dynamically
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Card(
+                  color: Colors.black54,
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(16.0),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          student['name'] ?? 'Unknown',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Tempo: ${studentTempo.toString()}',
+                          style: TextStyle(color: tempoColor),
+                        ),
+                      ],
+                    ),
+                    leading: Icon(Icons.person, color: Colors.white),
+                    trailing: Icon(Icons.music_note, color: Colors.white),
+                  ),
                 ),
               );
             }
           },
         ),
       ),
+    );
+  }
+
+  // Builds the Goal and Average Tempo UI
+  Widget _buildGoalAndAverageTempo(Color averageTempoColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Goal Tempo:',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+            Text(
+              '$goalTempo BPM',
+              style: TextStyle(
+                color: Colors.green,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Average Tempo:',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+            Text(
+              average != null ? '${average!.toInt()} BPM' : 'N/A',
+              style: TextStyle(
+                color: averageTempoColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16.0),
+      ],
     );
   }
 }

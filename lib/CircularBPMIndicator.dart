@@ -26,11 +26,7 @@ class CircularBPMIndicator extends StatelessWidget {
             savedBpm: savedBpm,
           ),
         ),
-        SizedBox(height: 20), // Space between circle and text
-        Text(
-          'Saved BPM: ${savedBpm.toInt()} BPM',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
-        ),
+       
       ],
     );
   }
@@ -58,34 +54,12 @@ class BPMIndicatorPainter extends CustomPainter {
 
     double bpmRange = goalBpm - 40;
 
-    // Draw the full arc for goal BPM (red)
-    paint.color = const Color.fromARGB(255, 255, 79, 66).withOpacity(0.8);
-    double goalSweepAngle = fullCircle;
-    canvas.drawArc(Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
-
-    // Draw the arc for the current BPM (yellow)
-    double currentSweepAngle = 0.0;
-    if (currentBpm > 40) {
-      currentSweepAngle = fullCircle * ((currentBpm - 40) / bpmRange);
-    }
-
-    paint.color = Colors.yellow.withOpacity(0.8);
-    paint.strokeWidth = 14;
-    canvas.drawArc(Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
-
-    // Draw the arc for saved BPM (green)
-    double savedSweepAngle = 0.0;
-    if (savedBpm > 40) {
-      savedSweepAngle = fullCircle * ((savedBpm - 40) / bpmRange);
-    }
-
-    paint.color = const Color.fromARGB(255, 0, 194, 6).withOpacity(1);
-    paint.strokeWidth = 10;
-    canvas.drawArc(Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
-
-    // Center Text (like a check mark when goal is met)
-    if (savedBpm == -1 || currentBpm >= goalBpm) {
-      // -1 means 'N/A' BPM
+    // If savedBpm is -1, draw the whole circle as green
+    if (savedBpm == -1) {
+      paint.color = const Color.fromARGB(255, 0, 194, 6).withOpacity(1);
+      paint.strokeWidth = 14;
+      canvas.drawArc(Offset(0, 0) & size, goalAngleStart, fullCircle, false, paint);
+      // Center text (check mark)
       TextSpan span = TextSpan(
         style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
         text: '✓', // Check mark
@@ -98,6 +72,32 @@ class BPMIndicatorPainter extends CustomPainter {
       tp.layout();
       tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     } else {
+      // Draw the full arc for goal BPM (red)
+      paint.color = const Color.fromARGB(255, 255, 79, 66).withOpacity(0.8);
+      double goalSweepAngle = fullCircle;
+      canvas.drawArc(Offset(0, 0) & size, goalAngleStart, goalSweepAngle, false, paint);
+
+      // Draw the arc for the current BPM (yellow)
+      double currentSweepAngle = 0.0;
+      if (currentBpm > 40) {
+        currentSweepAngle = fullCircle * ((currentBpm - 40) / bpmRange);
+      }
+
+      paint.color = Colors.yellow.withOpacity(0.8);
+      paint.strokeWidth = 14;
+      canvas.drawArc(Offset(0, 0) & size, goalAngleStart, currentSweepAngle, false, paint);
+
+      // Draw the arc for saved BPM (green)
+      double savedSweepAngle = 0.0;
+      if (savedBpm > 40) {
+        savedSweepAngle = fullCircle * ((savedBpm - 40) / bpmRange);
+      }
+
+      paint.color = const Color.fromARGB(255, 0, 194, 6).withOpacity(1);
+      paint.strokeWidth = 10;
+      canvas.drawArc(Offset(0, 0) & size, goalAngleStart, savedSweepAngle, false, paint);
+
+      // Center Text (display current BPM value)
       TextSpan span = TextSpan(
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         text: '${currentBpm.toInt()} BPM',
@@ -110,7 +110,7 @@ class BPMIndicatorPainter extends CustomPainter {
       tp.layout();
       tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, size.height / 2 - tp.height / 2));
     }
-  }
+  } 
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
