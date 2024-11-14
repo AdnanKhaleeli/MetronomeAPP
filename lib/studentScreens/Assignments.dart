@@ -20,7 +20,9 @@ class _AssignmentsState extends State<Assignments> {
   Future<void> fetchCurrentBPM(Piece piece) async {
     List<int?> currentBpmList = [];
 
-    for (int sectionIndex = 0; sectionIndex < piece.sections.length; sectionIndex++) {
+    for (int sectionIndex = 0;
+        sectionIndex < piece.sections.length;
+        sectionIndex++) {
       final section = piece.sections[sectionIndex];
 
       int currentBpm = await DatabaseHelper().getCurrentUserBPMForSection(
@@ -142,20 +144,34 @@ class _AssignmentsState extends State<Assignments> {
                                               ),
                                             ),
                                           ],
-                                          rows: sections.map<DataRow>((section) {
-                                            final currentBpm = pieceCurrentBpm != null
-                                                ? pieceCurrentBpm[sections.indexOf(section)]
-                                                : -1;
-                                            final currentBpmText = currentBpm == -1 ? "N/A" : currentBpm.toString();
+                                          rows:
+                                              sections.map<DataRow>((section) {
+                                            final currentBpm =
+                                                pieceCurrentBpm != null
+                                                    ? pieceCurrentBpm[sections
+                                                        .indexOf(section)]
+                                                    : -1;
+                                            final currentBpmText =
+                                                currentBpm == -1
+                                                    ? "N/A"
+                                                    : currentBpm.toString();
 
                                             Color? backgroundColorForCurrentBpm;
-                                            if (currentBpm == -1 || currentBpm! >= section.goalBpm) {
-                                              backgroundColorForCurrentBpm = Colors.green.shade700;
-                                            } else if (currentBpm! < section.goalBpm) {
-                                              if (section.goalBpm - currentBpm <= 10) {
-                                                backgroundColorForCurrentBpm = Colors.yellow.shade800;
+                                            if (currentBpm == -1 ||
+                                                currentBpm! >=
+                                                    section.goalBpm) {
+                                              backgroundColorForCurrentBpm =
+                                                  Colors.green.shade700;
+                                            } else if (currentBpm! <
+                                                section.goalBpm) {
+                                              if (section.goalBpm -
+                                                      currentBpm <=
+                                                  10) {
+                                                backgroundColorForCurrentBpm =
+                                                    Colors.yellow.shade800;
                                               } else {
-                                                backgroundColorForCurrentBpm = Colors.red.shade700;
+                                                backgroundColorForCurrentBpm =
+                                                    Colors.red.shade700;
                                               }
                                             }
 
@@ -167,7 +183,8 @@ class _AssignmentsState extends State<Assignments> {
                                                     section.sectionName,
                                                     style: TextStyle(
                                                       color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
@@ -179,23 +196,29 @@ class _AssignmentsState extends State<Assignments> {
                                                     '${section.goalBpm}',
                                                     style: TextStyle(
                                                       color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
                                               ),
                                               DataCell(
                                                 Container(
-                                                  color: backgroundColorForCurrentBpm,
+                                                  color:
+                                                      backgroundColorForCurrentBpm,
                                                   child: Align(
                                                     alignment: Alignment.center,
                                                     child: Padding(
-                                                      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 6.0,
+                                                          horizontal: 8.0),
                                                       child: Text(
                                                         currentBpmText,
                                                         style: TextStyle(
                                                           color: Colors.white,
-                                                          fontWeight: FontWeight.bold,
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                         ),
                                                       ),
                                                     ),

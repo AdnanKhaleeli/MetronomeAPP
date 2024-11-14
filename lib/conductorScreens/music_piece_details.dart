@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../database.dart';
-import 'section_details_page.dart'; // Import the SectionDetailsPage
+import 'section_details_page.dart';
 
 class MusicPieceDetails extends StatefulWidget {
   final Map<String, dynamic> piece;
@@ -30,16 +30,16 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
     Map<String, int> sectionCount = {};
 
     for (var student in _students) {
-      var studentID = student['_id']; // Get the student ID
-      var musicID = widget.piece['_id'].oid; // Music piece ID
+      var studentID = student['_id'];
+      var musicID = widget.piece['_id'].oid;
 
       if (student['assigned_music'] == null) {
-        continue; // Skip if no music is assigned
+        continue;
       }
 
-      var musicIDStr = musicID.toString(); // Convert ObjectId to a string
+      var musicIDStr = musicID.toString();
       if (!student['assigned_music'].containsKey(musicID)) {
-        continue; // Skip if student does not have this piece assigned
+        continue;
       }
 
       var studentTempos = student['assigned_music'][musicIDStr] as List<dynamic>;
@@ -72,12 +72,11 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
       }
     });
   }
+
   List<Map<String, dynamic>> _getStudentTemposForSection(int sectionIndex) {
     List<Map<String, dynamic>> sectionStudentTempos = [];
 
     for (var student in _students) {
-      print('Student Name: ${student['profilename']}'); // Debugging print
-
       var musicID = widget.piece['_id'].oid.toString();
 
       if (student['assigned_music'] == null || !student['assigned_music'].containsKey(musicID)) {
@@ -96,10 +95,8 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
       }
     }
 
-    print(sectionStudentTempos); // Check collected student data
     return sectionStudentTempos;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -136,32 +133,62 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                     children: (widget.piece['sections'] as List)
                         .asMap()
                         .entries
-                        .map((entry) =>
-                        ListTile(
-                          title: Text(entry.value['name'], style: TextStyle(color: Colors.white)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Goal Tempo: ${entry.value['bpm']}', style: TextStyle(color: Colors.grey[400])),
-                              Text('Average Tempo: ${averageTempos['section_${entry.key + 1}']?.toStringAsFixed(2) ?? 'N/A'}', style: TextStyle(color: Colors.grey[400])),
-                            ],
-                          ),
-                          onTap: () {
-                            List<Map<String, dynamic>> studentTempos = _getStudentTemposForSection(entry.key);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SectionDetailsPage(
-                                  average: averageTempos['section_${entry.key + 1}'],
-                                  goalTempo: entry.value['bpm'],
-                                  songName: widget.piece['piece_name'],
-                                  sectionName: entry.value['name'],
-                                  studentTempos: studentTempos,
+                        .map((entry) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                              child: Material(
+                                color: Colors.transparent, // Use transparent color for the Material widget
+                                child: InkWell(
+                                  onTap: () {
+                                    List<Map<String, dynamic>> studentTempos = _getStudentTemposForSection(entry.key);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => SectionDetailsPage(
+                                          average: averageTempos['section_${entry.key + 1}'],
+                                          goalTempo: entry.value['bpm'],
+                                          songName: widget.piece['piece_name'],
+                                          sectionName: entry.value['name'],
+                                          studentTempos: studentTempos,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
+                                    ),
+                                    child: ListTile(
+                                      title: Text(
+                                        entry.value['name'],
+                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center, // Center the section name
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,  // Align the content to center
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'Goal Tempo: ${entry.value['bpm']}',
+                                              style: TextStyle(color: Colors.grey[400]),
+                                            ),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'Average Tempo: ${averageTempos['section_${entry.key + 1}']?.toStringAsFixed(2) ?? 'N/A'}',
+                                              style: TextStyle(color: Colors.grey[400]),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            );
-                          },
-                        ))
+                            ))
                         .toList(),
                   );
                 },
