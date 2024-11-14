@@ -92,6 +92,15 @@ class _MetronomeAppState extends State<MetronomeApp> {
   int _currentSectionIndex = 0;
   dynamic? _currentSectionBpm = 0;
 
+  Map<String, Map<String, String>> soundPairs = {
+    'Sound 1': {'hi': 'Perc_Stick_hi.wav', 'lo': 'Perc_Stick_lo.wav'},
+    'Sound 2': {'hi': 'Perc_Tamb_A_hi.wav', 'lo': 'Perc_Tamb_A_lo.wav'},
+    'Sound 3': {'hi': 'Synth_Block_C_hi.wav', 'lo': 'Synth_Block_C_lo.wav'},
+    'Sound 4': {'hi': 'Synth_Square_E_hi.wav', 'lo': 'Synth_Square_E_lo.wav'},
+  };
+
+  String selectedSoundKey = 'Sound 1';
+
   @override
   void initState() {
     super.initState();
@@ -138,21 +147,18 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   void startMetronome(int subdivisions) {
     final double oneBeat = 60 / _bpm;
-    final double tickDuration =
-        (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
+    final double tickDuration = (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
     _timer?.cancel();
     _timer = Timer.periodic(
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
-      await player.setSource(AssetSource('tick_sound_156.wav'));
-
-      if (subdivisions == 1 || tickCount % subdivisions == 0) {
-        await player.setVolume(1.0);
-      } else {
-        await player.setVolume(0.2);
-      }
-
+      String soundToPlay = tickCount % subdivisions == 0
+          ? soundPairs[selectedSoundKey]!['hi']!
+          : soundPairs[selectedSoundKey]!['lo']!;
+      await player.setSource(AssetSource(soundToPlay));
+      print(soundToPlay);
+      await player.setVolume(1.0);
       await player.resume();
     });
 
@@ -518,6 +524,24 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   },
                   child: Text('Sixteenth'),
                 ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var soundKey in soundPairs.keys)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: selectedSoundKey == soundKey ? Colors.red : Colors.white,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        selectedSoundKey = soundKey;
+                      });
+                    },
+                    child: Text(soundKey),
+                  ),
               ],
             ),
           ],

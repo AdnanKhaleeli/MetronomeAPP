@@ -58,6 +58,15 @@ flutter:
   assets:
     #0.022 seconds
     - assets/tick_sound_156.wav
+    - assets/Perc_Stick_hi.wav
+    - assets/Perc_Stick_lo.wav
+    - assets/Perc_Tamb_A_hi.wav
+    - assets/Perc_Tamb_A_lo.wav
+    - assets/Synth_Block_C_hi.wav
+    - assets/Synth_Block_C_lo.wav
+    - assets/Synth_Square_E_hi.wav
+    - assets/Synth_Square_E_lo.wav
+
 
 
   # The following line ensures that the Material Icons font is
