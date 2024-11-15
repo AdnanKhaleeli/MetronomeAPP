@@ -222,7 +222,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     savedBpm: _currentSectionBpm?.toDouble(),
                   ),
                 ),
-              if (widget.user == null || widget.user == Conductor)
+              if (widget.user == null || widget.user is Conductor)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                   child: PulsingCircleWithNote(
