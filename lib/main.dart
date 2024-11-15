@@ -28,12 +28,16 @@ class MyApp extends StatelessWidget {
       title: 'Metronome App',
       initialRoute: '/',
       routes: {
-        '/': (context) => MetronomeApp(user: ModalRoute.of(context)?.settings.arguments as User?),
+        '/': (context) => MetronomeApp(
+            user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
-        '/addMusic': (context) => AddMusic(user: ModalRoute.of(context)!.settings.arguments as Conductor),
-        '/dashboard_conductor': (context) => Dashboard(user: ModalRoute.of(context)?.settings.arguments as Conductor),
+        '/addMusic': (context) => AddMusic(
+            user: ModalRoute.of(context)!.settings.arguments as Conductor),
+        '/dashboard_conductor': (context) => Dashboard(
+            user: ModalRoute.of(context)?.settings.arguments as Conductor),
         '/assignments': (context) {
-          final Map arguments = ModalRoute.of(context)?.settings.arguments as Map;
+          final Map arguments =
+              ModalRoute.of(context)?.settings.arguments as Map;
           final Student student = arguments['user'];
           final List<Piece> pieces = arguments['pieces'] as List<Piece>;
           return Assignments(student: student, pieces: pieces);
@@ -42,8 +46,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
-        textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: Colors.white)),
-        elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white)),
+        textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(foregroundColor: Colors.white)),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue, foregroundColor: Colors.white)),
       ),
       debugShowCheckedModeBanner: false,
     );
@@ -281,35 +288,66 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     ),
                   ),
                 ),
-              if (goalBpm != null)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Goal BPM: $goalBpm',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                ),
               if (_currentSectionBpm != null &&
                   _currentSectionBpm != "N/A" &&
                   goalBpm != null)
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Confirmed BPM: ${_currentSectionBpm!.toInt() == -1 ? 'N/A' : _currentSectionBpm!.toInt()}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: (_currentSectionBpm!.toDouble() >= goalBpm ||
-                              _currentSectionBpm! == -1)
-                          ? Colors.green
-                          : (_currentSectionBpm!.toDouble() >= (goalBpm! - 10))
-                              ? Colors.yellow
-                              : Colors.red,
-                    ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: DataTable(
+                    columns: const <DataColumn>[
+                      DataColumn(
+                        label: Text(
+                          'Confirmed BPM',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Goal BPM',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                    ],
+                    rows: [
+                      DataRow(
+                        cells: [
+                          DataCell(
+                            Text(
+                              _currentSectionBpm!.toInt() == -1
+                                  ? 'N/A'
+                                  : _currentSectionBpm!.toInt().toString(),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: (_currentSectionBpm!.toDouble() >=
+                                            goalBpm ||
+                                        _currentSectionBpm! == -1)
+                                    ? Colors.green
+                                    : (_currentSectionBpm!.toDouble() >=
+                                            (goalBpm! - 10))
+                                        ? Colors.yellow
+                                        : Colors.red,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              goalBpm?.toString() ?? 'N/A',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: goalBpm != null
+                                    ? Colors.white
+                                    : Colors
+                                        .grey, // Color to indicate if goalBPM is null
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               if (widget.user is Student && selectedPiece != null)
@@ -381,7 +419,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                         ],
                         onChanged: (value) {
                           int? bpmInput = int.tryParse(value);
-                          if (bpmInput != null && bpmInput >= 40 && bpmInput <= 200) {
+                          if (bpmInput != null &&
+                              bpmInput >= 40 &&
+                              bpmInput <= 200) {
                             setState(() {
                               _bpm = bpmInput.toDouble();
                               stopMetronome();
