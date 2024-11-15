@@ -59,7 +59,7 @@ flutter:
   assets:
     #0.022 seconds
     - assets/tick_sound_156.wav
-    - assets/Synth_Square_E_hi.wav
+    - assets/Synth_Square_E_hi-[AudioTrimmer.com] (1).wav
 
 
   # The following line ensures that the Material Icons font is

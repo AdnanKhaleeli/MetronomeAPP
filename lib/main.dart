@@ -135,7 +135,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
     _timer = Timer.periodic(
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
-      await player.setSource(AssetSource('Synth_Square_E_hi.wav'));
+      await player.setSource(AssetSource('Synth_Square_E_hi-[AudioTrimmer.com] (1).wav'));
 
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
         await player.setVolume(1.0);
