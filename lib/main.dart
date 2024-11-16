@@ -135,7 +135,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
     _timer = Timer.periodic(
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
-      await player.setSource(AssetSource('Synth_Square_E_hi-[AudioTrimmer.com] (1).wav'));
+      await player.setSource(
+          AssetSource('Synth_Square_E_hi-[AudioTrimmer.com] (1).wav'));
 
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
         await player.setVolume(1.0);
@@ -394,10 +395,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     ElevatedButton(
                       onPressed: () {
                         setState(() {
+                          stopMetronome();
                           if (_bpm > 40) {
                             _bpm -= 1;
                             _controller.text = _bpm.toInt().toString();
-                            stopMetronome();
                             startMetronome(currentSubdivisions);
                           }
                         });
@@ -423,8 +424,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                               bpmInput >= 40 &&
                               bpmInput <= 200) {
                             setState(() {
-                              _bpm = bpmInput.toDouble();
                               stopMetronome();
+                              _bpm = bpmInput.toDouble();
+
                               startMetronome(currentSubdivisions);
                             });
                           }
@@ -435,9 +437,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                       onPressed: () {
                         setState(() {
                           if (_bpm < 200) {
-                            _bpm += 1;
-                            _controller.text = _bpm.toInt().toString();
                             stopMetronome();
+                            _bpm += 1;
+                            _controller.text = _bpm.toInt().toString();        
                             startMetronome(currentSubdivisions);
                           }
                         });
@@ -455,9 +457,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   value: _bpm,
                   onChanged: (newBPM) {
                     setState(() {
+                       stopMetronome();
                       _bpm = newBPM;
-                      _controller.text = newBPM.toInt().toString();
-                      stopMetronome();
+                      _controller.text = newBPM.toInt().toString();     
                       startMetronome(currentSubdivisions);
                     });
                   },
@@ -508,9 +510,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           foregroundColor: Colors.black),
                       onPressed: () {
                         setState(() {
-                          selectedSubdivisionIndex = 0;
-                          currentSubdivisions = 1;
                           stopMetronome();
+                          selectedSubdivisionIndex = 0;
+                          currentSubdivisions = 1; 
                           startMetronome(currentSubdivisions);
                         });
                       },
@@ -525,9 +527,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           foregroundColor: Colors.black),
                       onPressed: () {
                         setState(() {
+                          stopMetronome();
                           selectedSubdivisionIndex = 1;
                           currentSubdivisions = 2;
-                          stopMetronome();
                           startMetronome(currentSubdivisions);
                         });
                       },
@@ -542,9 +544,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           foregroundColor: Colors.black),
                       onPressed: () {
                         setState(() {
+                           stopMetronome();
                           selectedSubdivisionIndex = 2;
-                          currentSubdivisions = 3;
-                          stopMetronome();
+                          currentSubdivisions = 3;             
                           startMetronome(currentSubdivisions);
                         });
                       },
@@ -559,9 +561,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           foregroundColor: Colors.black),
                       onPressed: () {
                         setState(() {
-                          selectedSubdivisionIndex = 3;
-                          currentSubdivisions = 4;
                           stopMetronome();
+                          selectedSubdivisionIndex = 3;
+                          currentSubdivisions = 4; 
                           startMetronome(currentSubdivisions);
                         });
                       },
