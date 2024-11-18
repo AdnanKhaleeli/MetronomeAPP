@@ -61,9 +61,7 @@ flutter:
   assets:
     #0.022 seconds
     - assets/tick_sound_156.wav
-    - assets/tick.mp3
-    - assets/tick2.mp3
-    - assets/tick2.wav
+
     - assets/click2.wav
 
 

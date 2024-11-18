@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+//import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:flutter/services.dart';
 import 'database.dart';
 import 'user.dart';
@@ -67,7 +68,7 @@ class MetronomeApp extends StatefulWidget {
 
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
-  var player = AudioPlayer();
+  final AudioPlayer _player = AudioPlayer(); // Change from var to final and use JustAudio's AudioPlayer
   Timer? _timer;
   bool playing = false;
   int currentSubdivisions = 1;
@@ -85,6 +86,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   @override
   void initState() {
     super.initState();
+    _player.setAsset('assets/click2.wav'); // Play from assets
     if (widget.user is Student) {
       fetchPieces();
     }
@@ -128,36 +130,19 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   void startMetronome(int subdivisions) {
     final double oneBeat = 60 / _bpm;
-    final double tickDuration =
-        (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
+    final int tickDurationMs = (oneBeat * 1000).toInt();
 
     _timer?.cancel();
-
-    _timer = Timer.periodic(
-        Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
-      tickCount++;
-
-       print('Tick duration: ' + (tickDuration * 1000).toInt().toString());
-
-       player.stop();
-       player.dispose();
-       player = AudioPlayer();
-
-      //The following configuration solved my issue:
-
-//AudioPlayer( audioLoadConfiguration: AudioLoadConfiguration( androidLoadControl: AndroidLoadControl( prioritizeTimeOverSizeThresholds: true )))
-
-
-
+    _timer = Timer.periodic(Duration(milliseconds: tickDurationMs), (timer) {
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
-        player.play(AssetSource('click2.wav'),
-            volume: 1.0, mode: PlayerMode.lowLatency);
+        _player.seek(Duration.zero); // Reset to the start
+        _player.play(); // JustAudio does not need volume or mode parameters
       } else {
-        player.play(AssetSource('click2.wav'),
-            volume: 0.2, mode: PlayerMode.lowLatency);
+        _player.seek(Duration.zero);
+        _player.setVolume(0.2); // Set volume for subdivision ticks
+        _player.play();
       }
-
-      player.onDurationChanged.listen((Duration duration) {});
+      tickCount++;
     });
 
     setState(() {
@@ -167,7 +152,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   void stopMetronome() {
     _timer?.cancel();
-    player.stop();
+    _player.stop();
+    _player.setVolume(1.0); // Reset volume to default when stopping
     tickCount = 0;
 
     setState(() {
@@ -178,7 +164,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   @override
   void dispose() {
     _timer?.cancel();
-    player.dispose();
+    _player.dispose();
     _pageController.dispose();
     super.dispose();
   }
