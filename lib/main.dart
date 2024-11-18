@@ -88,10 +88,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
     if (widget.user is Student) {
       fetchPieces();
     }
-
-    Future.delayed(Duration.zero, () async {
-       await player.setSourceAsset('tick_sound_156.wav');
-    });
   }
 
   void fetchPieces() async {
@@ -140,16 +136,28 @@ class _MetronomeAppState extends State<MetronomeApp> {
     _timer = Timer.periodic(
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
-      player.stop();
-      player = AudioPlayer();
+
+       print('Tick duration: ' + (tickDuration * 1000).toInt().toString());
+
+       player.stop();
+       player.dispose();
+       player = AudioPlayer();
+
+      //The following configuration solved my issue:
+
+//AudioPlayer( audioLoadConfiguration: AudioLoadConfiguration( androidLoadControl: AndroidLoadControl( prioritizeTimeOverSizeThresholds: true )))
+
+
 
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
-        player.play(AssetSource('tick_sound_156.wav'),
+        player.play(AssetSource('click2.wav'),
             volume: 1.0, mode: PlayerMode.lowLatency);
       } else {
-        player.play(AssetSource('tick_sound_156.wav'),
+        player.play(AssetSource('click2.wav'),
             volume: 0.2, mode: PlayerMode.lowLatency);
       }
+
+      player.onDurationChanged.listen((Duration duration) {});
     });
 
     setState(() {
