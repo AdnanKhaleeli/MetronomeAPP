@@ -67,7 +67,7 @@ class MetronomeApp extends StatefulWidget {
 
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
-  final player = AudioPlayer();
+  var player = AudioPlayer();
   Timer? _timer;
   bool playing = false;
   int currentSubdivisions = 1;
@@ -88,6 +88,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
     if (widget.user is Student) {
       fetchPieces();
     }
+
+    Future.delayed(Duration.zero, () async {
+       await player.setSourceAsset('tick_sound_156.wav');
+    });
   }
 
   void fetchPieces() async {
@@ -132,18 +136,20 @@ class _MetronomeAppState extends State<MetronomeApp> {
         (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
     _timer?.cancel();
+
     _timer = Timer.periodic(
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
-      await player.setSource(AssetSource('tick_sound_156.wav'));
+      player.stop();
+      player = AudioPlayer();
 
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
-        await player.setVolume(1.0);
+        player.play(AssetSource('tick_sound_156.wav'),
+            volume: 1.0, mode: PlayerMode.lowLatency);
       } else {
-        await player.setVolume(0.2);
+        player.play(AssetSource('tick_sound_156.wav'),
+            volume: 0.2, mode: PlayerMode.lowLatency);
       }
-
-      await player.resume();
     });
 
     setState(() {
