@@ -532,7 +532,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                             startMetronome(currentSubdivisions);
                           });
                         },
-                        child: Text('Whole'),
+                        child: Text('♩',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -549,7 +551,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                             startMetronome(currentSubdivisions);
                           });
                         },
-                        child: Text('Eighth '),
+                        child: Text('♪',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -566,7 +570,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                             startMetronome(currentSubdivisions);
                           });
                         },
-                        child: Text('Triplet'),
+                        child: Text('♫',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -583,7 +589,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                             startMetronome(currentSubdivisions);
                           });
                         },
-                        child: Text('Sixteenth'),
+                        child: Text('♬',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
                     ],
                   ),
