@@ -13,6 +13,7 @@ import 'music.dart';
 import 'studentScreens/Assignments.dart';
 import 'CircularBPMIndicator.dart';
 import 'PulsingCircleWithNote.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,19 +89,19 @@ class _MetronomeAppState extends State<MetronomeApp> {
   @override
   void initState() {
     super.initState();
-    if (widget.user is Student) {
-      fetchPieces();
-    }
 
     Future.delayed(Duration.zero, () async {
+      if (widget.user is Student) {
+       await fetchPieces();
+    }
       _soloud = SoLoud.instance;
-      await _soloud!.init();
+      await _soloud.init();
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
       sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
     });
   }
 
-  void fetchPieces() async {
+  Future<void> fetchPieces() async {
     if (widget.user != null) {
       pieces = await DatabaseHelper().getPiecesForUser(widget.user!);
     } else {
@@ -534,7 +535,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                         },
                         child: Text('♩',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
+                                fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -553,7 +554,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                         },
                         child: Text('♪',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
+                                fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -572,7 +573,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                         },
                         child: Text('♫',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
+                                fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
@@ -591,7 +592,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                         },
                         child: Text('♬',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18)),
+                                fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
                     ],
                   ),
