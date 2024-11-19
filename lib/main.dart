@@ -95,8 +95,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
     Future.delayed(Duration.zero, () async {
       _soloud = SoLoud.instance;
       await _soloud!.init();
-      sourceBeat = await _soloud.loadAsset('assets/click3.wav');
-      sourceTick = await _soloud.loadAsset('assets/click2.wav');
+      sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
+      sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
     });
   }
 

@@ -60,8 +60,9 @@ dev_dependencies:
 flutter:
   assets:
     #0.022 seconds
-    - assets/tick_sound_156.wav
-    - assets/tick.mp3
+    - assets/weak_tick.wav
+    - assets/sub_tick.wav
+    - assets/strong_tick.wav
     - assets/click2.wav
     - assets/click3.wav
 
