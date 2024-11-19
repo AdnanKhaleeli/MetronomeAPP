@@ -83,7 +83,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   PageController _pageController = PageController();
   int _currentSectionIndex = 0;
   dynamic? _currentSectionBpm = 0;
-  late var handle;
+  var handle = null;
 
   @override
   void initState() {
@@ -164,13 +164,16 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void stopMetronome() {
-    _timer?.cancel();
-    _soloud.stop(handle);
-    tickCount = 0;
-
-    setState(() {
-      playing = false;
-    });
+    if (handle != null) {
+      _timer?.cancel();
+      _soloud.stop(handle);
+      tickCount = 0;
+      setState(() {
+        playing = false;
+      });
+    } else {
+      print("Metronome handle not initialized yet.");
+    }
   }
 
   @override
@@ -467,9 +470,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   value: _bpm,
                   onChanged: (newBPM) {
                     setState(() {
+                      stopMetronome();
                       _bpm = newBPM;
                       _controller.text = newBPM.toInt().toString();
-                      stopMetronome();
+
                       startMetronome(currentSubdivisions);
                     });
                   },
