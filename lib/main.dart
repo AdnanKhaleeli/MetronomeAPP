@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:flutter/services.dart';
 import 'database.dart';
 import 'user.dart';
@@ -67,7 +67,9 @@ class MetronomeApp extends StatefulWidget {
 
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
-  var player = AudioPlayer();
+  late SoLoud _soloud;
+  late var sourceBeat;
+  late var sourceTick;
   Timer? _timer;
   bool playing = false;
   int currentSubdivisions = 1;
@@ -81,6 +83,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   PageController _pageController = PageController();
   int _currentSectionIndex = 0;
   dynamic? _currentSectionBpm = 0;
+  late var handle;
 
   @override
   void initState() {
@@ -88,6 +91,13 @@ class _MetronomeAppState extends State<MetronomeApp> {
     if (widget.user is Student) {
       fetchPieces();
     }
+
+    Future.delayed(Duration.zero, () async {
+      _soloud = SoLoud.instance;
+      await _soloud!.init();
+      sourceBeat = await _soloud.loadAsset('assets/click3.wav');
+      sourceTick = await _soloud.loadAsset('assets/click2.wav');
+    });
   }
 
   void fetchPieces() async {
@@ -137,27 +147,15 @@ class _MetronomeAppState extends State<MetronomeApp> {
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
 
-       print('Tick duration: ' + (tickDuration * 1000).toInt().toString());
-
-       player.stop();
-       player.dispose();
-       player = AudioPlayer();
-
-      //The following configuration solved my issue:
-
-//AudioPlayer( audioLoadConfiguration: AudioLoadConfiguration( androidLoadControl: AndroidLoadControl( prioritizeTimeOverSizeThresholds: true )))
-
-
+      print('Tick duration: ' + (tickDuration * 1000).toInt().toString());
 
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
-        player.play(AssetSource('click2.wav'),
-            volume: 1.0, mode: PlayerMode.lowLatency);
+        _soloud.setGlobalVolume(1.0);
+        handle = await _soloud.play(sourceBeat);
       } else {
-        player.play(AssetSource('click2.wav'),
-            volume: 0.2, mode: PlayerMode.lowLatency);
+        _soloud.setGlobalVolume(0.5);
+        handle = await _soloud.play(sourceTick);
       }
-
-      player.onDurationChanged.listen((Duration duration) {});
     });
 
     setState(() {
@@ -167,7 +165,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   void stopMetronome() {
     _timer?.cancel();
-    player.stop();
+    _soloud.stop(handle);
     tickCount = 0;
 
     setState(() {
@@ -178,7 +176,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   @override
   void dispose() {
     _timer?.cancel();
-    player.dispose();
+    _soloud.disposeSource(sourceBeat);
     _pageController.dispose();
     super.dispose();
   }
