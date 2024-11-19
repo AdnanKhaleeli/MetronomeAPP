@@ -34,6 +34,7 @@ dependencies:
   mongo_dart: ^0.10.3
   pulsator: ^1.0.0+2
   just_audio: ^0.9.42
+  flutter_soloud: ^2.1.7
 
 
 
@@ -61,6 +62,8 @@ flutter:
     #0.022 seconds
     - assets/tick_sound_156.wav
     - assets/tick.mp3
+    - assets/click2.wav
+    - assets/click3.wav
 
 
   # The following line ensures that the Material Icons font is

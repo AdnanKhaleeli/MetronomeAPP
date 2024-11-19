@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:flutter/services.dart';
 import 'database.dart';
 import 'user.dart';
@@ -67,7 +67,9 @@ class MetronomeApp extends StatefulWidget {
 
 class _MetronomeAppState extends State<MetronomeApp> {
   double _bpm = 60;
-  var player = AudioPlayer();
+  late SoLoud _soloud;
+  late var sourceBeat;
+  late var sourceTick;
   Timer? _timer;
   bool playing = false;
   int currentSubdivisions = 1;
@@ -81,6 +83,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   PageController _pageController = PageController();
   int _currentSectionIndex = 0;
   dynamic? _currentSectionBpm = 0;
+  late var handle;
 
   @override
   void initState() {
@@ -90,7 +93,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
     }
 
     Future.delayed(Duration.zero, () async {
-       await player.setSourceAsset('tick_sound_156.wav');
+      _soloud = SoLoud.instance;
+      await _soloud!.init();
+      sourceBeat = await _soloud.loadAsset('assets/click3.wav');
+      sourceTick = await _soloud.loadAsset('assets/click2.wav');
     });
   }
 
@@ -140,15 +146,15 @@ class _MetronomeAppState extends State<MetronomeApp> {
     _timer = Timer.periodic(
         Duration(milliseconds: (tickDuration * 1000).toInt()), (timer) async {
       tickCount++;
-      player.stop();
-      player = AudioPlayer();
+
+      print('Tick duration: ' + (tickDuration * 1000).toInt().toString());
 
       if (subdivisions == 1 || tickCount % subdivisions == 0) {
-        player.play(AssetSource('tick_sound_156.wav'),
-            volume: 1.0, mode: PlayerMode.lowLatency);
+        _soloud.setGlobalVolume(1.0);
+        handle = await _soloud.play(sourceBeat);
       } else {
-        player.play(AssetSource('tick_sound_156.wav'),
-            volume: 0.2, mode: PlayerMode.lowLatency);
+        _soloud.setGlobalVolume(0.5);
+        handle = await _soloud.play(sourceTick);
       }
     });
 
@@ -159,7 +165,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   void stopMetronome() {
     _timer?.cancel();
-    player.stop();
+    _soloud.stop(handle);
     tickCount = 0;
 
     setState(() {
@@ -170,7 +176,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   @override
   void dispose() {
     _timer?.cancel();
-    player.dispose();
+    _soloud.disposeSource(sourceBeat);
     _pageController.dispose();
     super.dispose();
   }
@@ -222,7 +228,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
         },
         onHorizontalDragEnd: handleSwipe,
         behavior: HitTestBehavior.translucent,
-        child: SingleChildScrollView(
+        child: Flexible(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -503,77 +509,80 @@ class _MetronomeAppState extends State<MetronomeApp> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 0
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 0;
-                          currentSubdivisions = 1;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('Whole'),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 1
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 1;
-                          currentSubdivisions = 2;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('Eighth '),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 2
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 2;
-                          currentSubdivisions = 3;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('Triplet'),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 3
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 3;
-                          currentSubdivisions = 4;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('Sixteenth'),
-                    ),
-                  ],
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 0
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 0;
+                            currentSubdivisions = 1;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('Whole'),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 1
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 1;
+                            currentSubdivisions = 2;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('Eighth '),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 2
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 2;
+                            currentSubdivisions = 3;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('Triplet'),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 3
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 3;
+                            currentSubdivisions = 4;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('Sixteenth'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
