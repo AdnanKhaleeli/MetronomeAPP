@@ -113,6 +113,7 @@ import AVFoundation
                     let recognizedText = speechResult.bestTranscription.formattedString
                     print("Recognized Text: \(recognizedText)")
                     result("Recognized Text: \(recognizedText)") // Send the recognized text to Flutter
+                    self?.sendToFlutter(recognizedText)
                     self?.restartListening() // Restart listening after recognizing speech
                 } else if let error = error {
                     print("Recognition error: \(error.localizedDescription)")

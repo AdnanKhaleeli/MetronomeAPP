@@ -111,6 +111,19 @@ class _MetronomeAppState extends State<MetronomeApp> {
       final startListening = await _channelMethod.invokeMethod('startListening');
       print('Result from IOS (startListening): $startListening');
       
+      _channelMethod.setMethodCallHandler((MethodCall call) async {
+      switch (call.method) {
+        case 'onSpeechRecognized':
+          String recognizedText = call.arguments;
+          print("Received recognized speech: $recognizedText");
+
+          // You can do whatever you need with the recognized text
+          // For example, update your UI, process the text, etc.
+          break;
+        default:
+          throw MissingPluginException('notImplemented');
+      }
+    });
 
     
     });
