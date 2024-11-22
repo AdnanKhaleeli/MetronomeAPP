@@ -105,6 +105,12 @@ class _MetronomeAppState extends State<MetronomeApp> {
       
       final permission = await _channelMethod.invokeMethod('permissions');
       print('Result from IOS  $permission');
+
+      final startListening = await _channelMethod.invokeMethod('startListening');
+      print('Result from IOS (startListening): $startListening');
+      
+
+    
     });
   }
 
