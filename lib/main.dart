@@ -13,7 +13,6 @@ import 'music.dart';
 import 'studentScreens/Assignments.dart';
 import 'CircularBPMIndicator.dart';
 import 'PulsingCircleWithNote.dart';
-import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,18 +85,23 @@ class _MetronomeAppState extends State<MetronomeApp> {
   dynamic? _currentSectionBpm = 0;
   var handle = null;
 
+  final MethodChannel _channelMethod = new MethodChannel("Method");
+
   @override
   void initState() {
     super.initState();
 
     Future.delayed(Duration.zero, () async {
       if (widget.user is Student) {
-       await fetchPieces();
-    }
+        await fetchPieces();
+      }
       _soloud = SoLoud.instance;
       await _soloud.init();
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
       sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
+
+      final result = await _channelMethod.invokeMethod('getSum');
+      print('Result from IOS  $result');
     });
   }
 
