@@ -102,6 +102,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
       final result = await _channelMethod.invokeMethod('getSum');
       print('Result from IOS  $result');
+      
+      final permission = await _channelMethod.invokeMethod('permissions');
+      print('Result from IOS  $permission');
     });
   }
 
