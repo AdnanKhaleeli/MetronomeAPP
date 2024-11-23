@@ -101,7 +101,6 @@ class _MetronomeAppState extends State<MetronomeApp>
       if (widget.user is Student) {
         await fetchPieces();
       }
-     
     });
   }
 
@@ -143,7 +142,7 @@ class _MetronomeAppState extends State<MetronomeApp>
 
   void startMetronome(int subdivisions) {
     Future.delayed(Duration.zero, () async {
-         _soloud = SoLoud.instance;
+      _soloud = SoLoud.instance;
       await _soloud.init();
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
       sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
@@ -245,400 +244,409 @@ class _MetronomeAppState extends State<MetronomeApp>
         },
         onHorizontalDragEnd: handleSwipe,
         behavior: HitTestBehavior.translucent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (widget.user is Student && goalBpm != null)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: CircularBPMIndicator(
-                  currentBpm: _bpm,
-                  goalBpm: goalBpm!.toDouble(),
-                  savedBpm: _currentSectionBpm?.toDouble(),
-                ),
-              ),
-            if (widget.user is! Student || pieces.isEmpty || selectedPiece == null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: PulsingCircleWithNote(
-                  size: 150.0,
-                  bpm: _bpm,
-                  playing: playing,
-                ),
-              ),
-            if (widget.user is Student)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: DropdownButton<Piece>(
-                  value: selectedPiece,
-                  hint: Text(pieces.isEmpty
-                      ? 'No pieces assigned '
-                      : 'Select a Piece'),
-                  items: pieces.map((Piece piece) {
-                    return DropdownMenuItem<Piece>(
-                      value: piece,
-                      child: Text(piece.pieceName),
-                    );
-                  }).toList(),
-                  onChanged: (Piece? newValue) {
-                    setState(() {
-                      selectedPiece = newValue;
-                      fetchSections(newValue!);
-                    });
-                  },
-                ),
-              ),
-            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: Container(
-                  height: 50,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: selectedPiece!.sections.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentSectionIndex = index;
-                        selectedSection = selectedPiece!.sections[index];
-                        fetchBpmForSection(selectedSection!);
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      return Center(
-                        child: Text(
-                          selectedPiece!.sections[index].sectionName,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            if (_currentSectionBpm != null &&
-                _currentSectionBpm != "N/A" &&
-                goalBpm != null)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: DataTable(
-                  columns: const <DataColumn>[
-                    DataColumn(
-                      label: Text(
-                        'Confirmed BPM',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        'Goal BPM',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                    ),
-                  ],
-                  rows: [
-                    DataRow(
-                      cells: [
-                        DataCell(
-                          Text(
-                            _currentSectionBpm!.toInt() == -1
-                                ? 'N/A'
-                                : _currentSectionBpm!.toInt().toString(),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  (_currentSectionBpm!.toDouble() >= goalBpm ||
-                                          _currentSectionBpm! == -1)
-                                      ? Colors.green
-                                      : (_currentSectionBpm!.toDouble() >=
-                                              (goalBpm! - 10))
-                                          ? Colors.yellow
-                                          : Colors.red,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            goalBpm?.toString() ?? 'N/A',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: goalBpm != null
-                                  ? Colors.white
-                                  : Colors
-                                      .grey, // Color to indicate if goalBPM is null
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            if (widget.user is Student && selectedPiece != null)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.user is Student && goalBpm != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        ElevatedButton(
-                            onPressed: () async {
-                              await DatabaseHelper().updateStudentBPM(
-                                  'N/A',
-                                  widget.user!.userId,
-                                  selectedPiece!.pieceId,
-                                  _currentSectionIndex);
-
-                              setState(() {
-                                _currentSectionBpm = -1;
-                              });
-                            },
-                            child: Text('N/A')),
-                        ElevatedButton(
-                            onPressed: () async {
-                              await DatabaseHelper().updateStudentBPM(
-                                  _bpm,
-                                  widget.user!.userId,
-                                  selectedPiece!.pieceId,
-                                  _currentSectionIndex);
-
-                              setState(() {
-                                _currentSectionBpm = _bpm;
-                              });
-                            },
-                            child: Text('Confirm BPM')),
-                      ]),
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      CircularBPMIndicator(
+                        currentBpm: _bpm,
+                        goalBpm: goalBpm!.toDouble(),
+                        savedBpm: _currentSectionBpm?.toDouble(),
+                      ),
+                      SizedBox(width: 20),
+                      if (_currentSectionBpm != null &&
+                          _currentSectionBpm != "N/A" &&
+                          goalBpm != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start, // Align text to the left
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Goal BPM:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  goalBpm?.toString() ?? 'N/A',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: goalBpm != null
+                                        ? Colors.white
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10), // Add space between columns
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Confirmed BPM:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  _currentSectionBpm!.toInt() == -1
+                                      ? 'N/A'
+                                      : _currentSectionBpm!.toInt().toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: (_currentSectionBpm!.toDouble() >=
+                                                goalBpm ||
+                                            _currentSectionBpm! == -1)
+                                        ? Colors.green
+                                        : (_currentSectionBpm!.toDouble() >=
+                                                (goalBpm! - 10))
+                                            ? Colors.yellow
+                                            : Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                    ],
+                  ),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
+              if (widget.user is! Student ||
+                  pieces.isEmpty ||
+                  selectedPiece == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: PulsingCircleWithNote(
+                    size: 150.0,
+                    bpm: _bpm,
+                    playing: playing,
+                  ),
+                ),
+              if (widget.user is Student)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: DropdownButton<Piece>(
+                    value: selectedPiece,
+                    hint: Text(pieces.isEmpty
+                        ? 'No pieces assigned '
+                        : 'Select a Piece'),
+                    items: pieces.map((Piece piece) {
+                      return DropdownMenuItem<Piece>(
+                        value: piece,
+                        child: Text(piece.pieceName),
+                      );
+                    }).toList(),
+                    onChanged: (Piece? newValue) {
                       setState(() {
-                        if (_bpm > 40) {
-                          _bpm -= 1;
-                          _controller.text = _bpm.toInt().toString();
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        }
+                        selectedPiece = newValue;
+                        fetchSections(newValue!);
                       });
                     },
-                    child: Text("-"),
                   ),
-                  SizedBox(
-                    width: 150,
-                    child: TextField(
-                      controller: _controller,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        labelText: 'BPM',
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(3),
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      onChanged: (value) {
-                        int? bpmInput = int.tryParse(value);
-                        if (bpmInput != null &&
-                            bpmInput >= 40 &&
-                            bpmInput <= 200) {
-                          setState(() {
-                            _bpm = bpmInput.toDouble();
-                            stopMetronome();
-                            startMetronome(currentSubdivisions);
-                          });
-                        }
+                ),
+              if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Container(
+                    height: 50,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: selectedPiece!.sections.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentSectionIndex = index;
+                          selectedSection = selectedPiece!.sections[index];
+                          fetchBpmForSection(selectedSection!);
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return Center(
+                          child: Text(
+                            selectedPiece!.sections[index].sectionName,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_bpm < 200) {
-                          _bpm += 1;
-                          _controller.text = _bpm.toInt().toString();
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        }
-                      });
-                    },
-                    child: Text("+"),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Slider(
-                min: 40,
-                max: 200,
-                value: _bpm,
-                onChanged: (newBPM) {
-                  setState(() {
-                    stopMetronome();
-                    _bpm = newBPM;
-                    _controller.text = newBPM.toInt().toString();
+                ),
+              if (widget.user is Student && selectedPiece != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          ElevatedButton(
+                              onPressed: () async {
+                                await DatabaseHelper().updateStudentBPM(
+                                    'N/A',
+                                    widget.user!.userId,
+                                    selectedPiece!.pieceId,
+                                    _currentSectionIndex);
 
-                    startMetronome(currentSubdivisions);
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      if (playing) {
-                        stopMetronome();
-                      } else {
-                        startMetronome(currentSubdivisions);
-                      }
-                    },
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          playing ? Icons.pause : Icons.play_arrow,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                    ),
+                                setState(() {
+                                  _currentSectionBpm = -1;
+                                });
+                              },
+                              child: Text('N/A')),
+                          ElevatedButton(
+                              onPressed: () async {
+                                await DatabaseHelper().updateStudentBPM(
+                                    _bpm,
+                                    widget.user!.userId,
+                                    selectedPiece!.pieceId,
+                                    _currentSectionIndex);
+
+                                setState(() {
+                                  _currentSectionBpm = _bpm;
+                                });
+                              },
+                              child: Text('Confirm BPM')),
+                        ]),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Container(
-                width: MediaQuery.of(context).size.width,
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 0
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5),
                       onPressed: () {
                         setState(() {
-                          selectedSubdivisionIndex = 0;
-                          currentSubdivisions = 1;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
+                          if (_bpm > 40) {
+                            _bpm -= 1;
+                            _controller.text = _bpm.toInt().toString();
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          }
                         });
                       },
-                      child: Text('♩',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22)),
+                      child: Text("-"),
                     ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 1
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    SizedBox(
+                      width: 150,
+                      child: TextField(
+                        controller: _controller,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 5),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 1;
-                          currentSubdivisions = 2;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('♪',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22)),
+                          labelText: 'BPM',
+                          labelStyle: TextStyle(color: Colors.white),
+                        ),
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(3),
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        onChanged: (value) {
+                          int? bpmInput = int.tryParse(value);
+                          if (bpmInput != null &&
+                              bpmInput >= 40 &&
+                              bpmInput <= 200) {
+                            setState(() {
+                              _bpm = bpmInput.toDouble();
+                              stopMetronome();
+                              startMetronome(currentSubdivisions);
+                            });
+                          }
+                        },
+                      ),
                     ),
-                    SizedBox(width: 8),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 2
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5),
                       onPressed: () {
                         setState(() {
-                          selectedSubdivisionIndex = 2;
-                          currentSubdivisions = 3;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
+                          if (_bpm < 200) {
+                            _bpm += 1;
+                            _controller.text = _bpm.toInt().toString();
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          }
                         });
                       },
-                      child: Text('♫',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22)),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 3
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 3;
-                          currentSubdivisions = 4;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('♬',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22)),
+                      child: Text("+"),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Slider(
+                  min: 40,
+                  max: 200,
+                  value: _bpm,
+                  onChanged: (newBPM) {
+                    setState(() {
+                      stopMetronome();
+                      _bpm = newBPM;
+                      _controller.text = newBPM.toInt().toString();
+
+                      startMetronome(currentSubdivisions);
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (playing) {
+                          stopMetronome();
+                        } else {
+                          startMetronome(currentSubdivisions);
+                        }
+                      },
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            playing ? Icons.pause : Icons.play_arrow,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 0
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 0;
+                            currentSubdivisions = 1;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('♩',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 1
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 1;
+                            currentSubdivisions = 2;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('♪',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 2
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 2;
+                            currentSubdivisions = 3;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('♫',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 3
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 3;
+                            currentSubdivisions = 4;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('♬',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
