@@ -20,9 +20,7 @@ class _AssignmentsState extends State<Assignments> {
   Future<void> fetchCurrentBPM(Piece piece) async {
     List<int?> currentBpmList = [];
 
-    for (int sectionIndex = 0;
-        sectionIndex < piece.sections.length;
-        sectionIndex++) {
+    for (int sectionIndex = 0; sectionIndex < piece.sections.length; sectionIndex++) {
       final section = piece.sections[sectionIndex];
 
       int currentBpm = await DatabaseHelper().getCurrentUserBPMForSection(
@@ -72,7 +70,16 @@ class _AssignmentsState extends State<Assignments> {
             ),
             Expanded(
               child: widget.pieces.isEmpty
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Text(
+                        'No assignments in pieces', // Show message when no pieces
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       itemCount: widget.pieces.length,
                       itemBuilder: (context, index) {
@@ -144,8 +151,7 @@ class _AssignmentsState extends State<Assignments> {
                                               ),
                                             ),
                                           ],
-                                          rows:
-                                              sections.map<DataRow>((section) {
+                                          rows: sections.map<DataRow>((section) {
                                             final currentBpm =
                                                 pieceCurrentBpm != null
                                                     ? pieceCurrentBpm[sections
