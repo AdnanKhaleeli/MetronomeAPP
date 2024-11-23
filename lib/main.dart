@@ -52,6 +52,11 @@ class MyApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue, foregroundColor: Colors.white)),
+        cardTheme: CardTheme(
+          color: Colors.blueGrey[900],
+          elevation: 5,
+          shadowColor: Colors.black.withOpacity(0.3),
+        ),
       ),
       debugShowCheckedModeBanner: false,
     );
@@ -66,7 +71,8 @@ class MetronomeApp extends StatefulWidget {
   _MetronomeAppState createState() => _MetronomeAppState();
 }
 
-class _MetronomeAppState extends State<MetronomeApp> {
+class _MetronomeAppState extends State<MetronomeApp>
+    with WidgetsBindingObserver {
   double _bpm = 60;
   late SoLoud _soloud;
   late var sourceBeat;
@@ -90,14 +96,12 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance?.addObserver(this);
     Future.delayed(Duration.zero, () async {
       if (widget.user is Student) {
-       await fetchPieces();
-    }
-      _soloud = SoLoud.instance;
-      await _soloud.init();
-      sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
-      sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
+        await fetchPieces();
+      }
+     
     });
   }
 
@@ -138,6 +142,12 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void startMetronome(int subdivisions) {
+    Future.delayed(Duration.zero, () async {
+         _soloud = SoLoud.instance;
+      await _soloud.init();
+      sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
+      sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
+    });
     final double oneBeat = 60 / _bpm;
     final double tickDuration =
         (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
@@ -182,6 +192,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
     _timer?.cancel();
     _soloud.disposeSource(sourceBeat);
     _pageController.dispose();
+    handle = null;
+    _soloud.deinit();
     super.dispose();
   }
 
@@ -217,7 +229,10 @@ class _MetronomeAppState extends State<MetronomeApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-    
+        title: Text('Metronome App'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: CustomDrawer(
         stopMetronome: stopMetronome,
@@ -242,7 +257,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                   savedBpm: _currentSectionBpm?.toDouble(),
                 ),
               ),
-            if ( widget.user is! Student || pieces.isEmpty)
+            if (widget.user is! Student || pieces.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: PulsingCircleWithNote(
@@ -256,7 +271,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: DropdownButton<Piece>(
                   value: selectedPiece,
-                  hint: Text(pieces.isEmpty ? 'No pieces assigned ' : 'Select a Piece'),
+                  hint: Text(pieces.isEmpty
+                      ? 'No pieces assigned '
+                      : 'Select a Piece'),
                   items: pieces.map((Piece piece) {
                     return DropdownMenuItem<Piece>(
                       value: piece,
@@ -334,14 +351,14 @@ class _MetronomeAppState extends State<MetronomeApp> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: (_currentSectionBpm!.toDouble() >=
-                                          goalBpm ||
-                                      _currentSectionBpm! == -1)
-                                  ? Colors.green
-                                  : (_currentSectionBpm!.toDouble() >=
-                                          (goalBpm! - 10))
-                                      ? Colors.yellow
-                                      : Colors.red,
+                              color:
+                                  (_currentSectionBpm!.toDouble() >= goalBpm ||
+                                          _currentSectionBpm! == -1)
+                                      ? Colors.green
+                                      : (_currentSectionBpm!.toDouble() >=
+                                              (goalBpm! - 10))
+                                          ? Colors.yellow
+                                          : Colors.red,
                             ),
                           ),
                         ),
@@ -377,7 +394,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                                   widget.user!.userId,
                                   selectedPiece!.pieceId,
                                   _currentSectionIndex);
-        
+
                               setState(() {
                                 _currentSectionBpm = -1;
                               });
@@ -390,7 +407,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                                   widget.user!.userId,
                                   selectedPiece!.pieceId,
                                   _currentSectionIndex);
-        
+
                               setState(() {
                                 _currentSectionBpm = _bpm;
                               });
@@ -423,8 +440,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
                       controller: _controller,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         labelText: 'BPM',
+                        labelStyle: TextStyle(color: Colors.white),
                       ),
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(3),
@@ -471,7 +491,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
                     stopMetronome();
                     _bpm = newBPM;
                     _controller.text = newBPM.toInt().toString();
-        
+
                     startMetronome(currentSubdivisions);
                   });
                 },
@@ -496,6 +516,13 @@ class _MetronomeAppState extends State<MetronomeApp> {
                       decoration: BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
                       child: Center(
                         child: Icon(
@@ -521,7 +548,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           backgroundColor: selectedSubdivisionIndex == 0
                               ? Colors.red
                               : Colors.white,
-                          foregroundColor: Colors.black),
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5),
                       onPressed: () {
                         setState(() {
                           selectedSubdivisionIndex = 0;
@@ -540,7 +571,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           backgroundColor: selectedSubdivisionIndex == 1
                               ? Colors.red
                               : Colors.white,
-                          foregroundColor: Colors.black),
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5),
                       onPressed: () {
                         setState(() {
                           selectedSubdivisionIndex = 1;
@@ -559,7 +594,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           backgroundColor: selectedSubdivisionIndex == 2
                               ? Colors.red
                               : Colors.white,
-                          foregroundColor: Colors.black),
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5),
                       onPressed: () {
                         setState(() {
                           selectedSubdivisionIndex = 2;
@@ -578,7 +617,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
                           backgroundColor: selectedSubdivisionIndex == 3
                               ? Colors.red
                               : Colors.white,
-                          foregroundColor: Colors.black),
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5),
                       onPressed: () {
                         setState(() {
                           selectedSubdivisionIndex = 3;
