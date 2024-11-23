@@ -11,6 +11,8 @@ import AVFoundation
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     private var channel: FlutterMethodChannel? // Reference to the Flutter channel
+    private var audioSession: AVAudioSession!
+   
 
     override func application(
         _ application: UIApplication,
@@ -63,7 +65,6 @@ import AVFoundation
         }
     }
 
-    // Start continuous listening for speech
     func startListening(result: @escaping FlutterResult) {
         print("Setting up audio session for recording...")
 
@@ -75,10 +76,10 @@ import AVFoundation
             }
 
             // Set up the AVAudioSession for recording
-            let audioSession = AVAudioSession.sharedInstance()
+            self.audioSession = AVAudioSession.sharedInstance()
             do {
-                try audioSession.setCategory(.record, mode: .measurement, options: [.duckOthers, .allowBluetooth])
-                try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+                try self.audioSession.setCategory(.record, mode: .measurement, options: [.duckOthers, .allowBluetooth])
+                try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
                 print("Audio session set up successfully.")
             } catch {
                 result(FlutterError(code: "AUDIO_SESSION_ERROR", message: "Audio session setup failed", details: error.localizedDescription))
@@ -88,9 +89,13 @@ import AVFoundation
             // Create a new recognition request and audio engine every time
             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
 
-            // Check if the recognizer supports on-device recognition
-            if let recognitionRequest = self.recognitionRequest {
-                recognitionRequest.requiresOnDeviceRecognition = true
+            // Set requiresOnDeviceRecognition based on whether it's supported
+            if let speechRecognizer = self.speechRecognizer, speechRecognizer.supportsOnDeviceRecognition {
+                self.recognitionRequest?.requiresOnDeviceRecognition = true
+                print("Using on-device recognition.")
+            } else {
+                self.recognitionRequest?.requiresOnDeviceRecognition = false
+                print("Using server-based recognition.")
             }
 
             guard let recognitionRequest = self.recognitionRequest else {
@@ -148,16 +153,40 @@ import AVFoundation
         recognitionTask = nil
     }
 
-    // Recreate the listening process to keep it continuous
     func restartListening() {
         // Stop and reset the current task and session
         stopListening()
-
-        // Restart listening after a small delay to avoid any race conditions
-        DispatchQueue.global().asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            self?.startListening { result in
-                // Optionally handle the result or errors
-            }
+        
+        // Re-initialize everything
+        recognitionRequest = nil
+        recognitionTask = nil
+        
+        // Deactivate the audio session before setting a new category
+        do {
+            try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+            print("Audio session deactivated.")
+        } catch {
+            print("Error deactivating audio session: \(error.localizedDescription)")
+        }
+        
+        // Set the new audio session category
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .duckOthers])
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            print("Audio session restarted and activated.")
+        } catch {
+            // Handle error if setting the audio session category fails
+            print("Error setting audio session category: \(error.localizedDescription)")
+        }
+        
+        // Initialize a new audio engine to avoid issues with the old one
+        self.audioEngine.reset()
+        
+        // Call startListening after a small delay to avoid any race conditions
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.startListening(result: { _ in
+                // Optionally handle result or errors
+            })
         }
     }
 
