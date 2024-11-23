@@ -257,7 +257,7 @@ class _MetronomeAppState extends State<MetronomeApp>
                   savedBpm: _currentSectionBpm?.toDouble(),
                 ),
               ),
-            if (widget.user is! Student || pieces.isEmpty)
+            if (widget.user is! Student || pieces.isEmpty || selectedPiece == null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: PulsingCircleWithNote(
