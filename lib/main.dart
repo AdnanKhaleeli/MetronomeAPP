@@ -109,8 +109,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         final permissions = await _channelMethod.invokeMethod('permissions');
         print('Result from IOS  $permissions');
 
-            await _channelMethod.invokeMethod('startListening');
-       
+        await _channelMethod.invokeMethod('startListening');
 
         _channelMethod.setMethodCallHandler((MethodCall call) async {
           switch (call.method) {
@@ -129,15 +128,20 @@ class _MetronomeAppState extends State<MetronomeApp>
   }
 
   void handleSpeechTextIOS(String text) {
+    bool updated = false;
     if (text.contains('increase')) {
       _bpm += 5;
+      updated = true;
     } else if (text.contains('decrease')) {
+      updated = true;
       _bpm -= 5;
     }
 
-    setState(() {
-      startMetronome(currentSubdivisions);
-    });
+    if (updated) {
+      setState(() {
+        startMetronome(currentSubdivisions);
+      });
+    }
   }
 
   Future<void> fetchPieces() async {
