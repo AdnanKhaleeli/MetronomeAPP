@@ -14,6 +14,7 @@ import 'studentScreens/Assignments.dart';
 import 'CircularBPMIndicator.dart';
 import 'PulsingCircleWithNote.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +93,8 @@ class _MetronomeAppState extends State<MetronomeApp>
   dynamic? _currentSectionBpm = 0;
   var handle = null;
 
+  final MethodChannel _channelMethod = new MethodChannel("Method");
+
   @override
   void initState() {
     super.initState();
@@ -101,6 +104,38 @@ class _MetronomeAppState extends State<MetronomeApp>
       if (widget.user is Student) {
         await fetchPieces();
       }
+
+      if (Platform.isIOS) {
+        final permissions = await _channelMethod.invokeMethod('permissions');
+        print('Result from IOS  $permissions');
+
+    
+
+        _channelMethod.setMethodCallHandler((MethodCall call) async {
+          switch (call.method) {
+            case 'onSpeechRecognized':
+              String recognizedText = call.arguments;
+              print("Received recognized speech: $recognizedText");
+              handleSpeechTextIOS(recognizedText.toLowerCase());
+
+              break;
+            default:
+              throw MissingPluginException('notImplemented');
+          }
+        });
+      }
+    });
+  }
+
+  void handleSpeechTextIOS(String text) {
+    if (text.contains('increase')) {
+      _bpm += 5;
+    } else if (text.contains('decrease')) {
+      _bpm -= 5;
+    }
+
+    setState(() {
+      startMetronome(currentSubdivisions);
     });
   }
 
