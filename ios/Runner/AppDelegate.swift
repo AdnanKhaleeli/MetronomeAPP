@@ -12,7 +12,9 @@ import AVFoundation
     private var recognitionTask: SFSpeechRecognitionTask?
     private var channel: FlutterMethodChannel? // Reference to the Flutter channel
     private var audioSession: AVAudioSession!
-   
+    private var lastRecognizedText: String? = nil // Track the last recognized text
+    private var lastSentTime: Date? = nil // To control the time interval between sending text
+    
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -89,8 +91,7 @@ import AVFoundation
 
             // Create a new recognition request and audio engine every time
             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-            //self.recognitionRequest?.shouldReportPartialResults = true
-
+            self.recognitionRequest?.shouldReportPartialResults = false
             // Set requiresOnDeviceRecognition based on whether it's supported
             if let speechRecognizer = self.speechRecognizer, speechRecognizer.supportsOnDeviceRecognition {
                 self.recognitionRequest?.requiresOnDeviceRecognition = true
@@ -119,16 +120,29 @@ import AVFoundation
                 if let speechResult = speechResult {
                     let recognizedText = speechResult.bestTranscription.formattedString
                     print("Recognized Text: \(recognizedText)")
-                    result("Recognized Text: \(recognizedText)") // Send the recognized text to Flutter
-                    self?.sendToFlutter(recognizedText)
-                  
+
+                    // Throttle: Only send text if it's significantly different or after a short delay
+                    let currentTime = Date()
+                    if let lastTime = self?.lastSentTime, currentTime.timeIntervalSince(lastTime) < 1.0 {
+                        // Do not send if less than 1 second has passed since the last update
+                        return
+                    }
+
+                    // If the recognized text has changed, or it's a new sentence, send it
+                    if recognizedText != self?.lastRecognizedText {
+                        self?.lastRecognizedText = recognizedText
+                        self?.lastSentTime = currentTime // Update the last sent time
+                        result("Recognized Text: \(recognizedText)") // Send the recognized text to Flutter
+                        self?.sendToFlutter(recognizedText)
+                    }
+
                 } else if let error = error {
                     print("Recognition error: \(error.localizedDescription)")
-                    self?.restartListening() // Restart listening if an error occurs
+                    self?.startListening(result: result) // Restart listening if an error occurs
                     result(FlutterError(code: "RECOGNITION_ERROR", message: "Recognition failed", details: error.localizedDescription))
                 } else {
                     print("No speech detected")
-                    self?.restartListening() // Restart listening if no speech detected
+                    self?.startListening(result: result) // Restart listening if no speech detected
                     result(FlutterError(code: "NO_SPEECH_DETECTED", message: "No speech detected", details: nil))
                 }
             }
@@ -153,43 +167,8 @@ import AVFoundation
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
         recognitionTask = nil
-    }
-
-    func restartListening() {
-        // Stop and reset the current task and session
-        stopListening()
-        
-        // Re-initialize everything
-        recognitionRequest = nil
-        recognitionTask = nil
-        
-        // Deactivate the audio session before setting a new category
-        do {
-            try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
-            print("Audio session deactivated.")
-        } catch {
-            print("Error deactivating audio session: \(error.localizedDescription)")
-        }
-        
-        // Set the new audio session category
-        do {
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .duckOthers])
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-            print("Audio session restarted and activated.")
-        } catch {
-            // Handle error if setting the audio session category fails
-            print("Error setting audio session category: \(error.localizedDescription)")
-        }
-        
-        // Initialize a new audio engine to avoid issues with the old one
-        self.audioEngine.reset()
-        
-        // Call startListening after a small delay to avoid any race conditions
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            self?.startListening(result: { _ in
-                // Optionally handle result or errors
-            })
-        }
+        lastRecognizedText = nil // Reset the last recognized text when stopping
+        lastSentTime = nil // Reset the time
     }
 
     // Helper method to send recognized text to Flutter
