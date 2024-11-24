@@ -100,11 +100,11 @@ class _MetronomeAppState extends State<MetronomeApp> {
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
       sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
 
-      final result = await _channelMethod.invokeMethod('getSum');
-      print('Result from IOS  $result');
+      // final result = await _channelMethod.invokeMethod('getSum');
+      // print('Result from IOS  $result');
       
-      final permission = await _channelMethod.invokeMethod('permissions');
-      print('Result from IOS  $permission');
+      final permissions = await _channelMethod.invokeMethod('permissions');
+      print('Result from IOS  $permissions');
 
 
       

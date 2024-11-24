@@ -13,7 +13,6 @@ import AVFoundation
     private var channel: FlutterMethodChannel? // Reference to the Flutter channel
     private var audioSession: AVAudioSession!
    
-
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -31,7 +30,7 @@ import AVFoundation
             print("On-device recognition is not supported")
         }
 
-        // Channel handler
+        // Channel handler for Flutter method calls
         channel?.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             if call.method == "getSum" {
                 let sum = self?.getSum() ?? 0
@@ -42,6 +41,9 @@ import AVFoundation
                 }
             } else if call.method == "startListening" {
                 self?.startListening(result: result)
+            } else if call.method == "stopListening" {
+                self?.stopListening()
+                result("Listening stopped")
             } else {
                 result(FlutterMethodNotImplemented)
             }
@@ -52,7 +54,6 @@ import AVFoundation
     }
 
     private func getSum() -> Int {
-        print("Swift code running")
         return 2 + 2
     }
 
@@ -88,6 +89,7 @@ import AVFoundation
 
             // Create a new recognition request and audio engine every time
             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+            //self.recognitionRequest?.shouldReportPartialResults = true
 
             // Set requiresOnDeviceRecognition based on whether it's supported
             if let speechRecognizer = self.speechRecognizer, speechRecognizer.supportsOnDeviceRecognition {
@@ -119,7 +121,7 @@ import AVFoundation
                     print("Recognized Text: \(recognizedText)")
                     result("Recognized Text: \(recognizedText)") // Send the recognized text to Flutter
                     self?.sendToFlutter(recognizedText)
-                    self?.restartListening() // Restart listening after recognizing speech
+                  
                 } else if let error = error {
                     print("Recognition error: \(error.localizedDescription)")
                     self?.restartListening() // Restart listening if an error occurs
