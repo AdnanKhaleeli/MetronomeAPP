@@ -105,6 +105,11 @@ class _MetronomeAppState extends State<MetronomeApp>
         await fetchPieces();
       }
 
+        _soloud = SoLoud.instance;
+      await _soloud.init();
+      sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
+      sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
+
       if (Platform.isIOS) {
         final permissions = await _channelMethod.invokeMethod('permissions');
         print('Result from IOS  $permissions');
@@ -181,12 +186,6 @@ class _MetronomeAppState extends State<MetronomeApp>
   }
 
   void startMetronome(int subdivisions) {
-    Future.delayed(Duration.zero, () async {
-      _soloud = SoLoud.instance;
-      await _soloud.init();
-      sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
-      sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
-    });
     final double oneBeat = 60 / _bpm;
     final double tickDuration =
         (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;

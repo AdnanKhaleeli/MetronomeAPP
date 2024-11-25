@@ -52,8 +52,6 @@ import AVFoundation
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
-    
-
     // Request microphone permission
     func requestMicrophonePermission(completion: @escaping (Bool) -> Void) {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
@@ -73,12 +71,13 @@ import AVFoundation
                 return
             }
 
-            // Set up the AVAudioSession for recording
+            // Set up the AVAudioSession for both recording and playback (for the metronome)
             self.audioSession = AVAudioSession.sharedInstance()
             do {
-                try self.audioSession.setCategory(.record, mode: .measurement, options: [.duckOthers, .allowBluetooth])
+                // Set the category to allow both playback and recording
+                try self.audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .allowBluetooth])
                 try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-                print("Audio session set up successfully.")
+                print("Audio session set up successfully for both playback and recording.")
             } catch {
                 result(FlutterError(code: "AUDIO_SESSION_ERROR", message: "Audio session setup failed", details: error.localizedDescription))
                 return
@@ -86,7 +85,7 @@ import AVFoundation
 
             // Create a new recognition request and audio engine every time
             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-            self.recognitionRequest?.shouldReportPartialResults = false
+            self.recognitionRequest?.shouldReportPartialResults = true
             // Set requiresOnDeviceRecognition based on whether it's supported
             if let speechRecognizer = self.speechRecognizer, speechRecognizer.supportsOnDeviceRecognition {
                 self.recognitionRequest?.requiresOnDeviceRecognition = true
@@ -171,3 +170,4 @@ import AVFoundation
         channel?.invokeMethod("onSpeechRecognized", arguments: text)
     }
 }
+
