@@ -105,7 +105,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         await fetchPieces();
       }
 
-        _soloud = SoLoud.instance;
+      _soloud = SoLoud.instance;
       await _soloud.init();
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
       sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
@@ -134,18 +134,18 @@ class _MetronomeAppState extends State<MetronomeApp>
 
   void handleSpeechTextIOS(String text) {
     bool updated = false;
-    if (text.contains('increase')) {
-      _bpm += 5;
+    if (text.contains('stop')) {
+      stopMetronome();
+      playing = false;
       updated = true;
-    } else if (text.contains('decrease')) {
+    } else if (text.contains('start')) {
       updated = true;
-      _bpm -= 5;
+      playing = true;
+      startMetronome(currentSubdivisions);
     }
 
     if (updated) {
-      setState(() {
-        startMetronome(currentSubdivisions);
-      });
+      setState(() {});
     }
   }
 
