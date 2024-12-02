@@ -134,6 +134,19 @@ class _MetronomeAppState extends State<MetronomeApp>
 
   void handleSpeechTextIOS(String text) {
     bool updated = false;
+    RegExp regExp = RegExp(r'-?\d+(\.\d+)?');
+    const numberWords = {
+      'one': 1,
+      'two': 2,
+      'three': 3,
+      'four': 4,
+      'five': 5,
+      'six': 6,
+      'seven': 7,
+      'eight': 8,
+      'nine': 9,
+    };
+
     if (text.contains('stop')) {
       stopMetronome();
       playing = false;
@@ -142,6 +155,39 @@ class _MetronomeAppState extends State<MetronomeApp>
       updated = true;
       playing = true;
       startMetronome(currentSubdivisions);
+    } else if (text.contains('increase')) {
+      if (_bpm + 5 <= 200) {
+        _bpm += 5;
+      } else {
+        _bpm = 200;
+      }
+      updated = true;
+    } else if (text.contains('faster')) {
+      Match? match = regExp.firstMatch(text);
+      if (match != null) {
+        String firstDigit = match.group(0)!;
+        print('First dnumber is $firstDigit');
+
+        setState(() {
+          _bpm += double.parse(firstDigit);
+          stopMetronome();
+          startMetronome(currentSubdivisions);
+        });
+      } 
+      else {
+       
+        numberWords.forEach((word, value) {
+          if (text.contains(word)) {
+            print('Found word number: $word');
+            setState(() {
+              _bpm += value;
+              stopMetronome();
+              startMetronome(currentSubdivisions);
+            });
+            updated = true;
+          }
+        });
+      }
     }
 
     if (updated) {

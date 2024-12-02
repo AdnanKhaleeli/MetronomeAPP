@@ -10,10 +10,10 @@ import AVFoundation
     private var speechRecognizer: SFSpeechRecognizer!
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
-    private var channel: FlutterMethodChannel? // Reference to the Flutter channel
+    private var channel: FlutterMethodChannel? 
     private var audioSession: AVAudioSession!
-    private var lastRecognizedText: String? = nil // Track the last recognized text
-    private var lastSentTime: Date? = nil // To control the time interval between sending text
+    private var lastRecognizedText: String? = nil 
+    private var lastSentTime: Date? = nil 
     
     override func application(
         _ application: UIApplication,
@@ -22,17 +22,17 @@ import AVFoundation
         let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
         channel = FlutterMethodChannel(name: "Method", binaryMessenger: controller.binaryMessenger)
         
-        // Initialize speech recognizer for English (US)
+       
         speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
         
-        // Check if the recognizer supports on-device recognition
+       
         if speechRecognizer?.supportsOnDeviceRecognition == true {
             print("On-device recognition supported")
         } else {
             print("On-device recognition is not supported")
         }
 
-        // Channel handler for Flutter method calls
+       
         channel?.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
              if call.method == "permissions" {
                 self?.requestMicrophonePermission { granted in
@@ -52,7 +52,7 @@ import AVFoundation
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
-    // Request microphone permission
+   
     func requestMicrophonePermission(completion: @escaping (Bool) -> Void) {
         AVAudioSession.sharedInstance().requestRecordPermission { granted in
             DispatchQueue.main.async {
@@ -64,14 +64,14 @@ import AVFoundation
     func startListening(result: @escaping FlutterResult) {
         print("Setting up audio session for recording...")
 
-        // Ensure microphone permission is granted before starting
+     
         requestMicrophonePermission { granted in
             guard granted else {
                 result(FlutterError(code: "PERMISSION_DENIED", message: "Microphone permission not granted", details: nil))
                 return
             }
 
-            // Set up the AVAudioSession for both recording and playback (for the metronome)
+            
             self.audioSession = AVAudioSession.sharedInstance()
             do {
                 // Set the category to allow both playback and recording
@@ -83,7 +83,7 @@ import AVFoundation
                 return
             }
 
-            // Create a new recognition request and audio engine every time
+           
             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
             self.recognitionRequest?.shouldReportPartialResults = true
             // Set requiresOnDeviceRecognition based on whether it's supported
@@ -100,7 +100,7 @@ import AVFoundation
                 return
             }
 
-            // Initialize the audio engine and set up the input node
+          
             self.audioEngine = AVAudioEngine()
             let inputNode = self.audioEngine.inputNode
             let recordingFormat = inputNode.outputFormat(forBus: 0)
@@ -109,30 +109,30 @@ import AVFoundation
                 self?.recognitionRequest?.append(buffer)
             }
 
-            // Create a new recognition task for each listening session
+          
             self.recognitionTask = self.speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] (speechResult: SFSpeechRecognitionResult?, error: Error?) in
                 if let speechResult = speechResult {
                     let recognizedText = speechResult.bestTranscription.formattedString
                     print("Recognized Text: \(recognizedText)")
 
-                    // Throttle: Only send text if it's significantly different or after a short delay
+                 
                     let currentTime = Date()
                     if let lastTime = self?.lastSentTime, currentTime.timeIntervalSince(lastTime) < 1.0 {
-                        // Do not send if less than 1 second has passed since the last update
+                       
                         return
                     }
 
-                    // If the recognized text has changed, or it's a new sentence, send it
+                    
                     if recognizedText != self?.lastRecognizedText {
                         self?.lastRecognizedText = recognizedText
-                        self?.lastSentTime = currentTime // Update the last sent time
-                        result("Recognized Text: \(recognizedText)") // Send the recognized text to Flutter
+                        self?.lastSentTime = currentTime 
+                        result("Recognized Text: \(recognizedText)") 
                         self?.sendToFlutter(recognizedText)
                     }
 
                 } else if let error = error {
                     print("Recognition error: \(error.localizedDescription)")
-                    self?.startListening(result: result) // Restart listening if an error occurs
+                    self?.startListening(result: result) 
                     result(FlutterError(code: "RECOGNITION_ERROR", message: "Recognition failed", details: error.localizedDescription))
                 } else {
                     print("No speech detected")
@@ -141,7 +141,7 @@ import AVFoundation
                 }
             }
 
-            // Prepare and start the audio engine
+      
             self.audioEngine.prepare()
             do {
                 try self.audioEngine.start()
@@ -154,18 +154,18 @@ import AVFoundation
         }
     }
 
-    // Stop continuous listening
+
     func stopListening() {
         print("Stopping listening...")
         audioEngine.stop()
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
         recognitionTask = nil
-        lastRecognizedText = nil // Reset the last recognized text when stopping
-        lastSentTime = nil // Reset the time
+        lastRecognizedText = nil 
+        lastSentTime = nil 
     }
 
-    // Helper method to send recognized text to Flutter
+
     func sendToFlutter(_ text: String) {
         channel?.invokeMethod("onSpeechRecognized", arguments: text)
     }
