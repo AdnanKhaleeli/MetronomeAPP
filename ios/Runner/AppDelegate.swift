@@ -105,7 +105,7 @@ import AVFoundation
             let inputNode = self.audioEngine.inputNode
             let recordingFormat = inputNode.outputFormat(forBus: 0)
 
-            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] (buffer: AVAudioPCMBuffer, time: AVAudioTime) in
+            inputNode.installTap(onBus: 0, bufferSize: 256, format: recordingFormat) { [weak self] (buffer: AVAudioPCMBuffer, time: AVAudioTime) in
                 self?.recognitionRequest?.append(buffer)
             }
 
@@ -117,7 +117,7 @@ import AVFoundation
 
                  
                     let currentTime = Date()
-                    if let lastTime = self?.lastSentTime, currentTime.timeIntervalSince(lastTime) < 1.0 {
+                    if let lastTime = self?.lastSentTime, currentTime.timeIntervalSince(lastTime) < 0.2 {
                        
                         return
                     }

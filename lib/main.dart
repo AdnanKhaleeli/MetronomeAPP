@@ -99,6 +99,7 @@ class _MetronomeAppState extends State<MetronomeApp>
   void initState() {
     super.initState();
 
+    _controller.text = _bpm.toInt().toString();
     WidgetsBinding.instance?.addObserver(this);
     Future.delayed(Duration.zero, () async {
       if (widget.user is Student) {
@@ -138,6 +139,7 @@ class _MetronomeAppState extends State<MetronomeApp>
     const numberWords = {
       'one': 1,
       'two': 2,
+      'too' : 2,
       'three': 3,
       'four': 4,
       'five': 5,
@@ -148,50 +150,49 @@ class _MetronomeAppState extends State<MetronomeApp>
     };
 
     if (text.contains('stop')) {
-      stopMetronome();
-      playing = false;
-      updated = true;
+      if (playing) {
+        stopMetronome();
+         playing = false;
+        updated = false;
+      }
+     
+     //Division 1
     } else if (text.contains('start')) {
-      updated = true;
       playing = true;
       startMetronome(currentSubdivisions);
-    } else if (text.contains('increase')) {
-      if (_bpm + 5 <= 200) {
-        _bpm += 5;
-      } else {
-        _bpm = 200;
-      }
       updated = true;
-    } else if (text.contains('faster')) {
-      Match? match = regExp.firstMatch(text);
-      if (match != null) {
-        String firstDigit = match.group(0)!;
-        print('First dnumber is $firstDigit');
+    } else if (text.contains('increase')) {
+      _bpm = (_bpm + 5 <= 200) ? _bpm + 5 : 200;
+      updated = true;
+    } else if (text.contains('fast') || text.contains('slow')) {
+      bool isFaster = text.contains('fast');
+      double adjustment = 0;
 
-        setState(() {
-          _bpm += double.parse(firstDigit);
-          stopMetronome();
-          startMetronome(currentSubdivisions);
-        });
-      } 
-      else {
-       
+      final match = regExp.firstMatch(text);
+      if (match != null) {
+        adjustment = double.parse(match.group(0)!);
+      } else {
         numberWords.forEach((word, value) {
           if (text.contains(word)) {
-            print('Found word number: $word');
-            setState(() {
-              _bpm += value;
-              stopMetronome();
-              startMetronome(currentSubdivisions);
-            });
-            updated = true;
+            adjustment = value.toDouble();
           }
         });
+      }
+
+      _bpm += isFaster ? adjustment : -1 * adjustment;
+      if (adjustment == 0) {
+        updated = false;
+      } else {
+        updated = true;
       }
     }
 
     if (updated) {
-      setState(() {});
+      setState(() {
+        _controller.text = _bpm.toInt().toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
     }
   }
 
