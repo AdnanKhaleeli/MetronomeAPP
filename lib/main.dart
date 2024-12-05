@@ -164,6 +164,8 @@ class _MetronomeAppState extends State<MetronomeApp>
     } else if (text.contains('increase')) {
       _bpm = (_bpm + 5 <= 200) ? _bpm + 5 : 200;
       updated = true;
+    } else if (text.contains('decrease')) {
+       _bpm = (_bpm - 5 >= 40) ? _bpm - 5 : 40;
     } else if (text.contains('fast') || text.contains('slow')) {
       bool isFaster = text.contains('fast');
       double adjustment = 0;
@@ -179,7 +181,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         });
       }
 
-      _bpm += isFaster ? adjustment : -1 * adjustment;
+      _bpm = isFaster ? adjustment+ _bpm  <= 200 ? adjustment+ _bpm : 200  : _bpm - adjustment > 40 ? _bpm - adjustment : 40;
       if (adjustment == 0) {
         updated = false;
       } else {
