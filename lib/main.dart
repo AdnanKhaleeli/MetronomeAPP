@@ -133,19 +133,7 @@ class _MetronomeAppState extends State<MetronomeApp>
     });
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   super.didChangeAppLifecycleState(state);
-  //   if (state == AppLifecycleState.paused ||
-  //       state == AppLifecycleState.detached) {
-  //     _channelMethod.invokeMethod('stopListening');
-  //   } else if (state == AppLifecycleState.resumed) {
-  //     if (ModalRoute.of(context)?.settings.name == '/') {
-  //       _channelMethod.invokeMethod('startListening');
-  //     }
-  //   }
-  // }
-
+ 
   void handleSpeechTextIOS(String text) {
     bool updated = false;
     RegExp regExp = RegExp(r'-?\d+(\.\d+)?');
