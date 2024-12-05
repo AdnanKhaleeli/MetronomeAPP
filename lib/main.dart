@@ -139,7 +139,7 @@ class _MetronomeAppState extends State<MetronomeApp>
     const numberWords = {
       'one': 1,
       'two': 2,
-      'too' : 2,
+      'too': 2,
       'three': 3,
       'four': 4,
       'five': 5,
@@ -152,11 +152,11 @@ class _MetronomeAppState extends State<MetronomeApp>
     if (text.contains('stop')) {
       if (playing) {
         stopMetronome();
-         playing = false;
+        playing = false;
         updated = false;
       }
-     
-     //Division 1
+
+      //Division 1
     } else if (text.contains('start')) {
       playing = true;
       startMetronome(currentSubdivisions);
@@ -185,6 +185,14 @@ class _MetronomeAppState extends State<MetronomeApp>
       } else {
         updated = true;
       }
+    } else if (text.contains('division')) {
+      numberWords.forEach((word, value) {
+        if (text.contains(word)) {
+          currentSubdivisions = value;
+          selectedSubdivisionIndex = currentSubdivisions - 1;
+          updated = true;
+        }
+      });
     }
 
     if (updated) {
