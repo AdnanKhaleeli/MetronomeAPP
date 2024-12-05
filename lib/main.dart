@@ -133,6 +133,19 @@ class _MetronomeAppState extends State<MetronomeApp>
     });
   }
 
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   super.didChangeAppLifecycleState(state);
+  //   if (state == AppLifecycleState.paused ||
+  //       state == AppLifecycleState.detached) {
+  //     _channelMethod.invokeMethod('stopListening');
+  //   } else if (state == AppLifecycleState.resumed) {
+  //     if (ModalRoute.of(context)?.settings.name == '/') {
+  //       _channelMethod.invokeMethod('startListening');
+  //     }
+  //   }
+  // }
+
   void handleSpeechTextIOS(String text) {
     bool updated = false;
     RegExp regExp = RegExp(r'-?\d+(\.\d+)?');
@@ -165,7 +178,7 @@ class _MetronomeAppState extends State<MetronomeApp>
       _bpm = (_bpm + 5 <= 200) ? _bpm + 5 : 200;
       updated = true;
     } else if (text.contains('decrease')) {
-       _bpm = (_bpm - 5 >= 40) ? _bpm - 5 : 40;
+      _bpm = (_bpm - 5 >= 40) ? _bpm - 5 : 40;
     } else if (text.contains('fast') || text.contains('slow')) {
       bool isFaster = text.contains('fast');
       double adjustment = 0;
@@ -181,7 +194,13 @@ class _MetronomeAppState extends State<MetronomeApp>
         });
       }
 
-      _bpm = isFaster ? adjustment+ _bpm  <= 200 ? adjustment+ _bpm : 200  : _bpm - adjustment > 40 ? _bpm - adjustment : 40;
+      _bpm = isFaster
+          ? adjustment + _bpm <= 200
+              ? adjustment + _bpm
+              : 200
+          : _bpm - adjustment > 40
+              ? _bpm - adjustment
+              : 40;
       if (adjustment == 0) {
         updated = false;
       } else {
@@ -195,6 +214,20 @@ class _MetronomeAppState extends State<MetronomeApp>
           updated = true;
         }
       });
+    } else if (text.contains('set')) {
+      final match = regExp.firstMatch(text);
+      if (match != null) {
+        double val = double.parse(match.group(0)!);
+        _bpm = val >= 40 && val <= 200 ? val : _bpm;
+        updated = true;
+      } else {
+        numberWords.forEach((word, value) {
+          if (text.contains(word)) {
+            _bpm = value >= 40 && value <= 200 ? value.toDouble() : _bpm;
+            updated = true;
+          }
+        });
+      }
     }
 
     if (updated) {
