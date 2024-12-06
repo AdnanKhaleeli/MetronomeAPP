@@ -76,6 +76,10 @@ import AVFoundation
             do {
                 // Set the category to allow both playback and recording
                 try self.audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .allowBluetooth])
+                 if let preferredInput = self.audioSession.availableInputs?.first(where: { $0.portType == .builtInMic }) {
+                    try self.audioSession.setPreferredInput(preferredInput)
+                }
+                try self.audioSession.overrideOutputAudioPort(.speaker)
                 try self.audioSession.setActive(true, options: .notifyOthersOnDeactivation)
                 print("Audio session set up successfully for both playback and recording.")
             } catch {

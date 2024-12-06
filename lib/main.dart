@@ -108,8 +108,10 @@ class _MetronomeAppState extends State<MetronomeApp>
 
       _soloud = SoLoud.instance;
       await _soloud.init();
+
+      
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
-      sourceTick = await _soloud.loadAsset('assets/sub_tick.wav');
+      sourceTick = await _soloud.loadAsset('assets/click3.wav');
 
       if (Platform.isIOS) {
         final permissions = await _channelMethod.invokeMethod('permissions');
@@ -148,6 +150,7 @@ class _MetronomeAppState extends State<MetronomeApp>
       'seven': 7,
       'eight': 8,
       'nine': 9,
+      'hundred' : 100
     };
 
     if (text.contains('stop')) {
