@@ -92,6 +92,7 @@ class _MetronomeAppState extends State<MetronomeApp>
   int _currentSectionIndex = 0;
   dynamic? _currentSectionBpm = 0;
   var handle = null;
+  bool isListening = false;
 
   final MethodChannel _channelMethod = new MethodChannel("Method");
 
@@ -117,7 +118,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         print('Result from IOS  $permissions');
 
         await _channelMethod.invokeMethod('startListening');
-
+        isListening = true;
         _channelMethod.setMethodCallHandler((MethodCall call) async {
           switch (call.method) {
             case 'onSpeechRecognized':
@@ -313,6 +314,11 @@ class _MetronomeAppState extends State<MetronomeApp>
     handle = null;
     _soloud.deinit();
     super.dispose();
+
+    Future.delayed(Duration.zero, () async {
+      _channelMethod.invokeMethod('stopListening');
+      isListening = false;
+    });
   }
 
   void handleSwipe(DragEndDetails details) {
@@ -343,6 +349,16 @@ class _MetronomeAppState extends State<MetronomeApp>
     }
   }
 
+  void toggleVoice()  {
+    if (isListening) {
+      _channelMethod.invokeMethod('stopListening');
+      isListening = false;
+    } else {
+      _channelMethod.invokeMethod('startListening');
+       isListening = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -356,6 +372,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         stopMetronome: stopMetronome,
         user: widget.user,
         list: pieces,
+        toggleVoice: toggleVoice
       ),
       body: GestureDetector(
         onTap: () {

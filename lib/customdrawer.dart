@@ -8,12 +8,9 @@ class CustomDrawer extends StatelessWidget {
   final Function? stopMetronome;
   User? user;
   List<Piece>? list;
+  final Function? toggleVoice;
 
-  CustomDrawer({
-    this.stopMetronome,
-    this.user,
-    this.list
-  });
+  CustomDrawer({this.stopMetronome, this.user, this.list, this.toggleVoice});
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +20,7 @@ class CustomDrawer extends StatelessWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(user != null ? user!.getProfileName() : "Guest"),
-            accountEmail:
-                Text(user != null ? user!.role : ""),
+            accountEmail: Text(user != null ? user!.role : ""),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
@@ -50,23 +46,23 @@ class CustomDrawer extends StatelessWidget {
                 if (user == null) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
+                  ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
                   Navigator.pushNamed(context, '/sign_in');
                 }
               },
             ),
           if (ModalRoute.of(context)?.settings.name != '/assignments' &&
-              user != null && user is Student)
+              user != null &&
+              user is Student)
             ListTile(
               title: Text("Assignments"),
               onTap: () {
                 if (user is Student) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
+                  ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
                   Navigator.pushNamed(context, '/assignments',
-                      arguments:{
-                        'user': user,
-                        'pieces' : list
-                      });
+                      arguments: {'user': user, 'pieces': list});
                 }
               },
             ),
@@ -75,6 +71,7 @@ class CustomDrawer extends StatelessWidget {
                 title: Text("Dashboard"),
                 onTap: () {
                   stopMetronome?.call();
+                    ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
                   Navigator.pushNamed(context, '/dashboard_conductor',
                       arguments: user);
                 }),
@@ -82,6 +79,7 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
                 title: Text("Add Music"),
                 onTap: () {
+                  ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
                   Navigator.pushNamed(context, '/addMusic', arguments: user);
                   Scaffold.of(context).closeDrawer();
                 }),
