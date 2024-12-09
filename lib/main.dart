@@ -319,6 +319,7 @@ class _MetronomeAppState extends State<MetronomeApp>
       _channelMethod.invokeMethod('stopListening');
       isListening = false;
     });
+ 
   }
 
   void handleSwipe(DragEndDetails details) {
@@ -349,19 +350,19 @@ class _MetronomeAppState extends State<MetronomeApp>
     }
   }
 
-  void toggleVoice()  {
+  void toggleVoice() {
     if (isListening) {
       _channelMethod.invokeMethod('stopListening');
       isListening = false;
     } else {
       _channelMethod.invokeMethod('startListening');
-       isListening = true;
+      isListening = true;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  Scaffold(
       appBar: AppBar(
         title: Text('Metronome App'),
         elevation: 0,
@@ -369,11 +370,10 @@ class _MetronomeAppState extends State<MetronomeApp>
         iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: CustomDrawer(
-        stopMetronome: stopMetronome,
-        user: widget.user,
-        list: pieces,
-        toggleVoice: toggleVoice
-      ),
+          stopMetronome: stopMetronome,
+          user: widget.user,
+          list: pieces,
+          toggleVoice: toggleVoice),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();

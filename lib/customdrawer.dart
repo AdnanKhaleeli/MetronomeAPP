@@ -46,7 +46,9 @@ class CustomDrawer extends StatelessWidget {
                 if (user == null) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
-                  ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
+                  ModalRoute.of(context)?.settings.name == '/'
+                      ? toggleVoice!()
+                      : null;
                   Navigator.pushNamed(context, '/sign_in');
                 }
               },
@@ -60,7 +62,9 @@ class CustomDrawer extends StatelessWidget {
                 if (user is Student) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
-                  ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
+                  ModalRoute.of(context)?.settings.name == '/'
+                      ? toggleVoice!()
+                      : null;
                   Navigator.pushNamed(context, '/assignments',
                       arguments: {'user': user, 'pieces': list});
                 }
@@ -71,7 +75,9 @@ class CustomDrawer extends StatelessWidget {
                 title: Text("Dashboard"),
                 onTap: () {
                   stopMetronome?.call();
-                    ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
+                  ModalRoute.of(context)?.settings.name == '/'
+                      ? toggleVoice!()
+                      : null;
                   Navigator.pushNamed(context, '/dashboard_conductor',
                       arguments: user);
                 }),
@@ -79,7 +85,9 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
                 title: Text("Add Music"),
                 onTap: () {
-                  ModalRoute.of(context)?.settings.name == '/' ? toggleVoice!() : null;
+                  ModalRoute.of(context)?.settings.name == '/'
+                      ? toggleVoice!()
+                      : null;
                   Navigator.pushNamed(context, '/addMusic', arguments: user);
                   Scaffold.of(context).closeDrawer();
                 }),
@@ -95,7 +103,8 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
               title: Text('Logout'),
               onTap: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/');
               },
             ),
         ],
