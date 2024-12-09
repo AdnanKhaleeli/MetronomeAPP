@@ -109,7 +109,6 @@ class _MetronomeAppState extends State<MetronomeApp>
       _soloud = SoLoud.instance;
       await _soloud.init();
 
-      
       sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
       sourceTick = await _soloud.loadAsset('assets/click3.wav');
 
@@ -135,7 +134,6 @@ class _MetronomeAppState extends State<MetronomeApp>
     });
   }
 
- 
   void handleSpeechTextIOS(String text) {
     bool updated = false;
     RegExp regExp = RegExp(r'-?\d+(\.\d+)?');
@@ -150,7 +148,7 @@ class _MetronomeAppState extends State<MetronomeApp>
       'seven': 7,
       'eight': 8,
       'nine': 9,
-      'hundred' : 100
+      'hundred': 100
     };
 
     if (text.contains('stop')) {
@@ -170,6 +168,7 @@ class _MetronomeAppState extends State<MetronomeApp>
       updated = true;
     } else if (text.contains('decrease')) {
       _bpm = (_bpm - 5 >= 40) ? _bpm - 5 : 40;
+      updated = true;
     } else if (text.contains('fast') || text.contains('slow')) {
       bool isFaster = text.contains('fast');
       double adjustment = 0;

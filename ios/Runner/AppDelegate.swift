@@ -73,6 +73,7 @@ import AVFoundation
 
             
             self.audioSession = AVAudioSession.sharedInstance()
+          
             do {
                 // Set the category to allow both playback and recording
                 try self.audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .allowBluetooth])
