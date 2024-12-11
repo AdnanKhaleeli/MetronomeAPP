@@ -6,8 +6,9 @@ plugins {
 }
 
 android {
-    namespace = "com.example.audioplayers"
     namespace = "com.example.metronome"
+
+
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
