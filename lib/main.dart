@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => MetronomeApp(
             user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
+        '/settings': (context) => Settings(),
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
         '/dashboard_conductor': (context) => Dashboard(
@@ -165,10 +166,10 @@ class _MetronomeAppState extends State<MetronomeApp>
       startMetronome(currentSubdivisions);
       updated = true;
     } else if (text.contains('increase')) {
-      _bpm = (_bpm + 5 <= 200) ? _bpm + 5 : 200;
+      _bpm = (_bpm + Settings.increaseValue <= 200) ? _bpm + Settings.increaseValue : 200;
       updated = true;
     } else if (text.contains('decrease')) {
-      _bpm = (_bpm - 5 >= 40) ? _bpm - 5 : 40;
+      _bpm = (_bpm - Settings.decreaseValue >= 40) ? _bpm - Settings.decreaseValue : 40;
       updated = true;
     } else if (text.contains('fast') || text.contains('slow')) {
       bool isFaster = text.contains('fast');

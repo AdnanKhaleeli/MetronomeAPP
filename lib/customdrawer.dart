@@ -93,7 +93,12 @@ class CustomDrawer extends StatelessWidget {
                 }),
           ListTile(
             title: Text('Settings'),
-            onTap: () {},
+            onTap: () {
+              ModalRoute.of(context)?.settings.name == '/'
+                  ? toggleVoice!()
+                  : null;
+              Navigator.pushNamed(context, '/settings');
+            },
           ),
           ListTile(
             title: Text('About'),
