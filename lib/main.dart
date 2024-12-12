@@ -171,6 +171,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void startMetronome(int subdivisions) {
+    _stopListening();
     final double oneBeat = 60 / _bpm;
     final double tickDuration = (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
@@ -210,6 +211,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void _startListening() async {
+    stopMetronome();
     await _speech.listen(
       onResult: _onSpeechResult,
       listenFor: Duration(seconds: 30),
@@ -234,6 +236,36 @@ class _MetronomeAppState extends State<MetronomeApp> {
         startMetronome(currentSubdivisions);
       } else if (_lastWords.toLowerCase().contains('stop')) {
         stopMetronome();
+      }else if (_lastWords.toLowerCase().contains('set to')) {
+        // Extract the BPM value from the command
+        RegExp exp = RegExp(r'set to (\d+)');
+        Match? match = exp.firstMatch(_lastWords.toLowerCase());
+        if (match != null) {
+          String bpmString = match.group(1)!;
+          int? newBpm = int.tryParse(bpmString);
+          if (newBpm != null && newBpm >= 40 && newBpm <= 200) {
+            setState(() {
+              _bpm = newBpm.toDouble();
+              _controller.text = newBpm.toString();
+              stopMetronome();
+              startMetronome(currentSubdivisions);
+            });
+          }
+        }
+      } else if (_lastWords.toLowerCase().contains('increase')) {
+        setState(() {
+          _bpm = (_bpm + 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
+          _controller.text = _bpm.toString();
+          stopMetronome();
+          startMetronome(currentSubdivisions);
+        });
+      } else if (_lastWords.toLowerCase().contains('decrease')) {
+        setState(() {
+          _bpm = (_bpm - 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
+          _controller.text = _bpm.toString();
+          stopMetronome();
+          startMetronome(currentSubdivisions);
+        });
       }
       _stopListening();
       print('Last words recognized: $_lastWords');
