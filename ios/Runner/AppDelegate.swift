@@ -90,7 +90,7 @@ import AVFoundation
 
            
             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-            self.recognitionRequest?.shouldReportPartialResults = true
+            self.recognitionRequest?.shouldReportPartialResults = false
             // Set requiresOnDeviceRecognition based on whether it's supported
             if let speechRecognizer = self.speechRecognizer, speechRecognizer.supportsOnDeviceRecognition {
                 self.recognitionRequest?.requiresOnDeviceRecognition = true
