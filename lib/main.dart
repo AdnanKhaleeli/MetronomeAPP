@@ -16,6 +16,9 @@ import 'PulsingCircleWithNote.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var db = DatabaseHelper();
@@ -95,6 +98,31 @@ class _MetronomeAppState extends State<MetronomeApp>
   var handle = null;
   bool isListening = false;
 
+  // Define available tick sounds
+  final List<String> tickSounds = [
+    'click3.wav',
+    'click2.wav',
+    'weak_tick.wav',
+    'strong_tick.wav',
+    'sub_tick.wav',
+    'up.wav',
+    'down.wav',
+    'claves.wav',
+    'claves2.wav',
+    'hihat.wav',
+    'hihat2.wav',
+    'kick.wav',
+    'low_block.wav',
+    'mid_block.wav',
+    'snare.wav'
+  ];
+
+  String? selectedStrongTick = 'strong_tick.wav';
+  String? selectedWeakTick = 'weak_tick.wav';
+  bool _speechEnabled = false;
+  String _lastWords = '';
+  final SpeechToText _speech = SpeechToText();
+
   final MethodChannel _channelMethod = new MethodChannel("Method");
 
   @override
@@ -133,7 +161,116 @@ class _MetronomeAppState extends State<MetronomeApp>
           }
         });
       }
+
+      if (Platform.isAndroid) {
+        _speech.initialize();
+      }
     });
+  }
+
+  void _startListening() async {
+    stopMetronome();
+    await _speech.listen(
+      onResult: _onSpeechResult,
+      listenFor: Duration(seconds: 30),
+      localeId: 'en_US', // specify your locale
+    );
+    setState(() {});
+  }
+
+  void _stopListening() async {
+    await _speech.stop();
+    setState(() {});
+  }
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      _lastWords = result.recognizedWords;
+    });
+
+    if (result.finalResult) {
+      if (_lastWords.toLowerCase().contains('start')) {
+        startMetronome(currentSubdivisions);
+      } else if (_lastWords.toLowerCase().contains('stop')) {
+        stopMetronome();
+      } else if (_lastWords.toLowerCase().contains('set to')) {
+        // Extract the BPM value from the command
+        RegExp exp = RegExp(r'set to (\d+)');
+        Match? match = exp.firstMatch(_lastWords.toLowerCase());
+        if (match != null) {
+          String bpmString = match.group(1)!;
+          int? newBpm = int.tryParse(bpmString);
+          if (newBpm != null && newBpm >= 40 && newBpm <= 200) {
+            setState(() {
+              _bpm = newBpm.toDouble();
+              _controller.text = newBpm.toString();
+              stopMetronome();
+              startMetronome(currentSubdivisions);
+            });
+          }
+        }
+      } else if (_lastWords.toLowerCase().contains('increase')) {
+        setState(() {
+          _bpm = (_bpm + 2)
+              .clamp(40.0, 200.0); // Ensure BPM stays within valid range
+          _controller.text = _bpm.toString();
+          stopMetronome();
+          startMetronome(currentSubdivisions);
+        });
+      } else if (_lastWords.toLowerCase().contains('decrease')) {
+        setState(() {
+          _bpm = (_bpm - 2)
+              .clamp(40.0, 200.0); // Ensure BPM stays within valid range
+          _controller.text = _bpm.toString();
+          stopMetronome();
+          startMetronome(currentSubdivisions);
+        });
+      }
+      _stopListening();
+      print('Last words recognized: $_lastWords');
+    }
+    print('Last words recognized: $_lastWords');
+  }
+
+  Future<void> updateTickSounds() async {
+    sourceBeat = await _soloud.loadAsset('assets/$selectedStrongTick');
+    sourceTick = await _soloud.loadAsset('assets/$selectedWeakTick');
+  }
+
+  // New method to show the tick sound selection dialog
+  void _showTickSelectionDialog(bool isStrong) async {
+    String? selected = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text(
+              isStrong ? 'Select Strong Tick Sound' : 'Select Weak Tick Sound'),
+          children: tickSounds.map((sound) {
+            return SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, sound);
+              },
+              child: Text(sound),
+            );
+          }).toList(),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        if (isStrong) {
+          selectedStrongTick = selected;
+        } else {
+          selectedWeakTick = selected;
+        }
+      });
+      await updateTickSounds();
+      if (playing) {
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      }
+    }
   }
 
   void handleSpeechTextIOS(String text) {
@@ -166,10 +303,14 @@ class _MetronomeAppState extends State<MetronomeApp>
       startMetronome(currentSubdivisions);
       updated = true;
     } else if (text.contains('increase')) {
-      _bpm = (_bpm + Settings.increaseValue <= 200) ? _bpm + Settings.increaseValue : 200;
+      _bpm = (_bpm + Settings.increaseValue <= 200)
+          ? _bpm + Settings.increaseValue
+          : 200;
       updated = true;
     } else if (text.contains('decrease')) {
-      _bpm = (_bpm - Settings.decreaseValue >= 40) ? _bpm - Settings.decreaseValue : 40;
+      _bpm = (_bpm - Settings.decreaseValue >= 40)
+          ? _bpm - Settings.decreaseValue
+          : 40;
       updated = true;
     } else if (text.contains('fast') || text.contains('slow')) {
       bool isFaster = text.contains('fast');
@@ -268,6 +409,7 @@ class _MetronomeAppState extends State<MetronomeApp>
   }
 
   void startMetronome(int subdivisions) {
+    Platform.isAndroid ? _stopListening() : null;
     final double oneBeat = 60 / _bpm;
     final double tickDuration =
         (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
@@ -320,7 +462,6 @@ class _MetronomeAppState extends State<MetronomeApp>
       _channelMethod.invokeMethod('stopListening');
       isListening = false;
     });
- 
   }
 
   void handleSwipe(DragEndDetails details) {
@@ -363,7 +504,7 @@ class _MetronomeAppState extends State<MetronomeApp>
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('Metronome App'),
         elevation: 0,
@@ -782,10 +923,50 @@ class _MetronomeAppState extends State<MetronomeApp>
                   ),
                 ),
               ),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _showTickSelectionDialog(true),
+                            child: Text(
+                              'Strong Tick: ${selectedStrongTick ?? "N/A"}',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _showTickSelectionDialog(false),
+                            child: Text(
+                              'Weak Tick: ${selectedWeakTick ?? "N/A"}',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20), // Add some space between the rows
+                ],
+              )
             ],
           ),
         ),
       ),
-    );
+      floatingActionButton: Platform.isAndroid ? Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: FloatingActionButton(
+        onPressed: _speechEnabled ? _startListening : null,
+        tooltip: 'Voice Control',
+        child: Icon(_speech.isListening ? Icons.mic : Icons.mic_none),
+      )
+      )
+    : null);
   }
 }
