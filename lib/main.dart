@@ -163,9 +163,16 @@ class _MetronomeAppState extends State<MetronomeApp>
       }
 
       if (Platform.isAndroid) {
-        _speech.initialize();
+        print('Hello');
+        _initSpeech();
       }
     });
+  }
+
+  void _initSpeech() async {
+    _speechEnabled = await _speech.initialize();
+    print(_speechEnabled);
+    setState(() {});
   }
 
   void _startListening() async {
@@ -959,14 +966,18 @@ class _MetronomeAppState extends State<MetronomeApp>
           ),
         ),
       ),
-      floatingActionButton: Platform.isAndroid ? Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: FloatingActionButton(
-        onPressed: _speechEnabled ? _startListening : null,
-        tooltip: 'Voice Control',
-        child: Icon(_speech.isListening ? Icons.mic : Icons.mic_none),
-      )
-      )
-    : null);
+      floatingActionButton: Platform.isAndroid
+          ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Tooltip(
+                message: 'Voice Control',
+                child: FloatingActionButton(
+                  onPressed: _speechEnabled ? _startListening : null,
+                  child: Icon(_speech.isListening ? Icons.mic : Icons.mic_none),
+                ),
+              ),
+            )
+          : null,
+    );
   }
 }
