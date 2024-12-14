@@ -60,6 +60,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/images/progress_bar_screenshot.png
     #0.022 seconds
     - assets/weak_tick.wav
     - assets/sub_tick.wav

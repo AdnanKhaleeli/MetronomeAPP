@@ -18,6 +18,7 @@ import 'dart:io' show Platform;
 
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'about.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
         '/dashboard_conductor': (context) => Dashboard(
             user: ModalRoute.of(context)?.settings.arguments as Conductor),
+        '/about': (context) => About(),
         '/assignments': (context) {
           final Map arguments =
               ModalRoute.of(context)?.settings.arguments as Map;
@@ -233,7 +235,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         setState(() {
           _bpm = (_bpm + increaseVal)
               .clamp(40.0, 200.0); // Ensure BPM stays within valid range
-          _controller.text = _bpm.toString();
+          _controller.text = _bpm.toInt().toString();
           stopMetronome();
           startMetronome(currentSubdivisions);
         });
@@ -241,7 +243,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         setState(() {
           _bpm = (_bpm - deceaseVal)
               .clamp(40.0, 200.0); // Ensure BPM stays within valid range
-          _controller.text = _bpm.toString();
+          _controller.text = _bpm.toInt().toString();
           stopMetronome();
           startMetronome(currentSubdivisions);
         });
