@@ -61,12 +61,23 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/progress_bar_screenshot.png
-    #0.022 seconds
-    - assets/weak_tick.wav
-    - assets/sub_tick.wav
-    - assets/strong_tick.wav
-    - assets/click2.wav
-    - assets/click3.wav
+    - assets/audio/claves.wav
+    - assets/audio/click3.wav
+    - assets/audio/low_block.wav
+    - assets/audio/up.wav
+    - assets/audio/claves2.wav
+    - assets/audio/down.wav
+    - assets/audio/mid_block.wav
+    - assets/audio/weak_tick.wav
+    - assets/audio/click1.wav
+    - assets/audio/hihat.wav
+    - assets/audio/snare.wav
+    - assets/audio/click2.wav
+    - assets/audio/hihat2.wav
+    - assets/audio/strong_tick.wav
+    - assets/audio/click3.ogg
+    - assets/audio/kick.wav
+    - assets/audio/sub_tick.wav
 
 
   # The following line ensures that the Material Icons font is

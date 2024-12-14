@@ -145,8 +145,8 @@ class _MetronomeAppState extends State<MetronomeApp>
       _soloud = SoLoud.instance;
       await _soloud.init();
 
-      sourceBeat = await _soloud.loadAsset('assets/strong_tick.wav');
-      sourceTick = await _soloud.loadAsset('assets/click3.wav');
+      sourceBeat = await _soloud.loadAsset('assets/audio/strong_tick.wav');
+      sourceTick = await _soloud.loadAsset('assets/audio/click3.wav');
 
       if (Platform.isIOS) {
         final permissions = await _channelMethod.invokeMethod('permissions');
@@ -255,8 +255,8 @@ class _MetronomeAppState extends State<MetronomeApp>
   }
 
   Future<void> updateTickSounds() async {
-    sourceBeat = await _soloud.loadAsset('assets/$selectedStrongTick');
-    sourceTick = await _soloud.loadAsset('assets/$selectedWeakTick');
+    sourceBeat = await _soloud.loadAsset('assets/audio/$selectedStrongTick');
+    sourceTick = await _soloud.loadAsset('assets/audio/$selectedWeakTick');
   }
 
   // New method to show the tick sound selection dialog
