@@ -93,12 +93,23 @@ class CustomDrawer extends StatelessWidget {
                 }),
           ListTile(
             title: Text('Settings'),
-            onTap: () {},
+            onTap: () {
+              ModalRoute.of(context)?.settings.name == '/'
+                  ? toggleVoice!()
+                  : null;
+              Navigator.pushNamed(context, '/setting', arguments: user);
+              Scaffold.of(context).closeDrawer();
+            },
           ),
           ListTile(
             title: Text('About'),
-            onTap: () {},
-          ),
+            onTap: () {
+              ModalRoute.of(context)?.settings.name == '/'
+                  ? toggleVoice!()
+                  : null;
+              Navigator.pushNamed(context, '/about', arguments: user);
+              Scaffold.of(context).closeDrawer();
+            }),
           if (user != null)
             ListTile(
               title: Text('Logout'),

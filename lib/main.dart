@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'database.dart';
 import 'user.dart';
 import 'sign_in.dart';
+import 'about.dart';
 import 'settings.dart';
 import 'customdrawer.dart';
 import 'conductorScreens/music.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => MetronomeApp(
             user: ModalRoute.of(context)?.settings.arguments as User?),
+        '/about': (context) => About(),
         '/sign_in': (context) => SignIn(),
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
