@@ -113,9 +113,22 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Details for ${widget.piece['piece_name']}',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Details for ${widget.piece['piece_name']}',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.person, color: Colors.white),
+                      tooltip: 'View all Students' ,
+                      onPressed: () {
+                        // Add your action here
+                        print("Person Icon Pressed");
+                      },
+                    ),
+                  ],
                 ),
               ),
               FutureBuilder<Map<String, double?>>(
@@ -136,7 +149,7 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                         .map((entry) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                               child: Material(
-                                color: Colors.transparent, // Use transparent color for the Material widget
+                                color: Colors.transparent,
                                 child: InkWell(
                                   onTap: () {
                                     List<Map<String, dynamic>> studentTempos = _getStudentTemposForSection(entry.key);
@@ -163,10 +176,10 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                                       title: Text(
                                         entry.value['name'],
                                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.center, // Center the section name
+                                        textAlign: TextAlign.center,
                                       ),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,  // Align the content to center
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Align(
                                             alignment: Alignment.center,
