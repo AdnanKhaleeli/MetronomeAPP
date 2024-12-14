@@ -1,14 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'database.dart';
+import 'user.dart';
 
-class Settings extends StatelessWidget {
-  static int increaseValue = 2;
-  static int decreaseValue = 2;
+class Settings extends StatefulWidget {
+  final User user;
 
-  Settings({super.key});
+  Settings({super.key, required this.user});
 
-  final TextEditingController increaseController = TextEditingController(text: increaseValue.toString());
-  final TextEditingController decreaseController = TextEditingController(text: decreaseValue.toString());
+  @override
+  _SettingsState createState() => _SettingsState();
+}
+
+class _SettingsState extends State<Settings> {
+  late int increaseValue;
+  late int decreaseValue;
+
+  final TextEditingController increaseController = TextEditingController();
+  final TextEditingController decreaseController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeValues();
+  }
+
+  Future<void> _initializeValues() async {
+    int fetchedIncreaseValue =
+        await DatabaseHelper().getIncreaseVal(widget.user);
+    int fetchedDecreaseValue =
+        await DatabaseHelper().getDecreaseVal(widget.user);
+    setState(() {
+      increaseValue = fetchedIncreaseValue;
+      decreaseValue = fetchedDecreaseValue;
+      increaseController.text = increaseValue.toString();
+      decreaseController.text = decreaseValue.toString();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +52,7 @@ class Settings extends StatelessWidget {
             padding: EdgeInsets.all(8.0),
             child: Text(
               "Voice Recognition Default Values",
-              style: TextStyle(
-                fontSize: 24,
-              ),
+              style: TextStyle(fontSize: 24),
             ),
           ),
           Row(
@@ -34,9 +60,7 @@ class Settings extends StatelessWidget {
             children: [
               Text(
                 "Increase",
-                style: TextStyle(
-                  fontSize: 18,
-                ),
+                style: TextStyle(fontSize: 18),
               ),
               SizedBox(width: 8.0),
               SizedBox(
@@ -60,9 +84,7 @@ class Settings extends StatelessWidget {
             children: [
               Text(
                 "Decrease",
-                style: TextStyle(
-                  fontSize: 18,
-                ),
+                style: TextStyle(fontSize: 18),
               ),
               SizedBox(width: 8.0),
               SizedBox(
@@ -82,15 +104,20 @@ class Settings extends StatelessWidget {
           ),
           SizedBox(height: 24.0),
           ElevatedButton(
-            onPressed: () {
-              if (increaseController.text != "" && decreaseController.text != "") {
+            onPressed: () async {
+              if (increaseController.text.isNotEmpty &&
+                  decreaseController.text.isNotEmpty) {
                 int increaseInput = int.parse(increaseController.text);
                 int decreaseInput = int.parse(decreaseController.text);
 
                 if (increaseInput > 0 && decreaseInput > 0) {
-                  increaseValue = increaseInput;
-                  decreaseValue = decreaseInput;
-                  Navigator.pushNamed(context, '/');
+                  setState(() {
+                    DatabaseHelper().setIncreaseVal(widget.user, increaseInput);
+                    DatabaseHelper().setDecreaseVal(widget.user, decreaseInput);
+                    increaseValue = increaseInput;
+                    decreaseValue = decreaseInput;
+                  });
+                  Navigator.pushNamed(context, '/', arguments: widget.user);
                 }
               }
             },

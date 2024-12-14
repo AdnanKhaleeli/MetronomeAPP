@@ -36,12 +36,11 @@ class DatabaseHelper {
     return _db!;
   }
 
-  Future<bool> insertStudent({
-    required String username,
-    required String pwd,
-    required String profilename,
-    required String role
-  }) async {
+  Future<bool> insertStudent(
+      {required String username,
+      required String pwd,
+      required String profilename,
+      required String role}) async {
     if (_db == null) {
       return false;
     }
@@ -63,8 +62,9 @@ class DatabaseHelper {
       'pwd': pwd,
       'profilename': profilename,
       'assigned_music': {},
-      'role' : role,
-      'subgroup_id': null
+      'role': role,
+      'increaseVal': 5,
+      'decreaseVal': 5
     };
 
     await studentsCollection.insert(newStudent);
@@ -111,12 +111,11 @@ class DatabaseHelper {
 
     if (student != null && student['pwd'] == password) {
       return Student(
-        userId: student['_id'],
-        username: student['username'],
-        password: student['pwd'],
-        profileName: student['profilename'] ?? '',
-        role: student['role']
-      );
+          userId: student['_id'],
+          username: student['username'],
+          password: student['pwd'],
+          profileName: student['profilename'] ?? '',
+          role: student['role']);
     } else {
       var conductorCollection = _db!.collection('Conductor');
       var conductor =
@@ -124,12 +123,11 @@ class DatabaseHelper {
 
       if (conductor != null && conductor['pwd'] == password) {
         return Conductor(
-          userId: conductor['_id'],
-          username: conductor['username'],
-          password: conductor['pwd'],
-          profileName: conductor['profilename'],
-          role : conductor['role']
-        );
+            userId: conductor['_id'],
+            username: conductor['username'],
+            password: conductor['pwd'],
+            profileName: conductor['profilename'],
+            role: conductor['role']);
       }
     }
 
@@ -404,7 +402,6 @@ class DatabaseHelper {
 
           if (currentMusicData.length >= 2) {
             currentMusicData[currentSection] = bpm;
-      
 
             var result = await studentsCollection.updateOne(
               where.id(studentID),
@@ -425,7 +422,8 @@ class DatabaseHelper {
     }
   }
 
-  Future<int> getCurrentUserBPMForSection(int sectionIndex, ObjectId studentID, String musicID) async {
+  Future<int> getCurrentUserBPMForSection(
+      int sectionIndex, ObjectId studentID, String musicID) async {
     var studentCollection = db.collection('Student');
 
     var student = await studentCollection.findOne(where.id(studentID));
@@ -433,8 +431,10 @@ class DatabaseHelper {
     Map<String, dynamic> assignedMusic = student!['assigned_music'];
 
     List<dynamic> currentMusicData = assignedMusic[musicID];
-    
-    return currentMusicData[sectionIndex] != "N/A"?  currentMusicData[sectionIndex].toInt() : -1;
+
+    return currentMusicData[sectionIndex] != "N/A"
+        ? currentMusicData[sectionIndex].toInt()
+        : -1;
   }
 
   Future<List<Map<String, dynamic>>> getAllStudents() async {
@@ -456,7 +456,9 @@ class DatabaseHelper {
       };
     }).toList();
   }
-  Future<void> assignStudentsToMusic(ObjectId musicId, List<ObjectId> studentIds) async {
+
+  Future<void> assignStudentsToMusic(
+      ObjectId musicId, List<ObjectId> studentIds) async {
     if (_db == null) {
       throw Exception('Database not initialized. Call init() first.');
     }
@@ -466,10 +468,47 @@ class DatabaseHelper {
     // Update the music piece to include the list of student IDs
     await musicCollection.update(
         where.eq('_id', musicId),
-        modify.set('assigned_students', studentIds.map((id) => id.toHexString()).toList())
-    );
+        modify.set(
+            'assigned_students', studentIds.map((id) => id.oid).toList()));
   }
 
+  Future<DbCollection> _getUserCollection(dynamic user) async {
+    if (user is Student) {
+      return _db!.collection('Student');
+    } else if (user is Conductor) {
+      return _db!.collection('Conductor');
+    } else {
+      throw Exception('Unknown user type');
+    }
+  }
 
+  Future<int> getIncreaseVal(User user) async {
+    var userCollection = await _getUserCollection(user);
+    var userData = await userCollection.findOne(where.eq('_id', user.userId));
+    return userData!['increaseVal'] ?? 0;
+  }
 
+  Future<int> getDecreaseVal(User user) async {
+    var userCollection = await _getUserCollection(user);
+    var userData = await userCollection.findOne(where.eq('_id', user.userId));
+    return userData!['decreaseVal'] ?? 0;
+  }
+
+  Future<bool> setIncreaseVal(User user, int val) async {
+    var userCollection = await _getUserCollection(user);
+    var result = await userCollection.updateOne(
+      where.eq('_id', user.userId),
+      modify.set('increaseVal', val),
+    );
+    return result.isAcknowledged;
+  }
+
+  Future<bool> setDecreaseVal(User user, int val) async {
+    var userCollection = await _getUserCollection(user);
+    var result = await userCollection.updateOne(
+      where.eq('_id', user.userId),
+      modify.set('decreaseVal', val),
+    );
+    return result.isAcknowledged;
+  }
 }

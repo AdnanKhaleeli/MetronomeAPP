@@ -36,7 +36,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => MetronomeApp(
             user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
-        '/settings': (context) => Settings(),
+        '/settings': (context) =>
+            Settings(user: ModalRoute.of(context)?.settings.arguments as User),
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
         '/dashboard_conductor': (context) => Dashboard(
@@ -97,6 +98,9 @@ class _MetronomeAppState extends State<MetronomeApp>
   dynamic? _currentSectionBpm = 0;
   var handle = null;
   bool isListening = false;
+
+  int increaseVal = 5;
+  int deceaseVal = 5;
 
   // Define available tick sounds
   final List<String> tickSounds = [
@@ -163,10 +167,19 @@ class _MetronomeAppState extends State<MetronomeApp>
       }
 
       if (Platform.isAndroid) {
-        print('Hello');
         _initSpeech();
       }
     });
+
+    if (widget.user != null) {
+      _fetchUserValues();
+    }
+  }
+
+  void _fetchUserValues() async {
+    increaseVal = await DatabaseHelper().getIncreaseVal(widget.user!);
+    deceaseVal = await DatabaseHelper().getDecreaseVal(widget.user!);
+    setState(() {});
   }
 
   void _initSpeech() async {
@@ -218,7 +231,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         }
       } else if (_lastWords.toLowerCase().contains('increase')) {
         setState(() {
-          _bpm = (_bpm + 2)
+          _bpm = (_bpm + increaseVal)
               .clamp(40.0, 200.0); // Ensure BPM stays within valid range
           _controller.text = _bpm.toString();
           stopMetronome();
@@ -226,7 +239,7 @@ class _MetronomeAppState extends State<MetronomeApp>
         });
       } else if (_lastWords.toLowerCase().contains('decrease')) {
         setState(() {
-          _bpm = (_bpm - 2)
+          _bpm = (_bpm - deceaseVal)
               .clamp(40.0, 200.0); // Ensure BPM stays within valid range
           _controller.text = _bpm.toString();
           stopMetronome();
@@ -280,7 +293,7 @@ class _MetronomeAppState extends State<MetronomeApp>
     }
   }
 
-  void handleSpeechTextIOS(String text) {
+  void handleSpeechTextIOS(String text) async {
     bool updated = false;
     RegExp regExp = RegExp(r'-?\d+(\.\d+)?');
     const numberWords = {
@@ -310,14 +323,10 @@ class _MetronomeAppState extends State<MetronomeApp>
       startMetronome(currentSubdivisions);
       updated = true;
     } else if (text.contains('increase')) {
-      _bpm = (_bpm + Settings.increaseValue <= 200)
-          ? _bpm + Settings.increaseValue
-          : 200;
+      _bpm = (_bpm + increaseVal <= 200) ? _bpm + increaseVal : 200;
       updated = true;
     } else if (text.contains('decrease')) {
-      _bpm = (_bpm - Settings.decreaseValue >= 40)
-          ? _bpm - Settings.decreaseValue
-          : 40;
+      _bpm = (_bpm - deceaseVal >= 40) ? _bpm - deceaseVal : 40;
       updated = true;
     } else if (text.contains('fast') || text.contains('slow')) {
       bool isFaster = text.contains('fast');
