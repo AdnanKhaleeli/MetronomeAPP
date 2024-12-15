@@ -147,6 +147,7 @@ class DatabaseHelper {
         '_id': student['_id'],
         'username': student['username'],
         'profilename': student['profilename'],
+        'assigned_music' : student['assigned_music']
       };
     }).toList();
   }

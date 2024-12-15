@@ -50,9 +50,12 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
     // Check each student if they have this music assigned
     for (var student in _students) {
       var studentId = student['_id'] as mongo.ObjectId;
-      var musicIds = student['assigned_music']?.keys.map((key) => mongo.ObjectId.fromHexString(key)).toList() ?? [];
+      var assignedMusic = student['assigned_music'] as Map<String, dynamic>?;
 
-      if (musicIds.contains(widget.musicId)) {
+      print('Assigned students $assignedMusic');
+
+      // Check if the assigned music contains the current musicId
+      if (assignedMusic != null && assignedMusic.containsKey(widget.musicId.oid)) {
         setState(() {
           _selectedStudents.add(studentId);
         });
@@ -64,10 +67,10 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
     setState(() {
       if (_selectedStudents.contains(studentId)) {
         _selectedStudents.remove(studentId);
-        _removeMusicFromStudent(studentId);  // Remove the music assignment
+        _removeMusicFromStudent(studentId); // Remove the music assignment
       } else {
         _selectedStudents.add(studentId);
-        _assignMusicToStudent(studentId);  // Assign the music
+        _assignMusicToStudent(studentId); // Assign the music
       }
 
       // Update the "Select All" checkbox based on the current selection
@@ -79,12 +82,12 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
     setState(() {
       if (_allSelected) {
         _selectedStudents.clear();
-        _removeMusicFromAllStudents();  // Remove music from all students
+        _removeMusicFromAllStudents(); // Remove music from all students
       } else {
         _selectedStudents = _students
             .map((student) => student['_id'] as mongo.ObjectId)
             .toList();
-        _assignMusicToAllStudents();  // Assign music to all students
+        _assignMusicToAllStudents(); // Assign music to all students
       }
       _allSelected = !_allSelected;
     });
