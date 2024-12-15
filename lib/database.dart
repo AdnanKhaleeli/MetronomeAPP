@@ -63,8 +63,8 @@ class DatabaseHelper {
       'profilename': profilename,
       'assigned_music': {},
       'role': role,
-      'increaseVal': 5,
-      'decreaseVal': 5
+      'increaseVal': 2,
+      'decreaseVal': 2
     };
 
     await studentsCollection.insert(newStudent);
