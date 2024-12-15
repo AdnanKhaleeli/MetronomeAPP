@@ -185,6 +185,18 @@ class DatabaseHelper {
     }
 
     var studentsCollection = _db!.collection('Student');
+
+
+    var student = await studentsCollection.findOne(where.eq('_id', studentId));
+
+    if (student == null) {
+      return false;
+    }
+
+    if (student['assigned_music'] != null && student['assigned_music'].containsKey(musicId.oid)) {
+      return false;
+    }
+
     List<dynamic> initialArray = List<dynamic>.filled(numSections, 'N/A');
 
     var result = await studentsCollection.updateOne(
@@ -193,6 +205,17 @@ class DatabaseHelper {
     );
 
     return result.isAcknowledged;
+  }
+
+  Future<ObjectId?> getStudentID(String username) async {
+    var studentsCollection = _db!.collection('Student');
+    var student =
+        await studentsCollection.findOne(where.eq('username', username));
+
+    if (student != null) {
+      return student['_id'];
+    }
+    return null;
   }
 
   Future<List<String>> getPieceNamesForUser(User user) async {

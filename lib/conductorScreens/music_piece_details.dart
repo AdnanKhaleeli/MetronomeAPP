@@ -1,17 +1,16 @@
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../database.dart';
 import 'section_details_page.dart';
-import 'view_students.dart';
 import '../user.dart';
 import '../customdrawer.dart';
 
 class MusicPieceDetails extends StatefulWidget {
   final Map<String, dynamic> piece;
-  Conductor conductor;
+  final Conductor conductor;
 
-   MusicPieceDetails(
-      {Key? key, required this.piece, required this.conductor})
+  MusicPieceDetails({Key? key, required this.piece, required this.conductor})
       : super(key: key);
 
   @override
@@ -26,6 +25,7 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
   void initState() {
     super.initState();
     _averageTempoFuture = _fetchStudentsAndCalculateAverageTempo();
+    print(widget.piece);
   }
 
   Future<Map<String, double?>> _fetchStudentsAndCalculateAverageTempo() async {
@@ -112,6 +112,91 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
     return sectionStudentTempos;
   }
 
+  void _showAddStudentDialog() {
+    TextEditingController usernameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Add Student"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(hintText: "Enter username"),
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                String username = usernameController.text;
+                print("Submitted click");
+
+                mongo.ObjectId? studentId =
+                    await DatabaseHelper().getStudentID(username);
+
+                if (studentId == null) {
+                  Navigator.of(context).pop();
+                  _showErrorDialog('Username not found');
+                } else {
+                  print(widget.piece['sections'].length);
+                  print(widget.piece['_id'].oid);
+                  bool result = await DatabaseHelper().addMusicToStudent(
+                    studentId,
+                    widget.piece['_id'],
+                    widget.piece['sections'].length,
+                  );
+
+                  if (!result) {
+                    Navigator.of(context).pop();
+                    _showErrorDialog('Music already added to student');
+                  } else {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Successfully added music to student')),
+                    );
+                  }
+                }
+              },
+              child: Text('Add Student'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Error"),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,18 +221,10 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                     IconButton(
-                      icon: Icon(Icons.person, color: Colors.white),
-                      tooltip: 'View all Students',
+                      icon: Icon(Icons.add, color: Colors.white),
+                      tooltip: 'Add Student',
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ViewStudents(songId: widget.piece['_id'], conductor: widget.conductor,),
-                    
-                          ),
-                        );
-                        print("Person Icon Pressed");
+                        _showAddStudentDialog();
                       },
                     ),
                   ],
