@@ -145,7 +145,7 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                     IconButton(
-                      icon: Icon(Icons.add, color: Colors.white),
+                      icon: Icon(Icons.person, color: Colors.white),
                       tooltip: 'Add Student',
                       onPressed: () {
                         Navigator.push(

@@ -52,7 +52,6 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
       var studentId = student['_id'] as mongo.ObjectId;
       var assignedMusic = student['assigned_music'] as Map<String, dynamic>?;
 
-      print('Assigned students $assignedMusic');
 
       // Check if the assigned music contains the current musicId
       if (assignedMusic != null && assignedMusic.containsKey(widget.musicId.oid)) {
@@ -123,7 +122,7 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Music assigned to selected students!')),
+      SnackBar(content: Text('Music updated for the Students')),
     );
 
     Navigator.pop(context);
@@ -161,7 +160,7 @@ class _SelectStudentsPageState extends State<SelectStudentsPage> {
                 var studentId = student['_id'] as mongo.ObjectId;
 
                 return ListTile(
-                  title: Text(student['profilename']),
+                  title: Text(student['profilename'] + ' (@' + student['username'] + ')'),
                   trailing: Checkbox(
                     value: _selectedStudents.contains(studentId),
                     onChanged: (bool? value) {
