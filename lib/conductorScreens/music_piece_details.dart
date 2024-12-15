@@ -2,11 +2,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../database.dart';
 import 'section_details_page.dart';
+import 'view_students.dart';
+import '../user.dart';
+import '../customdrawer.dart';
 
 class MusicPieceDetails extends StatefulWidget {
   final Map<String, dynamic> piece;
+  Conductor conductor;
 
-  const MusicPieceDetails({Key? key, required this.piece}) : super(key: key);
+   MusicPieceDetails(
+      {Key? key, required this.piece, required this.conductor})
+      : super(key: key);
 
   @override
   _MusicPieceDetailsState createState() => _MusicPieceDetailsState();
@@ -42,9 +48,12 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
         continue;
       }
 
-      var studentTempos = student['assigned_music'][musicIDStr] as List<dynamic>;
+      var studentTempos =
+          student['assigned_music'][musicIDStr] as List<dynamic>;
 
-      for (int sectionIndex = 0; sectionIndex < studentTempos.length; sectionIndex++) {
+      for (int sectionIndex = 0;
+          sectionIndex < studentTempos.length;
+          sectionIndex++) {
         var tempo = studentTempos[sectionIndex];
 
         if (tempo == "N/A" || tempo == 0) {
@@ -56,10 +65,13 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
 
           String sectionId = 'section_${sectionIndex + 1}';
 
-          sectionTempoSums.update(sectionId, (list) => [...list, tempoInt], ifAbsent: () => [tempoInt]);
-          sectionCount.update(sectionId, (count) => count + 1, ifAbsent: () => 1);
+          sectionTempoSums.update(sectionId, (list) => [...list, tempoInt],
+              ifAbsent: () => [tempoInt]);
+          sectionCount.update(sectionId, (count) => count + 1,
+              ifAbsent: () => 1);
         } catch (e) {
-          print("Error parsing tempo for student $studentID, section $sectionIndex: $e");
+          print(
+              "Error parsing tempo for student $studentID, section $sectionIndex: $e");
         }
       }
     }
@@ -68,7 +80,8 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
       if (value.isEmpty) {
         return MapEntry(key, null);
       } else {
-        return MapEntry(key, value.reduce((a, b) => a + b) / sectionCount[key]!);
+        return MapEntry(
+            key, value.reduce((a, b) => a + b) / sectionCount[key]!);
       }
     });
   }
@@ -79,7 +92,8 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
     for (var student in _students) {
       var musicID = widget.piece['_id'].oid.toString();
 
-      if (student['assigned_music'] == null || !student['assigned_music'].containsKey(musicID)) {
+      if (student['assigned_music'] == null ||
+          !student['assigned_music'].containsKey(musicID)) {
         continue;
       }
 
@@ -105,6 +119,7 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
         title: Text(widget.piece['piece_name']),
         backgroundColor: Colors.black,
       ),
+      drawer: CustomDrawer(user: widget.conductor),
       body: Container(
         color: Colors.black,
         child: SingleChildScrollView(
@@ -122,9 +137,16 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                     ),
                     IconButton(
                       icon: Icon(Icons.person, color: Colors.white),
-                      tooltip: 'View all Students' ,
+                      tooltip: 'View all Students',
                       onPressed: () {
-                        // Add your action here
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ViewStudents(songId: widget.piece['_id'], conductor: widget.conductor,),
+                    
+                          ),
+                        );
                         print("Person Icon Pressed");
                       },
                     ),
@@ -138,7 +160,8 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white));
+                    return Text('Error: ${snapshot.error}',
+                        style: TextStyle(color: Colors.white));
                   }
 
                   var averageTempos = snapshot.data ?? {};
@@ -147,21 +170,26 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                         .asMap()
                         .entries
                         .map((entry) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16.0),
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
                                   onTap: () {
-                                    List<Map<String, dynamic>> studentTempos = _getStudentTemposForSection(entry.key);
+                                    List<Map<String, dynamic>> studentTempos =
+                                        _getStudentTemposForSection(entry.key);
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => SectionDetailsPage(
-                                          average: averageTempos['section_${entry.key + 1}'],
+                                        builder: (context) =>
+                                            SectionDetailsPage(
+                                          average: averageTempos[
+                                              'section_${entry.key + 1}'],
                                           goalTempo: entry.value['bpm'],
                                           songName: widget.piece['piece_name'],
                                           sectionName: entry.value['name'],
                                           studentTempos: studentTempos,
+                                          conductor: widget.conductor,
                                         ),
                                       ),
                                     );
@@ -170,29 +198,36 @@ class _MusicPieceDetailsState extends State<MusicPieceDetails> {
                                     decoration: BoxDecoration(
                                       color: Colors.black54,
                                       borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
+                                      border: Border.all(
+                                          color: Colors.white.withOpacity(0.4),
+                                          width: 1),
                                     ),
                                     child: ListTile(
                                       title: Text(
                                         entry.value['name'],
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
                                         textAlign: TextAlign.center,
                                       ),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Align(
                                             alignment: Alignment.center,
                                             child: Text(
                                               'Goal Tempo: ${entry.value['bpm']}',
-                                              style: TextStyle(color: Colors.grey[400]),
+                                              style: TextStyle(
+                                                  color: Colors.grey[400]),
                                             ),
                                           ),
                                           Align(
                                             alignment: Alignment.center,
                                             child: Text(
                                               'Average Tempo: ${averageTempos['section_${entry.key + 1}']?.toStringAsFixed(2) ?? 'N/A'}',
-                                              style: TextStyle(color: Colors.grey[400]),
+                                              style: TextStyle(
+                                                  color: Colors.grey[400]),
                                             ),
                                           ),
                                         ],

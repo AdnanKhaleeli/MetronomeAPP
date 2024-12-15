@@ -70,7 +70,7 @@ class _DashboardState extends State<Dashboard> {
                         onTap: () => {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => MusicPieceDetails(piece: music),
+                              builder: (context) => MusicPieceDetails(piece: music, conductor: widget.user,),
                             ),
                           ),
                         },
