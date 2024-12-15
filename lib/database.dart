@@ -186,14 +186,14 @@ class DatabaseHelper {
 
     var studentsCollection = _db!.collection('Student');
 
-
     var student = await studentsCollection.findOne(where.eq('_id', studentId));
 
     if (student == null) {
       return false;
     }
 
-    if (student['assigned_music'] != null && student['assigned_music'].containsKey(musicId.oid)) {
+    if (student['assigned_music'] != null &&
+        student['assigned_music'].containsKey(musicId.oid)) {
       return false;
     }
 
@@ -534,4 +534,35 @@ class DatabaseHelper {
     );
     return result.isAcknowledged;
   }
+
+  Future<bool> removeMusicFromStudent(ObjectId studentId, ObjectId musicId) async {
+  if (_db == null) {
+    throw Exception('Database not initialized. Call init() first.');
+  }
+
+  var studentsCollection = _db!.collection('Student');
+  var student = await studentsCollection.findOne(where.eq('_id', studentId));
+
+  if (student == null) {
+    return false;
+  }
+
+  var assignedMusic = student['assigned_music'];
+
+  if (assignedMusic != null && assignedMusic.containsKey(musicId.oid)) {
+    var result = await studentsCollection.updateOne(
+      where.eq('_id', studentId),
+      modify.unset('assigned_music.${musicId.oid}'),
+    );
+
+    return result.isAcknowledged;
+  } else {
+    return false;
+  }
+}
+
+
+
+
+  
 }

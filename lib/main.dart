@@ -15,6 +15,7 @@ import 'CircularBPMIndicator.dart';
 import 'PulsingCircleWithNote.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
+import 'package:mongo_dart/mongo_dart.dart' as mongo;
 
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
