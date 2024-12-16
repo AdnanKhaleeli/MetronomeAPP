@@ -15,6 +15,10 @@ import 'CircularBPMIndicator.dart';
 import 'PulsingCircleWithNote.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:vosk_flutter/vosk_flutter.dart';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +72,6 @@ class MetronomeApp extends StatefulWidget {
 }
 
 class _MetronomeAppState extends State<MetronomeApp> {
-  static const platform = MethodChannel('samples.flutter.dev/speech');
   double _bpm = 60;
   Timer? _timer;
   bool playing = false;
@@ -87,7 +90,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
   final SpeechToText _speech = SpeechToText();
   bool _speechEnabled = false;
   String _lastWords = '';
-
+  bool _isListening = false;
+  SpeechService? speechService;
   // Define available tick sounds
   final List<String> tickSounds = [
     'click3.wav',
@@ -114,9 +118,13 @@ class _MetronomeAppState extends State<MetronomeApp> {
   var sourceBeat; // Will be changed based on strong tick selection
   var sourceTick; // Will be changed based on weak tick selection
 
+
   @override
   void initState() {
     super.initState();
+    _initVosk();
+    //_startContinuousListening();
+
     if (widget.user is Student) {
       fetchPieces();
     }
@@ -128,6 +136,53 @@ class _MetronomeAppState extends State<MetronomeApp> {
     });
     _initSpeech();
   }
+
+  void _initVosk() async {
+    final vosk = VoskFlutterPlugin.instance();
+    final modelLoader = ModelLoader();
+
+    try {
+      final modelDescription = await modelLoader.loadModelsList().then(
+              (modelsList) => modelsList.firstWhere((model) => model.name == 'vosk-model-small-en-us-0.15'));
+      final modelPath = await modelLoader.loadFromNetwork(modelDescription.url);
+      final model = await vosk.createModel(modelPath);
+      print("heres the model path"+modelPath);
+      final recognizer = await vosk.createRecognizer(model: model, sampleRate: 16000);
+      print("vosk has been lodead");
+      if (Platform.isAndroid) {
+        print("i am android");
+        speechService = await vosk.initSpeechService(recognizer); // Store speechService in a class variable
+        print("Speech service initialized"); // This shows that the service is ready
+
+        await speechService?.start(); // Start listening
+        print("I am now listening"); // This will indicate that listening has started
+
+        speechService?.onResult().listen((result) {
+          print(result);
+          List<String> keyphrases = ["metronome", "that you know", "match you know", "metro know"];
+
+          for (String phrase in keyphrases) {
+            if (result.toLowerCase().contains(phrase)) {
+              _onKeywordDetected();
+              break; // Stop checking once a match is found if desired
+            }
+          }
+        });
+      } else {
+        // For non-Android platforms, implement file-based recognition if needed.
+      }
+    } catch (e) {
+      print('Vosk initialization error: $e');
+    }
+  }
+
+  void _onKeywordDetected() {
+    // Here you can trigger whatever action you want when "metronome" is detected.
+    print('Keyword "metronome" detected!');
+    _startListening();
+    // Maybe start the metronome or show some UI feedback?
+  }
+
 
   void _initSpeech() async {
     _speechEnabled = await _speech.initialize();
@@ -142,7 +197,18 @@ class _MetronomeAppState extends State<MetronomeApp> {
     }
     setState(() {});
   }
+  Future<void> _startContinuousListening() async {
+    // Assuming you have initialized vosk and speechService in _initVosk
+    if (Platform.isAndroid) {
+      await speechService?.start();
+    }
+  }
 
+  Future<void> _stopContinuousListening() async {
+    if (Platform.isAndroid) {
+      await speechService?.stop();
+    }
+  }
   void fetchSections(Piece piece) async {
     setState(() {
       selectedPiece = piece;
@@ -212,6 +278,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
   void _startListening() async {
     stopMetronome();
+    _stopContinuousListening();
     await _speech.listen(
       onResult: _onSpeechResult,
       listenFor: Duration(seconds: 30),
@@ -224,6 +291,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void _stopListening() async {
     await _speech.stop();
     setState(() {});
+    _startContinuousListening();
+
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
@@ -271,6 +340,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
       print('Last words recognized: $_lastWords');
     }
     print('Last words recognized: $_lastWords');
+    _stopListening();
+
   }
 
   void handleSwipe(DragEndDetails details) {
