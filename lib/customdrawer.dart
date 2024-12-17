@@ -49,7 +49,7 @@ class CustomDrawer extends StatelessWidget {
                   ModalRoute.of(context)?.settings.name == '/'
                       ? toggleVoice!()
                       : null;
-                  Navigator.pushNamed(context, '/sign_in');
+                  Navigator.pushReplacementNamed(context, '/sign_in');
                 }
               },
             ),
