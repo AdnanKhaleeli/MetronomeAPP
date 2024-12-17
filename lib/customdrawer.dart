@@ -88,7 +88,7 @@ class CustomDrawer extends StatelessWidget {
                   ModalRoute.of(context)?.settings.name == '/'
                       ? toggleVoice!()
                       : null;
-                  Navigator.pushNamed(context, '/addMusic', arguments: user);
+                  Navigator.pushReplacementNamed(context, '/addMusic', arguments: user);
                   Scaffold.of(context).closeDrawer();
                 }),
           if (user != null)

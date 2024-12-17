@@ -478,8 +478,10 @@ class _MetronomeAppState extends State<MetronomeApp>
     super.dispose();
 
     Future.delayed(Duration.zero, () async {
-      _channelMethod.invokeMethod('stopListening');
-      isListening = false;
+      if (Platform.isIOS) {
+        _channelMethod.invokeMethod('stopListening');
+        isListening = false;
+      }
     });
   }
 
