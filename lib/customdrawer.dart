@@ -36,7 +36,7 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
               title: Text('Home'),
               onTap: () {
-                Navigator.pushReplacementNamed(context, '/', arguments: user);
+                Navigator.pushNamed(context, '/', arguments: user);
               },
             ),
           if (ModalRoute.of(context)?.settings.name != '/sign_in')
