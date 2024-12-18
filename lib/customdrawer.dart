@@ -39,7 +39,7 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pushNamed(context, '/', arguments: user);
               },
             ),
-          if (ModalRoute.of(context)?.settings.name != '/sign_in')
+          if (ModalRoute.of(context)?.settings.name != '/sign_in' && user == null)
             ListTile(
               title: Text(user == null ? 'Sign Up / Log In' : 'Profile'),
               onTap: () {
@@ -88,7 +88,7 @@ class CustomDrawer extends StatelessWidget {
                   ModalRoute.of(context)?.settings.name == '/'
                       ? toggleVoice!()
                       : null;
-                  Navigator.pushReplacementNamed(context, '/addMusic', arguments: user);
+                  Navigator.pushNamed(context, '/addMusic', arguments: user);
                   Scaffold.of(context).closeDrawer();
                 }),
           if (user != null)

@@ -43,88 +43,85 @@ class _SettingsState extends State<Settings> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
-        backgroundColor: Colors.red,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Voice Recognition Default Values",
-              style: TextStyle(fontSize: 24),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Text(
+                  "Default Values",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              _buildRow(
+                label: "Increase",
+                controller: increaseController,
+              ),
+              SizedBox(height: 20.0),
+              _buildRow(
+                label: "Decrease",
+                controller: decreaseController,
+              ),
+              SizedBox(height: 30.0),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (increaseController.text.isNotEmpty &&
+                        decreaseController.text.isNotEmpty) {
+                      int increaseInput = int.parse(increaseController.text);
+                      int decreaseInput = int.parse(decreaseController.text);
+
+                      if (increaseInput > 0 && decreaseInput > 0) {
+                        setState(() {
+                          DatabaseHelper().setIncreaseVal(widget.user, increaseInput);
+                          DatabaseHelper().setDecreaseVal(widget.user, decreaseInput);
+                          increaseValue = increaseInput;
+                          decreaseValue = decreaseInput;
+                        });
+                        Navigator.pushNamed(context, '/', arguments: widget.user);
+                      }
+                    }
+                  },
+                  child: Text("Save"),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRow({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 18),
+        ),
+        SizedBox(
+          width: 150,
+          child: TextField(
+            controller: controller,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(2),
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Increase",
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(width: 8.0),
-              SizedBox(
-                width: 150,
-                child: TextField(
-                  controller: increaseController,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(2),
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Decrease",
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(width: 8.0),
-              SizedBox(
-                width: 150,
-                child: TextField(
-                  controller: decreaseController,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(2),
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24.0),
-          ElevatedButton(
-            onPressed: () async {
-              if (increaseController.text.isNotEmpty &&
-                  decreaseController.text.isNotEmpty) {
-                int increaseInput = int.parse(increaseController.text);
-                int decreaseInput = int.parse(decreaseController.text);
-
-                if (increaseInput > 0 && decreaseInput > 0) {
-                  setState(() {
-                    DatabaseHelper().setIncreaseVal(widget.user, increaseInput);
-                    DatabaseHelper().setDecreaseVal(widget.user, decreaseInput);
-                    increaseValue = increaseInput;
-                    decreaseValue = decreaseInput;
-                  });
-                  Navigator.pushNamed(context, '/', arguments: widget.user);
-                }
-              }
-            },
-            child: Text("Save"),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
