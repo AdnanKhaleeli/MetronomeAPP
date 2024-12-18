@@ -99,7 +99,7 @@ class CustomDrawer extends StatelessWidget {
                     ? toggleVoice!()
                     : null;
                 stopMetronome?.call();
-                Navigator.pushNamed(
+                Navigator.pushReplacementNamed(
                   context,
                   '/settings',
                   arguments: user,

@@ -101,7 +101,7 @@ class _MetronomeAppState extends State<MetronomeApp>
   dynamic? _currentSectionBpm = 0;
   var handle = null;
   bool isListening = false;
-
+  bool _isInitialized = false;
   int increaseVal = 2;
   int decreaseVal = 2;
 
@@ -134,6 +134,7 @@ class _MetronomeAppState extends State<MetronomeApp>
 
   @override
   void initState() {
+    _initializeApp();
     super.initState();
 
     _controller.text = _bpm.toInt().toString();
@@ -253,6 +254,13 @@ class _MetronomeAppState extends State<MetronomeApp>
       print('Last words recognized: $_lastWords');
     }
     print('Last words recognized: $_lastWords');
+  }
+
+  Future<void> _initializeApp() async {
+    await Future.delayed(Duration(seconds: 2)); // Simulating async work
+    setState(() {
+      _isInitialized = true;
+    });
   }
 
   Future<void> updateTickSounds() async {
@@ -525,7 +533,7 @@ class _MetronomeAppState extends State<MetronomeApp>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return _isInitialized? Scaffold(
       appBar: AppBar(
         title: Text('Metronome App'),
         elevation: 0,
@@ -992,6 +1000,17 @@ class _MetronomeAppState extends State<MetronomeApp>
               ),
             )
           : null,
+    ) : Scaffold(
+      body: Center(
+        child: const Text(
+          'Loading...',  // The text to display
+          style: TextStyle(
+            fontSize: 36,  // Makes the text fairly large
+            fontWeight: FontWeight.bold,  // Optional: Makes the text bold
+            color: Colors.white,  // Text color
+          ),
+        ),
+      ),
     );
   }
 }
