@@ -17,8 +17,9 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:vosk_flutter/vosk_flutter.dart';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:words_numbers/words_numbers.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +93,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
   String _lastWords = '';
   bool _isListening = false;
   SpeechService? speechService;
+
   // Define available tick sounds
   final List<String> tickSounds = [
     'click3.wav',
@@ -123,7 +125,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
   void initState() {
     super.initState();
     _initVosk();
-    //_startContinuousListening();
 
     if (widget.user is Student) {
       fetchPieces();
@@ -150,15 +151,17 @@ class _MetronomeAppState extends State<MetronomeApp> {
       final recognizer = await vosk.createRecognizer(model: model, sampleRate: 16000);
       print("vosk has been lodead");
       if (Platform.isAndroid) {
-        print("i am android");
-        speechService = await vosk.initSpeechService(recognizer); // Store speechService in a class variable
-        print("Speech service initialized"); // This shows that the service is ready
+        if (await Permission.microphone.request().isGranted) {
+          print("i am android");
+          speechService = await vosk.initSpeechService(recognizer);
+          print("Speech service initialized"); // This shows that the service is ready
 
         await speechService?.start(); // Start listening
         print("I am now listening"); // This will indicate that listening has started
 
         speechService?.onResult().listen((result) {
-          print(result);
+          _handleVoskResult(result);
+/*
           List<String> keyphrases = ["metronome", "that you know", "match you know", "metro know"];
 
           for (String phrase in keyphrases) {
@@ -166,29 +169,266 @@ class _MetronomeAppState extends State<MetronomeApp> {
               _onKeywordDetected();
               break; // Stop checking once a match is found if desired
             }
-          }
+          }*/
         });
-      } else {
+      }
+        else {
+          print("Microphone permission denied");}}
+          else {
         // For non-Android platforms, implement file-based recognition if needed.
       }
     } catch (e) {
       print('Vosk initialization error: $e');
     }
   }
+  void _handleVoskResult(String result) {
+    setState(() {
+      _lastWords = result;
+    });
+    String processedResult = _convertWordsToNumber(result);
 
-  void _onKeywordDetected() {
-    // Here you can trigger whatever action you want when "metronome" is detected.
-    print('Keyword "metronome" detected!');
-    _startListening();
-    // Maybe start the metronome or show some UI feedback?
+    if ((result.toLowerCase().contains('start')) ||(result.toLowerCase().contains('stark')) ) {
+      startMetronome(currentSubdivisions);
+    } else if (result.toLowerCase().contains('stop')) {
+      stopMetronome();
+    } else if ((processedResult.toLowerCase().contains('tempo'))) {
+      // Extract the BPM value from the command, now using processedResult
+      RegExp exp = RegExp(r'tempo (\d+)');
+      Match? match = exp.firstMatch(processedResult.toLowerCase());
+      if (match != null) {
+        String bpmString = match.group(1)!;
+        int? newBpm = int.tryParse(bpmString);
+        if (newBpm != null && newBpm >= 40 && newBpm <= 200) {
+          setState(() {
+            _bpm = newBpm.toDouble();
+            _controller.text = newBpm.toString();
+            stopMetronome();
+            startMetronome(currentSubdivisions);
+          });
+        }
+      }
+    }else if ((processedResult.toLowerCase().contains('tampa'))) {
+      // Extract the BPM value from the command, now using processedResult
+      RegExp exp = RegExp(r'tempo (\d+)');
+      Match? match = exp.firstMatch(processedResult.toLowerCase());
+      if (match != null) {
+        String bpmString = match.group(1)!;
+        int? newBpm = int.tryParse(bpmString);
+        if (newBpm != null && newBpm >= 40 && newBpm <= 200) {
+          setState(() {
+            _bpm = newBpm.toDouble();
+            _controller.text = newBpm.toString();
+            stopMetronome();
+            startMetronome(currentSubdivisions);
+          });
+        }
+      }
+    } else if (result.toLowerCase().contains('increase')) {
+      setState(() {
+        _bpm = (_bpm + 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
+        _controller.text = _bpm.toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    } else if (result.toLowerCase().contains('decrease')) {
+      setState(() {
+        _bpm = (_bpm - 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
+        _controller.text = _bpm.toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    }else if (processedResult.toLowerCase().contains('division 1')) {
+      setState(() {
+        selectedSubdivisionIndex = 0;
+        currentSubdivisions = 1;
+      stopMetronome();
+      startMetronome(currentSubdivisions);
+      });
+
+    }else if (processedResult.toLowerCase().contains('division 2')) {
+      setState(() {
+        selectedSubdivisionIndex = 1;
+
+        currentSubdivisions = 2;
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    }else if (processedResult.toLowerCase().contains('division to')) {
+      setState(() {
+        selectedSubdivisionIndex = 1;
+
+        currentSubdivisions = 2;
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    }else if (processedResult.toLowerCase().contains('division 3')) {
+      setState(() {
+        selectedSubdivisionIndex = 2;
+
+        currentSubdivisions = 3;
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    }else if (processedResult.toLowerCase().contains('division 4')) {
+      setState(() {
+        selectedSubdivisionIndex = 3;
+
+        currentSubdivisions = 4;
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    }else if (processedResult.toLowerCase().contains('division for')) {
+      setState(() {
+        selectedSubdivisionIndex = 3;
+
+        currentSubdivisions = 4;
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      });
+    }else if (processedResult.toLowerCase().contains('fast')) {
+      RegExp exp = RegExp(r'fast (\d+)');
+      Match? match = exp.firstMatch(processedResult.toLowerCase());
+      if (match != null) {
+        String changeString = match.group(1)!;
+        int? change = int.tryParse(changeString);
+        if (change != null) {
+          setState(() {
+            _bpm = (_bpm + change).clamp(40.0, 200.0);
+            _controller.text = _bpm.toString();
+            stopMetronome();
+            startMetronome(currentSubdivisions);
+          });
+        }
+      }
+    }else if (processedResult.toLowerCase().contains('vast')) {
+      RegExp exp = RegExp(r'fast (\d+)');
+      Match? match = exp.firstMatch(processedResult.toLowerCase());
+      if (match != null) {
+        String changeString = match.group(1)!;
+        int? change = int.tryParse(changeString);
+        if (change != null) {
+          setState(() {
+            _bpm = (_bpm + change).clamp(40.0, 200.0);
+            _controller.text = _bpm.toString();
+            stopMetronome();
+            startMetronome(currentSubdivisions);
+          });
+        }
+      }
+    } else if (processedResult.toLowerCase().contains('slow')) {
+      RegExp exp = RegExp(r'slow (\d+)');
+      Match? match = exp.firstMatch(processedResult.toLowerCase());
+      if (match != null) {
+        String changeString = match.group(1)!;
+        int? change = int.tryParse(changeString);
+        if (change != null) {
+          setState(() {
+            _bpm = (_bpm - change).clamp(40.0, 200.0);
+            _controller.text = _bpm.toString();
+            stopMetronome();
+            startMetronome(currentSubdivisions);
+          });
+        }
+      }
+    }
+
+    print('Last words recognized: $processedResult');
   }
+  String _convertWordsToNumber(String text) {
+    Map<String, String> wordToNumber = {
+      'zero': '0',
+      'one': '1',
+      'two': '2',
+      'three': '3',
+      'four': '4',
+      'five': '5',
+      'six': '6',
+      'seven': '7',
+      'eight': '8',
+      'nine': '9',
+      'ten': '10',
+      'eleven': '11',
+      'twelve': '12',
+      'thirteen': '13',
+      'fourteen': '14',
+      'fifteen': '15',
+      'sixteen': '16',
+      'seventeen': '17',
+      'eighteen': '18',
+      'nineteen': '19',
+      'twenty': '20',
+      'thirty': '30',
+      'forty': '40',
+      'fifty': '50',
+      'sixty': '60',
+      'seventy': '70',
+      'eighty': '80',
+      'ninety': '90',
+      'hundred': '100',
+    };
+
+    // Add mappings for numbers from 21 to 99
+    for (int i = 21; i <= 99; i++) {
+      String word;
+      if (i % 10 == 0) {
+        word = '${["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"][i ~/ 10]}';
+      } else {
+        word = '${["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"][i ~/ 10]}-' +
+            '${["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"][i % 10]}';
+      }
+      wordToNumber[word.toLowerCase()] = i.toString();
+    }
+
+    // Add mappings for numbers from 100 to 200
+    for (int i = 100; i <= 200; i++) {
+      if (i == 100) {
+        wordToNumber['one hundred'] = '100';
+      } else {
+        String word = 'one hundred ' + (i % 100 == 0 ? '' :
+        (i % 100 < 20 ? wordToNumber.keys.firstWhere((key) => wordToNumber[key] == (i % 100).toString(), orElse: () => '') :
+        '${["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"][(i % 100) ~/ 10]}' +
+            (i % 10 == 0 ? '' : '-${["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"][i % 10]}')));
+        wordToNumber[word.toLowerCase()] = i.toString();
+      }
+    }
+
+    // Sort keys by length descending to replace longer phrases first
+    final sortedKeys = wordToNumber.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+
+    // Use a loop to replace words with numbers, considering context
+    for (var key in sortedKeys) {
+      // This regex looks for whole words, but also allows for spaces between tens and units
+      text = text.replaceAll(RegExp(r'\b' + key.replaceAll('-', r'\s*') + r'\b', caseSensitive: false), wordToNumber[key]!);
+    }
+
+    return text;
+  }
+
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _soloud.disposeSource(sourceBeat);
+    _pageController.dispose();
+    handle = null;
+    _soloud.deinit();
+    speechService?.stop();
+
+    speechService?.dispose();
+
+    super.dispose();
+
+    Future.delayed(Duration.zero, () async {
+
+    });
+  }
+
 
 
   void _initSpeech() async {
     _speechEnabled = await _speech.initialize();
     setState(() {});
   }
-
   void fetchPieces() async {
     if (widget.user != null) {
       pieces = await DatabaseHelper().getPiecesForUser(widget.user!);
@@ -237,7 +477,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
   }
 
   void startMetronome(int subdivisions) {
-    _stopListening();
     final double oneBeat = 60 / _bpm;
     final double tickDuration = (subdivisions == 1) ? oneBeat : oneBeat / subdivisions;
 
@@ -276,73 +515,6 @@ class _MetronomeAppState extends State<MetronomeApp> {
     }
   }
 
-  void _startListening() async {
-    stopMetronome();
-    _stopContinuousListening();
-    await _speech.listen(
-      onResult: _onSpeechResult,
-      listenFor: Duration(seconds: 30),
-      partialResults: false,
-      localeId: 'en_US', // specify your locale
-    );
-    setState(() {});
-  }
-
-  void _stopListening() async {
-    await _speech.stop();
-    setState(() {});
-    _startContinuousListening();
-
-  }
-
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    setState(() {
-      _lastWords = result.recognizedWords;
-    });
-
-    if (result.finalResult) {
-      if (_lastWords.toLowerCase().contains('start')) {
-        startMetronome(currentSubdivisions);
-      } else if (_lastWords.toLowerCase().contains('stop')) {
-        stopMetronome();
-      }else if (_lastWords.toLowerCase().contains('set to')) {
-        // Extract the BPM value from the command
-        RegExp exp = RegExp(r'set to (\d+)');
-        Match? match = exp.firstMatch(_lastWords.toLowerCase());
-        if (match != null) {
-          String bpmString = match.group(1)!;
-          int? newBpm = int.tryParse(bpmString);
-          if (newBpm != null && newBpm >= 40 && newBpm <= 200) {
-            setState(() {
-              _bpm = newBpm.toDouble();
-              _controller.text = newBpm.toString();
-              stopMetronome();
-              startMetronome(currentSubdivisions);
-            });
-          }
-        }
-      } else if (_lastWords.toLowerCase().contains('increase')) {
-        setState(() {
-          _bpm = (_bpm + 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
-          _controller.text = _bpm.toString();
-          stopMetronome();
-          startMetronome(currentSubdivisions);
-        });
-      } else if (_lastWords.toLowerCase().contains('decrease')) {
-        setState(() {
-          _bpm = (_bpm - 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
-          _controller.text = _bpm.toString();
-          stopMetronome();
-          startMetronome(currentSubdivisions);
-        });
-      }
-      _stopListening();
-      print('Last words recognized: $_lastWords');
-    }
-    print('Last words recognized: $_lastWords');
-    _stopListening();
-
-  }
 
   void handleSwipe(DragEndDetails details) {
     if (details.velocity.pixelsPerSecond.dx > 0) {
@@ -822,14 +994,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
           ],
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: FloatingActionButton(
-          onPressed: _speechEnabled ? _startListening : null,
-          tooltip: 'Voice Control',
-          child: Icon(_speech.isListening ? Icons.mic : Icons.mic_none),
-        ),
-      ),
+
     );
   }
 }

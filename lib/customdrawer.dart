@@ -40,7 +40,7 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
               title: Text('Home'),
               onTap: () {
-                Navigator.pushReplacementNamed(context, '/', arguments: user);
+                Navigator.pushNamed(context, '/', arguments: user);
               },
             ),
           if (ModalRoute.of(context)?.settings.name != '/sign_in')
@@ -50,7 +50,7 @@ class CustomDrawer extends StatelessWidget {
                 if (user == null) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
-                  Navigator.pushNamed(context, '/sign_in');
+                  Navigator.pushReplacementNamed(context, '/sign_in');
                 }
               },
             ),
