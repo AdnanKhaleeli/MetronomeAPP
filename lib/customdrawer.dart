@@ -88,7 +88,7 @@ class CustomDrawer extends StatelessWidget {
               onTap: () {
 
                 stopMetronome?.call();
-                Navigator.pushNamed(
+                Navigator.pushReplacementNamed(
                   context,
                   '/settings',
                   arguments: user,

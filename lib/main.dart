@@ -20,6 +20,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:words_numbers/words_numbers.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'about.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +39,13 @@ class MyApp extends StatelessWidget {
         '/': (context) => MetronomeApp(
             user: ModalRoute.of(context)?.settings.arguments as User?),
         '/sign_in': (context) => SignIn(),
+        '/settings': (context) =>
+            Settings(user: ModalRoute.of(context)?.settings.arguments as User),
         '/addMusic': (context) => AddMusic(
             user: ModalRoute.of(context)!.settings.arguments as Conductor),
         '/dashboard_conductor': (context) => Dashboard(
             user: ModalRoute.of(context)?.settings.arguments as Conductor),
+        '/about': (context) => About(),
         '/assignments': (context) {
           final Map arguments =
           ModalRoute.of(context)?.settings.arguments as Map;
@@ -93,7 +97,8 @@ class _MetronomeAppState extends State<MetronomeApp> {
   String _lastWords = '';
   bool _isListening = false;
   SpeechService? speechService;
-
+  int increaseVal = 2;
+  int decreaseVal = 2;
   // Define available tick sounds
   final List<String> tickSounds = [
     'click3.wav',
@@ -136,6 +141,9 @@ class _MetronomeAppState extends State<MetronomeApp> {
       await updateTickSounds();
     });
     _initSpeech();
+    if (widget.user != null) {
+      _fetchUserValues();
+    }
   }
 
   void _initVosk() async {
@@ -225,14 +233,14 @@ class _MetronomeAppState extends State<MetronomeApp> {
       }
     } else if (result.toLowerCase().contains('increase')) {
       setState(() {
-        _bpm = (_bpm + 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
+        _bpm = (_bpm + increaseVal).clamp(40.0, 200.0); // Ensure BPM stays within valid range
         _controller.text = _bpm.toString();
         stopMetronome();
         startMetronome(currentSubdivisions);
       });
     } else if (result.toLowerCase().contains('decrease')) {
       setState(() {
-        _bpm = (_bpm - 2).clamp(40.0, 200.0); // Ensure BPM stays within valid range
+        _bpm = (_bpm - decreaseVal ).clamp(40.0, 200.0); // Ensure BPM stays within valid range
         _controller.text = _bpm.toString();
         stopMetronome();
         startMetronome(currentSubdivisions);
@@ -571,10 +579,14 @@ class _MetronomeAppState extends State<MetronomeApp> {
       }
     }
   }
-
+  void _fetchUserValues() async {
+    increaseVal = await DatabaseHelper().getIncreaseVal(widget.user!);
+    decreaseVal = await DatabaseHelper().getDecreaseVal(widget.user!);
+    setState(() {});
+  }
   Future<void> updateTickSounds() async {
-    sourceBeat = await _soloud.loadAsset('assets/$selectedStrongTick');
-    sourceTick = await _soloud.loadAsset('assets/$selectedWeakTick');
+    sourceBeat = await _soloud.loadAsset('assets/audio/$selectedStrongTick');
+    sourceTick = await _soloud.loadAsset('assets/audio/$selectedWeakTick');
   }
 
   // New method to show the tick sound selection dialog
@@ -616,410 +628,456 @@ class _MetronomeAppState extends State<MetronomeApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Metronome App'),
-        centerTitle: true,
-        backgroundColor: Colors.red[400],
+        title: Text('Metronome App'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: CustomDrawer(
-        stopMetronome: stopMetronome,
-        user: widget.user,
-        list: pieces,
-      ),
+          stopMetronome: stopMetronome,
+          user: widget.user,
+          list: pieces),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
         },
         onHorizontalDragEnd: handleSwipe,
         behavior: HitTestBehavior.translucent,
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          children: [
-            if (widget.user is Student && goalBpm != null)
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.user is Student && goalBpm != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      CircularBPMIndicator(
+                        currentBpm: _bpm,
+                        goalBpm: goalBpm!.toDouble(),
+                        savedBpm: _currentSectionBpm?.toDouble(),
+                      ),
+                      SizedBox(width: 20),
+                      if (_currentSectionBpm != null &&
+                          _currentSectionBpm != "N/A" &&
+                          goalBpm != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start, // Align text to the left
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Goal BPM:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  goalBpm?.toString() ?? 'N/A',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: goalBpm != null
+                                        ? Colors.white
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10), // Add space between columns
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Confirmed BPM:',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  _currentSectionBpm!.toInt() == -1
+                                      ? 'N/A'
+                                      : _currentSectionBpm!.toInt().toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: (_currentSectionBpm!.toDouble() >=
+                                        goalBpm ||
+                                        _currentSectionBpm! == -1)
+                                        ? Colors.green
+                                        : (_currentSectionBpm!.toDouble() >=
+                                        (goalBpm! - 10))
+                                        ? Colors.yellow
+                                        : Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                    ],
+                  ),
+                ),
+              if (widget.user is! Student ||
+                  pieces.isEmpty ||
+                  selectedPiece == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: PulsingCircleWithNote(
+                    size: 150.0,
+                    bpm: _bpm,
+                    playing: playing,
+                  ),
+                ),
+              if (widget.user is Student)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: DropdownButton<Piece>(
+                    value: selectedPiece,
+                    hint: Text(pieces.isEmpty
+                        ? 'No pieces assigned '
+                        : 'Select a Piece'),
+                    items: pieces.map((Piece piece) {
+                      return DropdownMenuItem<Piece>(
+                        value: piece,
+                        child: Text(piece.pieceName),
+                      );
+                    }).toList(),
+                    onChanged: (Piece? newValue) {
+                      setState(() {
+                        selectedPiece = newValue;
+                        fetchSections(newValue!);
+                      });
+                    },
+                  ),
+                ),
+              if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Container(
+                    height: 50,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: selectedPiece!.sections.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentSectionIndex = index;
+                          selectedSection = selectedPiece!.sections[index];
+                          fetchBpmForSection(selectedSection!);
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return Center(
+                          child: Text(
+                            selectedPiece!.sections[index].sectionName,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              if (widget.user is Student && selectedPiece != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          ElevatedButton(
+                              onPressed: () async {
+                                await DatabaseHelper().updateStudentBPM(
+                                    'N/A',
+                                    widget.user!.userId,
+                                    selectedPiece!.pieceId,
+                                    _currentSectionIndex);
+
+                                setState(() {
+                                  _currentSectionBpm = -1;
+                                });
+                              },
+                              child: Text('N/A')),
+                          ElevatedButton(
+                              onPressed: () async {
+                                await DatabaseHelper().updateStudentBPM(
+                                    _bpm,
+                                    widget.user!.userId,
+                                    selectedPiece!.pieceId,
+                                    _currentSectionIndex);
+
+                                setState(() {
+                                  _currentSectionBpm = _bpm;
+                                });
+                              },
+                              child: Text('Confirm BPM')),
+                        ]),
+                  ),
+                ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: CircularBPMIndicator(
-                  currentBpm: _bpm,
-                  goalBpm: goalBpm!.toDouble(),
-                  savedBpm: _currentSectionBpm?.toDouble(),
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          if (_bpm > 40) {
+                            _bpm -= 1;
+                            _controller.text = _bpm.toInt().toString();
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          }
+                        });
+                      },
+                      child: Text("-"),
+                    ),
+                    SizedBox(
+                      width: 150,
+                      child: TextField(
+                        controller: _controller,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          labelText: 'BPM',
+                          labelStyle: TextStyle(color: Colors.white),
+                        ),
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(3),
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        onChanged: (value) {
+                          int? bpmInput = int.tryParse(value);
+                          if (bpmInput != null &&
+                              bpmInput >= 40 &&
+                              bpmInput <= 200) {
+                            setState(() {
+                              _bpm = bpmInput.toDouble();
+                              stopMetronome();
+                              startMetronome(currentSubdivisions);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          if (_bpm < 200) {
+                            _bpm += 1;
+                            _controller.text = _bpm.toInt().toString();
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          }
+                        });
+                      },
+                      child: Text("+"),
+                    ),
+                  ],
                 ),
               ),
-            if (widget.user == null || widget.user is Conductor)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: PulsingCircleWithNote(
-                  size: 150.0,
-                  bpm: _bpm,
-                  playing: playing,
-                ),
-              ),
-            if (widget.user is Student)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: DropdownButton<Piece>(
-                  value: selectedPiece,
-                  hint: Text('Select a Piece'),
-                  items: pieces.map((Piece piece) {
-                    return DropdownMenuItem<Piece>(
-                      value: piece,
-                      child: Text(piece.pieceName),
-                    );
-                  }).toList(),
-                  onChanged: (Piece? newValue) {
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Slider(
+                  min: 40,
+                  max: 200,
+                  value: _bpm,
+                  onChanged: (newBPM) {
                     setState(() {
-                      selectedPiece = newValue;
-                      fetchSections(newValue!);
+                      stopMetronome();
+                      _bpm = newBPM;
+                      _controller.text = newBPM.toInt().toString();
+
+                      startMetronome(currentSubdivisions);
                     });
                   },
                 ),
               ),
-            if (selectedPiece != null && selectedPiece!.sections.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: Container(
-                  height: 50,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: selectedPiece!.sections.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentSectionIndex = index;
-                        selectedSection = selectedPiece!.sections[index];
-                        fetchBpmForSection(selectedSection!);
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      return Center(
-                        child: Text(
-                          selectedPiece!.sections[index].sectionName,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (playing) {
+                          stopMetronome();
+                        } else {
+                          startMetronome(currentSubdivisions);
+                        }
+                      },
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            playing ? Icons.pause : Icons.play_arrow,
                             color: Colors.white,
+                            size: 40,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            if (_currentSectionBpm != null &&
-                _currentSectionBpm != "N/A" &&
-                goalBpm != null)
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: DataTable(
-                  columnSpacing: 20.0,
-                  columns: const <DataColumn>[
-                    DataColumn(
-                      label: Text(
-                        'Confirmed BPM',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                    ),
-                    DataColumn(
-                      label: Text(
-                        'Goal BPM',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                    ),
-                  ],
-                  rows: [
-                    DataRow(
-                      cells: [
-                        DataCell(
-                          Text(
-                            _currentSectionBpm!.toInt() == -1
-                                ? 'N/A'
-                                : _currentSectionBpm!.toInt().toString(),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: (_currentSectionBpm!.toDouble() >=
-                                  goalBpm ||
-                                  _currentSectionBpm! == -1)
-                                  ? Colors.green
-                                  : (_currentSectionBpm!.toDouble() >=
-                                  (goalBpm! - 10))
-                                  ? Colors.yellow
-                                  : Colors.red,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            goalBpm?.toString() ?? 'N/A',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: goalBpm != null
-                                  ? Colors.white
-                                  : Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
               ),
-            if (widget.user is Student && selectedPiece != null)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: Center(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
+                    children: [
                       ElevatedButton(
-                        onPressed: () async {
-                          await DatabaseHelper().updateStudentBPM(
-                              'N/A',
-                              widget.user!.userId,
-                              selectedPiece!.pieceId,
-                              _currentSectionIndex);
-
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 0
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
                           setState(() {
-                            _currentSectionBpm = -1;
+                            selectedSubdivisionIndex = 0;
+                            currentSubdivisions = 1;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
                           });
                         },
-                        child: Text('N/A'),
+                        child: Text('♩',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () async {
-                          await DatabaseHelper().updateStudentBPM(
-                              _bpm,
-                              widget.user!.userId,
-                              selectedPiece!.pieceId,
-                              _currentSectionIndex);
-
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 1
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
                           setState(() {
-                            _currentSectionBpm = _bpm;
+                            selectedSubdivisionIndex = 1;
+                            currentSubdivisions = 2;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
                           });
                         },
-                        child: Text('Confirm BPM'),
+                        child: Text('♪',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 2
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 2;
+                            currentSubdivisions = 3;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('♫',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: selectedSubdivisionIndex == 3
+                                ? Colors.red
+                                : Colors.white,
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5),
+                        onPressed: () {
+                          setState(() {
+                            selectedSubdivisionIndex = 3;
+                            currentSubdivisions = 4;
+                            stopMetronome();
+                            startMetronome(currentSubdivisions);
+                          });
+                        },
+                        child: Text('♬',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22)),
                       ),
                     ],
                   ),
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_bpm > 40) {
-                          _bpm -= 1;
-                          _controller.text = _bpm.toInt().toString();
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        }
-                      });
-                    },
-                    child: Text("-"),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    width: 120,
-                    child: TextField(
-                      controller: _controller,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'BPM',
-                      ),
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(3),
-                        FilteringTextInputFormatter.digitsOnly,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _showTickSelectionDialog(true),
+                            child: Text(
+                              'Strong Tick: ${selectedStrongTick ?? "N/A"}',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => _showTickSelectionDialog(false),
+                            child: Text(
+                              'Weak Tick: ${selectedWeakTick ?? "N/A"}',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                       ],
-                      onChanged: (value) {
-                        int? bpmInput = int.tryParse(value);
-                        if (bpmInput != null &&
-                            bpmInput >= 40 &&
-                            bpmInput <= 200) {
-                          setState(() {
-                            _bpm = bpmInput.toDouble();
-                            stopMetronome();
-                            startMetronome(currentSubdivisions);
-                          });
-                        }
-                      },
                     ),
                   ),
-                  SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_bpm < 200) {
-                          _bpm += 1;
-                          _controller.text = _bpm.toInt().toString();
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        }
-                      });
-                    },
-                    child: Text("+"),
-                  ),
+                  SizedBox(height: 20), // Add some space between the rows
                 ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Slider(
-                min: 40,
-                max: 200,
-                value: _bpm,
-                onChanged: (newBPM) {
-                  setState(() {
-                    stopMetronome();
-                    _bpm = newBPM;
-                    _controller.text = newBPM.toInt().toString();
-
-                    startMetronome(currentSubdivisions);
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Center(
-                child: GestureDetector(
-                  onTap: () {
-                    if (playing) {
-                      stopMetronome();
-                    } else {
-                      startMetronome(currentSubdivisions);
-                    }
-                  },
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        playing ? Icons.pause : Icons.play_arrow,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 0
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 0;
-                          currentSubdivisions = 1;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('♩'),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 1
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 1;
-                          currentSubdivisions = 2;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('♪'),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 2
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 2;
-                          currentSubdivisions = 3;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('♫'),
-                    ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: selectedSubdivisionIndex == 3
-                              ? Colors.red
-                              : Colors.white,
-                          foregroundColor: Colors.black),
-                      onPressed: () {
-                        setState(() {
-                          selectedSubdivisionIndex = 3;
-                          currentSubdivisions = 4;
-                          stopMetronome();
-                          startMetronome(currentSubdivisions);
-                        });
-                      },
-                      child: Text('♬'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _showTickSelectionDialog(true),
-                      child: Text(
-                        'Strong Tick: ${selectedStrongTick ?? "N/A"}',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _showTickSelectionDialog(false),
-                      child: Text(
-                        'Weak Tick: ${selectedWeakTick ?? "N/A"}',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+              )
+            ],
+          ),
         ),
       ),
 
