@@ -9,11 +9,7 @@ class CustomDrawer extends StatelessWidget {
   User? user;
   List<Piece>? list;
 
-  CustomDrawer({
-    this.stopMetronome,
-    this.user,
-    this.list
-  });
+  CustomDrawer({this.stopMetronome, this.user, this.list});
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +19,7 @@ class CustomDrawer extends StatelessWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(user != null ? user!.getProfileName() : "Guest"),
-            accountEmail:
-                Text(user != null ? user!.role : ""),
+            accountEmail: Text(user != null ? user!.role : ""),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
@@ -50,23 +45,23 @@ class CustomDrawer extends StatelessWidget {
                 if (user == null) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
+
                   Navigator.pushReplacementNamed(context, '/sign_in');
                 }
               },
             ),
           if (ModalRoute.of(context)?.settings.name != '/assignments' &&
-              user != null && user is Student)
+              user != null &&
+              user is Student)
             ListTile(
               title: Text("Assignments"),
               onTap: () {
                 if (user is Student) {
                   Scaffold.of(context).closeDrawer();
                   stopMetronome?.call();
+
                   Navigator.pushNamed(context, '/assignments',
-                      arguments:{
-                        'user': user,
-                        'pieces' : list
-                      });
+                      arguments: {'user': user, 'pieces': list});
                 }
               },
             ),
@@ -75,6 +70,7 @@ class CustomDrawer extends StatelessWidget {
                 title: Text("Dashboard"),
                 onTap: () {
                   stopMetronome?.call();
+
                   Navigator.pushNamed(context, '/dashboard_conductor',
                       arguments: user);
                 }),
@@ -82,22 +78,36 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
                 title: Text("Add Music"),
                 onTap: () {
-                  Navigator.pushNamed(context, '/addMusic', arguments: user);
+
+                  Navigator.pushReplacementNamed(context, '/addMusic', arguments: user);
                   Scaffold.of(context).closeDrawer();
                 }),
-          ListTile(
-            title: Text('Settings'),
-            onTap: () {},
-          ),
+          if (user != null)
+            ListTile(
+              title: Text('Settings'),
+              onTap: () {
+
+                stopMetronome?.call();
+                Navigator.pushNamed(
+                  context,
+                  '/settings',
+                  arguments: user,
+                );
+              },
+            ),
           ListTile(
             title: Text('About'),
-            onTap: () {},
+            onTap: () {
+              stopMetronome?.call();
+              Navigator.pushNamed(context, '/about');
+            },
           ),
           if (user != null)
             ListTile(
               title: Text('Logout'),
               onTap: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/');
               },
             ),
         ],

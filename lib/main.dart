@@ -189,7 +189,7 @@ class _MetronomeAppState extends State<MetronomeApp> {
 
     if ((result.toLowerCase().contains('start')) ||(result.toLowerCase().contains('stark')) ) {
       startMetronome(currentSubdivisions);
-    } else if (result.toLowerCase().contains('stop')) {
+    } else if ((result.toLowerCase().contains('stop')) ||(result.toLowerCase().contains('stock')) ) {
       stopMetronome();
     } else if ((processedResult.toLowerCase().contains('tempo'))) {
       // Extract the BPM value from the command, now using processedResult
@@ -330,7 +330,35 @@ class _MetronomeAppState extends State<MetronomeApp> {
           });
         }
       }
-    }
+    }else if (processedResult.toLowerCase().contains('slow for')) {
+      setState(() {
+        _bpm = (_bpm - 4).clamp(40.0, 200.0);
+        _controller.text = _bpm.toInt().toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      }
+      );}else if (processedResult.toLowerCase().contains('fast for')) {
+      setState(() {
+        _bpm = (_bpm + 4).clamp(40.0, 200.0);
+        _controller.text = _bpm.toInt().toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      }
+      );}else if (processedResult.toLowerCase().contains('slow to')) {
+      setState(() {
+        _bpm = (_bpm - 2).clamp(40.0, 200.0);
+        _controller.text = _bpm.toInt().toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      }
+      );}else if (processedResult.toLowerCase().contains('fast to')) {
+      setState(() {
+        _bpm = (_bpm + 2).clamp(40.0, 200.0);
+        _controller.text = _bpm.toInt().toString();
+        stopMetronome();
+        startMetronome(currentSubdivisions);
+      }
+      );}
 
     print('Last words recognized: $processedResult');
   }

@@ -16,9 +16,10 @@ class SignIn extends StatelessWidget {
         backgroundColor: Colors.red[400],
       ),
       drawer: CustomDrawer(user: null),
-      body: Center(
-        child: Column(
-          children: [LogIn()],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: LogIn(),
         ),
       ),
     );
@@ -38,7 +39,7 @@ class _LogInState extends State<LogIn> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
   final TextEditingController _profileController = TextEditingController();
-  String? selectedRole;  // For role selection
+  String? selectedRole;
   List<String> roles = [
     'Soprano Cornet', 'Solo Cornet', 'Repiano Cornet', 'Second Cornet', 'Third Cornet',
     'Flugelhorn', 'Solo Horn', 'Horn 1', 'Horn 2', 'Baritone 1', 'Baritone 2',
@@ -106,7 +107,7 @@ class _LogInState extends State<LogIn> {
               if (value == null || value.isEmpty) {
                 return 'Please enter a username';
               }
-              return null; // Assume valid for now
+              return null;
             },
             onChanged: (value) async {
               if (value.isNotEmpty && sign_up) {
@@ -133,7 +134,7 @@ class _LogInState extends State<LogIn> {
               if (value == null || value.isEmpty) {
                 return 'Please enter a password';
               }
-              return null; // Assume valid for now
+              return null;
             },
           ),
         ),
@@ -188,7 +189,6 @@ class _LogInState extends State<LogIn> {
         ElevatedButton(
           onPressed: () async {
             if (sign_up) {
-              // Sign-up logic
               if (_formKey.currentState!.validate()) {
                 bool isUnique =
                     await _isUsernameUnique(_userNameController.text);
@@ -203,7 +203,7 @@ class _LogInState extends State<LogIn> {
                   username: _userNameController.text,
                   pwd: _pwdController.text,
                   profilename: _profileController.text,
-                  role: selectedRole ?? '', // Add the selected role here
+                  role: selectedRole ?? '',
                 );
 
                 var userID = await db.getUserID(_userNameController.text);
@@ -213,7 +213,7 @@ class _LogInState extends State<LogIn> {
                     username: _userNameController.text,
                     password: _pwdController.text,
                     profileName: _profileController.text,
-                    role: selectedRole ?? '',  // Include the role for the user
+                    role: selectedRole ?? '',
                   );
 
                   Navigator.pushReplacement(
@@ -225,7 +225,6 @@ class _LogInState extends State<LogIn> {
                 }
               }
             } else {
-              // Login logic
               if (_formKey.currentState!.validate()) {
                 var db = DatabaseHelper();
                 await db.init();

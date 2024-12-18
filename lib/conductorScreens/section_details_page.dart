@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../user.dart';
+import '../customdrawer.dart';
 
 class SectionDetailsPage extends StatelessWidget {
   final String? sectionName;
@@ -6,15 +8,17 @@ class SectionDetailsPage extends StatelessWidget {
   final int goalTempo;
   final double? average;
   final List<Map<String, dynamic>> studentTempos;
+  Conductor conductor;
 
-  const SectionDetailsPage({
-    Key? key,
-    required this.sectionName,
-    required this.songName,
-    required this.goalTempo,
-    required this.studentTempos,
-    required this.average,
-  }) : super(key: key);
+  SectionDetailsPage(
+      {Key? key,
+      required this.sectionName,
+      required this.songName,
+      required this.goalTempo,
+      required this.studentTempos,
+      required this.average,
+      required this.conductor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +28,14 @@ class SectionDetailsPage extends StatelessWidget {
     Color averageTempoColor;
     if (average != null) {
       if (average! >= goalTempo) {
-        averageTempoColor = Colors.green; // Average tempo greater than or equal to goal
+        averageTempoColor =
+            Colors.green; // Average tempo greater than or equal to goal
       } else if (average! >= goalTempo - 10) {
-        averageTempoColor = Colors.yellow; // Average tempo within 10 of the goal
+        averageTempoColor =
+            Colors.yellow; // Average tempo within 10 of the goal
       } else {
-        averageTempoColor = Colors.red; // Average tempo below goal by more than 10
+        averageTempoColor =
+            Colors.red; // Average tempo below goal by more than 10
       }
     } else {
       averageTempoColor = Colors.white; // Default color if average is null
@@ -40,6 +47,7 @@ class SectionDetailsPage extends StatelessWidget {
         backgroundColor: Colors.black,
         elevation: 4.0,
       ),
+      drawer: CustomDrawer(user: conductor),
       body: Container(
         color: Colors.black,
         child: ListView.builder(
@@ -77,7 +85,8 @@ class SectionDetailsPage extends StatelessWidget {
             } else {
               // Regular ListTile for student tempos
               final student = studentTempos[index - 1];
-              int studentTempo = student['tempo'] != null ? student['tempo'].toInt() : 0;
+              int studentTempo =
+                  student['tempo'] != null ? student['tempo'].toInt() : 0;
 
               // Set the color based on the student's tempo compared to the goal tempo
               Color tempoColor;
@@ -90,11 +99,13 @@ class SectionDetailsPage extends StatelessWidget {
               }
 
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: Card(
                   color: Colors.black54,
                   elevation: 4.0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0)),
                   child: ListTile(
                     contentPadding: EdgeInsets.all(16.0),
                     title: Row(
@@ -102,7 +113,8 @@ class SectionDetailsPage extends StatelessWidget {
                       children: [
                         Text(
                           student['name'] ?? 'Unknown',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Tempo: ${studentTempo.toString()}',
