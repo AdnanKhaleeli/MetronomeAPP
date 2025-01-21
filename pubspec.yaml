@@ -78,6 +78,7 @@ flutter:
     - assets/audio/click3.ogg
     - assets/audio/kick.wav
     - assets/audio/sub_tick.wav
+    - assets/images/Atlantic_Brass_Band.png
 
 
   # The following line ensures that the Material Icons font is

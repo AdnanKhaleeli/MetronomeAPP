@@ -138,11 +138,10 @@ import AVFoundation
                 } else if let error = error {
                     print("Recognition error: \(error.localizedDescription)")
                     self?.startListening(result: result) 
-                    result(FlutterError(code: "RECOGNITION_ERROR", message: "Recognition failed", details: error.localizedDescription))
+                   
                 } else {
                     print("No speech detected")
                     self?.startListening(result: result) // Restart listening if no speech detected
-                    result(FlutterError(code: "NO_SPEECH_DETECTED", message: "No speech detected", details: nil))
                 }
             }
 

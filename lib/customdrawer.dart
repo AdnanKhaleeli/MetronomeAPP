@@ -116,8 +116,12 @@ class CustomDrawer extends StatelessWidget {
           if (user != null)
             ListTile(
               title: Text('Logout'),
-              onTap: () {
-                Navigator.pop(context);
+                onTap: () async{
+                ModalRoute.of(context)?.settings.name == '/'
+                    ? toggleVoice!()
+                    : null;
+               // Navigator.pop(context);
+                // await Future.delayed(Duration(seconds: 3));
                 Navigator.pushNamed(context, '/');
               },
             ),

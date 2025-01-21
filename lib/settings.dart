@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'database.dart';
 import 'user.dart';
+import 'customdrawer.dart';
 
 class Settings extends StatefulWidget {
   final User user;
@@ -44,6 +45,7 @@ class _SettingsState extends State<Settings> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
+      drawer: CustomDrawer(user: widget.user),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
@@ -78,12 +80,15 @@ class _SettingsState extends State<Settings> {
 
                       if (increaseInput > 0 && decreaseInput > 0) {
                         setState(() {
-                          DatabaseHelper().setIncreaseVal(widget.user, increaseInput);
-                          DatabaseHelper().setDecreaseVal(widget.user, decreaseInput);
+                          DatabaseHelper()
+                              .setIncreaseVal(widget.user, increaseInput);
+                          DatabaseHelper()
+                              .setDecreaseVal(widget.user, decreaseInput);
                           increaseValue = increaseInput;
                           decreaseValue = decreaseInput;
                         });
-                        Navigator.pushNamed(context, '/', arguments: widget.user);
+                        Navigator.pushNamed(context, '/',
+                            arguments: widget.user);
                       }
                     }
                   },
