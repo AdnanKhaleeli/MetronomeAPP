@@ -1,6 +1,7 @@
 import 'package:mongo_dart/mongo_dart.dart';
 import 'user.dart';
 import 'music.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -17,8 +18,9 @@ class DatabaseHelper {
   // Method to initialize the database connection
   Future<void> init() async {
     if (_db == null) {
-      _db = await Db.create(
-          "mongodb+srv://USER:USER1@metronome-cluster.3otig.mongodb.net/metronome_db?retryWrites=true&w=majority");
+
+      String mongoUri = dotenv.env['MONGO_URI'] ?? 'default_value';
+      _db = await Db.create(mongoUri);
       await _db!.open();
     }
     if (_db != null && _db!.isConnected) {

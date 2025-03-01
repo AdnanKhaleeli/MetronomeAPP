@@ -20,9 +20,11 @@ import 'package:mongo_dart/mongo_dart.dart' as mongo;
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'about.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   var db = DatabaseHelper();
   await db.init();
   runApp(MyApp());
